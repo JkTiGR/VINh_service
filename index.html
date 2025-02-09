@@ -54,15 +54,16 @@
       100% { filter: hue-rotate(45deg); }
     }
     
-    /* Глобальные стили */
+    /* Глобальные стили для фона и текста */
     html, body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
       min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
       background: linear-gradient(135deg, #0d0d0d, #181818, #252525);
       background-size: 200% 200%;
       animation: background-flow 12s infinite alternate;
@@ -80,18 +81,26 @@
       text-shadow: none !important;
     }
     
-    /* Контейнер с эффектом стекла и плавным изменением оттенков */
-    .container {
+    /* Базовый контейнер для шапки и формы (без неонового эффекта) */
+    .content {
       width: 90%;
       max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    
+    /* Неоновый контейнер для секции "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" */
+    .neon-effect {
       background: rgba(20,20,20,0.95);
       backdrop-filter: blur(10px);
       border-radius: 16px;
-      border: 1px solid #00c6ff;
-      box-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff;
+      border: 2px solid #00c6ff;
+      box-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff, 0 0 30px #00c6ff;
       padding: 30px;
-      margin: 20px;
+      margin: 20px auto;
       animation: fadeIn 0.7s ease-in-out, hueShift 8s infinite linear;
+      max-width: 900px;
+      width: 90%;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -157,7 +166,7 @@
       box-shadow: 0 0 8px #00c6ff, 0 0 20px #0072ff;
     }
     
-    /* Таблица «Акт дефектів автомобіля» – убраны прямые линии (используем мягкие отступы) */
+    /* Таблица «Акт дефектів автомобіля» – убраны прямые линии */
     #detailsTable {
       width: 100%;
       border-collapse: separate;
@@ -169,7 +178,6 @@
       margin-bottom: 20px;
     }
     #detailsTable th, #detailsTable td {
-      /* Прямые линии убраны – можно оставить только внутренние отступы */
       padding: 5px;
       text-align: center;
       animation: ghost-text 2s infinite alternate;
@@ -201,16 +209,8 @@
     
     /* --- Секция "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" --- */
     .work-application {
-      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5));
-      padding: 20px;
-      border-radius: 16px;
+      /* Дополнительные отступы уже заданы в .neon-effect */
       margin-top: 30px;
-    }
-    .work-application h2 {
-      margin-bottom: 20px;
-      color: #fff;
-      /* Стабильный заголовок – без дрожания */
-      animation: none;
     }
     /* Таблица расчёта стоимости */
     #workTable {
@@ -224,7 +224,6 @@
       margin-bottom: 10px;
     }
     #workTable th, #workTable td {
-      /* Убираем прямые линии */
       padding: 5px;
       text-align: center;
     }
@@ -248,29 +247,17 @@
       margin-left: 5px;
     }
     
-    /* --- Адаптация для мобильных и планшетов --- */
-    /* Для данных автомобиля: группируем поля в две колонки */
-    .vehicle-info .row > div {
-      /* На ПК можно использовать col-md-6, а на мобильных col-6 */
-      /* Если нужно, можно задать класс col-6 дополнительно */
-    }
-    
-    /* Для контрольных показателей ("Акт дефектів автомобіля") создаём 2 колонки для каждой группы */
-    /* Группа 1: П.ТК. (%) и З.Т.К. (%) */
-    /* Группа 2: ПТД (мм) и ЗТД (мм) */
-    /* Группа 3: тормозной жидкости и антифриз */
-    /* Группа 4: масла ДВС и масла в трансмиссии */
-    
-    /* Адаптивные стили */
+    /* --- Адаптация для мобильных устройств и планшетов --- */
     @media (max-width:768px) {
-      .container { width: 95%; padding: 20px; }
+      .content, .neon-effect { width: 95%; padding: 20px; }
       .header h1 { font-size: 20px; }
       .form-control { font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- Блок шапки и основной формы (без внешнего контейнера) -->
+  <div class="content">
     <!-- Шапка сайта -->
     <div class="header">
       <h1 class="stable">VINh AUTOSERVICE</h1>
@@ -493,64 +480,64 @@
         <p>Администрация сервиса не несёт ответственности за ценные вещи, оставленные в автомобиле.</p>
       </div>
     </form>
+  </div>
+  
+  <!-- Секция "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" с неоновым эффектом -->
+  <div class="work-application neon-effect">
+    <h2>ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
+    <!-- Таблица расчёта стоимости (3 строки по умолчанию) -->
+    <table id="workTable">
+      <thead>
+        <tr class="table-headers">
+          <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
+          <th style="width: 20%;">ціна запчастини</th>
+          <th style="width: 20%;">ціна роботи</th>
+          <th style="width: 15%;">Сума</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" class="form-control"></td>
+          <td><input type="number" class="form-control part-price" value=""></td>
+          <td><input type="number" class="form-control work-price" value=""></td>
+          <td><input type="number" class="form-control row-sum" value="" readonly></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="form-control"></td>
+          <td><input type="number" class="form-control part-price" value=""></td>
+          <td><input type="number" class="form-control work-price" value=""></td>
+          <td><input type="number" class="form-control row-sum" value="" readonly></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="form-control"></td>
+          <td><input type="number" class="form-control part-price" value=""></td>
+          <td><input type="number" class="form-control work-price" value=""></td>
+          <td><input type="number" class="form-control row-sum" value="" readonly></td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- "Загальна сума" под таблицей -->
+    <div id="workTotal">Загальна сума: </div>
+    <button type="button" class="btn btn-primary mt-3" id="addWorkRowBtn">Додати ще рядок</button>
     
-    <!-- Новый блок "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" -->
-    <div class="work-application">
-      <h2>ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
-      <!-- Таблица расчёта стоимости (3 строки по умолчанию) -->
-      <table id="workTable">
-        <thead>
-          <tr class="table-headers">
-            <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
-            <th style="width: 20%;">ціна запчастини</th>
-            <th style="width: 20%;">ціна роботи</th>
-            <th style="width: 15%;">Сума</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" class="form-control"></td>
-            <td><input type="number" class="form-control part-price" value=""></td>
-            <td><input type="number" class="form-control work-price" value=""></td>
-            <td><input type="number" class="form-control row-sum" value="" readonly></td>
-          </tr>
-          <tr>
-            <td><input type="text" class="form-control"></td>
-            <td><input type="number" class="form-control part-price" value=""></td>
-            <td><input type="number" class="form-control work-price" value=""></td>
-            <td><input type="number" class="form-control row-sum" value="" readonly></td>
-          </tr>
-          <tr>
-            <td><input type="text" class="form-control"></td>
-            <td><input type="number" class="form-control part-price" value=""></td>
-            <td><input type="number" class="form-control work-price" value=""></td>
-            <td><input type="number" class="form-control row-sum" value="" readonly></td>
-          </tr>
-        </tbody>
-      </table>
-      <!-- "Загальна сума" под таблицей -->
-      <div id="workTotal">Загальна сума: </div>
-      <button type="button" class="btn btn-primary mt-3" id="addWorkRowBtn">Додати ще рядок</button>
-      
-      <!-- Блок дополнительных отметок -->
-      <div class="work-marks">
-        <div>
-          <input type="checkbox" class="square-checkbox">
-          <label>Контрольна обтяжка встановлених запчастин</label>
-        </div>
-        <div>
-          <input type="checkbox" class="square-checkbox">
-          <label>Затягування колісних болтів</label>
-          <input type="text" class="form-control" style="width: 80px; display:inline-block; vertical-align:middle;" placeholder="Nm">
-        </div>
-        <div>
-          <input type="checkbox" class="square-checkbox">
-          <label>підпис менедж</label>
-        </div>
-        <div>
-          <input type="checkbox" class="square-checkbox">
-          <label>підпис клієнта: Я прочитав і приймаю</label>
-        </div>
+    <!-- Блок дополнительных отметок -->
+    <div class="work-marks">
+      <div>
+        <input type="checkbox" class="square-checkbox">
+        <label>Контрольна обтяжка встановлених запчастин</label>
+      </div>
+      <div>
+        <input type="checkbox" class="square-checkbox">
+        <label>Затягування колісних болтів</label>
+        <input type="text" class="form-control" style="width: 80px; display:inline-block; vertical-align:middle;" placeholder="Nm">
+      </div>
+      <div>
+        <input type="checkbox" class="square-checkbox">
+        <label>підпис менедж</label>
+      </div>
+      <div>
+        <input type="checkbox" class="square-checkbox">
+        <label>підпис клієнта: Я прочитав і приймаю</label>
       </div>
     </div>
   </div>
