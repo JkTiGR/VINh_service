@@ -1,1 +1,596 @@
-# VINh_service
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JEDI AUTOSERVICE - LSD Trip</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    /* Квадратные чекбоксы для блока "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" */
+    .square-checkbox {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #00c6ff;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+    .square-checkbox:checked {
+      background-color: #00c6ff;
+    }
+    
+    /* Анимация движения фона – гипнотический эффект */
+    @keyframes background-flow {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 50% 50%; }
+      100% { background-position: 100% 100%; }
+    }
+    /* Лёгкое дрожание текста с уменьшенной амплитудой */
+    @keyframes shake {
+      0% { transform: translateX(0px); }
+      25% { transform: translateX(0.5px); }
+      50% { transform: translateX(-0.5px); }
+      75% { transform: translateX(0.5px); }
+      100% { transform: translateX(0px); }
+    }
+    /* Анимация неонового перелива – плавное изменение оттенков */
+    @keyframes neon-glow {
+      0% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 12px #ff00ff; }
+      50% { color: #00ffff; text-shadow: 0 0 8px #00ffff, 0 0 12px #00ffff; }
+      100% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 12px #ff00ff; }
+    }
+    /* Лёгкий эффект следа для текста */
+    @keyframes ghost-text {
+      0% { opacity: 1; text-shadow: 0 0 5px rgba(255,255,255,0.6); }
+      50% { opacity: 0.8; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
+      100% { opacity: 1; text-shadow: 0 0 5px rgba(255,255,255,0.6); }
+    }
+    /* Плавый сдвиг цвета контейнера */
+    @keyframes hueShift {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(45deg); }
+    }
+    
+    /* Глобальные стили */
+    html, body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0d0d0d, #181818, #252525);
+      background-size: 200% 200%;
+      animation: background-flow 12s infinite alternate;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    /* Глобальная неоновая тень для большинства текстовых элементов */
+    body, input, textarea, .form-control, th, td, label, p {
+      text-shadow: 1px 1px 2px rgba(255,0,255,0.5),
+                   1px 1px 2px rgba(0,255,255,0.5),
+                   1px 1px 2px rgba(255,0,0,0.5);
+    }
+    /* Вводимый текст остаётся чисто белым */
+    input[type="text"], textarea {
+      text-shadow: none !important;
+    }
+    
+    /* Контейнер с эффектом стекла и плавным изменением оттенков */
+    .container {
+      width: 90%;
+      max-width: 900px;
+      background: rgba(20,20,20,0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid #00c6ff;
+      box-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff;
+      padding: 30px;
+      margin: 20px;
+      animation: fadeIn 0.7s ease-in-out, hueShift 8s infinite linear;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Заголовок и логотип */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      /* Для стабильных надписей убираем дрожание */
+      animation: neon-glow 3s infinite alternate, ghost-text 2s infinite alternate;
+    }
+    .header img {
+      width: 80px;
+      border-radius: 50%;
+      box-shadow: 0 0 15px 3px #00c6ff, 0 0 30px 6px #0072ff;
+    }
+    /* Класс для стабильных надписей */
+    .stable, .stable-text {
+      animation: none !important;
+    }
+    
+    /* Стили для полей ввода */
+    .form-control {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid #00c6ff;
+      color: #fff;
+    }
+    .form-control:focus {
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 0 8px #00c6ff, inset 0 0 8px rgba(0,198,255,0.2);
+    }
+    
+    /* Кнопки с неоновым эффектом, уменьшенная пульсация */
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 5px #00c6ff; }
+      50% { transform: scale(1.02); box-shadow: 0 0 8px #00c6ff; }
+      100% { transform: scale(1); box-shadow: 0 0 5px #00c6ff; }
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #005eff, #0039ff);
+      border: none;
+      font-weight: bold;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.3s ease;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    .btn-primary:hover {
+      transform: scale(1.03);
+      background: linear-gradient(135deg, #0080ff, #005eff);
+      box-shadow: 0 0 8px #00c6ff, 0 0 20px #0072ff;
+    }
+    
+    /* Таблица «Акт дефектів автомобіля» – убраны прямые линии (мягкие отступы) */
+    #detailsTable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      background-color: #1a1a1a;
+      border: 2px solid #00c6ff;
+      margin-bottom: 20px;
+    }
+    #detailsTable th, #detailsTable td {
+      padding: 5px;
+      text-align: center;
+      animation: ghost-text 2s infinite alternate;
+    }
+    #detailsTable .table-headers th {
+      background-color: #002b55;
+    }
+    
+    /* Горящие индикаторы – вывод в 3 столбца (без надписей) */
+    .indicators {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .indicators .form-check label {
+      text-shadow: 0 0 4px #9b00ff;
+      transition: text-shadow 0.2s;
+    }
+    .form-check-input:checked + label,
+    .form-check-input:active + label {
+      text-shadow: 0 0 8px #ff0000;
+    }
+    
+    /* Анимация для заголовков и параграфов (умеренное дрожание, перелив и след) */
+    h2, h3, p {
+      animation: shake 0.3s infinite ease-in-out alternate, neon-glow 3s infinite alternate, ghost-text 2s infinite alternate;
+    }
+    
+    /* --- Секция "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" --- */
+    .work-application {
+      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.5));
+      padding: 20px;
+      border-radius: 16px;
+      margin-top: 30px;
+    }
+    .work-application h2 {
+      margin-bottom: 20px;
+      color: #fff;
+      /* Стабильный заголовок – без дрожания */
+      animation: none;
+    }
+    /* Таблица расчёта стоимости */
+    #workTable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      background-color: #1a1a1a;
+      border: 2px solid #00c6ff;
+      margin-bottom: 10px;
+    }
+    #workTable th, #workTable td {
+      padding: 5px;
+      text-align: center;
+    }
+    #workTable .table-headers th {
+      background-color: #002b55;
+    }
+    /* Блок итоговой суммы – перемещён под таблицей */
+    #workTotal {
+      font-size: 18px;
+      margin-top: 10px;
+      text-align: right;
+    }
+    
+    /* Стили для блока дополнительных отметок в заявке */
+    .work-marks {
+      margin-top: 20px;
+    }
+    .work-marks div {
+      margin-bottom: 10px;
+    }
+    .work-marks label {
+      margin-left: 5px;
+    }
+    
+    /* --- Адаптация для мобильных и планшетов --- */
+    @media (max-width:768px) {
+      .container { width: 95%; padding: 20px; }
+      .header h1 { font-size: 20px; }
+      .form-control { font-size: 14px; }
+      .btn-primary { font-size: 16px; padding: 8px 16px; }
+    }
+    @media (max-width:576px) {
+      .container { padding: 15px; }
+      .form-control { font-size: 13px; }
+      .btn-primary { font-size: 14px; padding: 6px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Шапка сайта -->
+    <div class="header">
+      <h1 class="stable">JEDI AUTOSERVICE</h1>
+      <img src="logo.png" alt="Logo">
+    </div>
+    <!-- Основная форма -->
+    <form action="/submit" method="POST">
+      <!-- Данные клиента -->
+      <div class="row">
+        <div class="col-md-6 col-12">
+          <label for="clientName">Имя клиента:</label>
+          <input type="text" id="clientName" name="clientName" class="form-control">
+        </div>
+        <div class="col-md-6 col-12">
+          <label for="phone">Телефон:</label>
+          <input type="text" id="phone" name="phone" class="form-control">
+        </div>
+      </div>
+      <!-- VIN (на всю ширину) -->
+      <div class="row mt-3">
+        <div class="col-12">
+          <label for="vin">VIN номер:</label>
+          <input type="text" id="vin" name="vin" class="form-control">
+        </div>
+      </div>
+      <!-- Данные автомобиля (группировка в 2 колонки) -->
+      <div class="row mt-3 vehicle-info">
+        <div class="col-md-6 col-6">
+          <label for="carModel">Модель авто:</label>
+          <input type="text" id="carModel" name="carModel" class="form-control">
+        </div>
+        <div class="col-md-6 col-6">
+          <label for="year">Год выпуска:</label>
+          <input type="text" id="year" name="year" class="form-control">
+        </div>
+      </div>
+      <div class="row mt-3 vehicle-info">
+        <div class="col-md-6 col-6">
+          <label for="plate">Госномер:</label>
+          <input type="text" id="plate" name="plate" class="form-control">
+        </div>
+        <div class="col-md-6 col-6">
+          <label for="mileage">Пробег (км):</label>
+          <input type="text" id="mileage" name="mileage" class="form-control">
+        </div>
+      </div>
+      
+      <!-- Горящие индикаторы (3 столбца) -->
+      <div class="indicators mt-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
+          <label class="form-check-label" for="checkEngine">
+            <img src="icons/check_engine.png" alt="Check Engine" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="battery" name="battery">
+          <label class="form-check-label" for="battery">
+            <img src="icons/battery.png" alt="Battery" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="oil" name="oil">
+          <label class="form-check-label" for="oil">
+            <img src="icons/oil.png" alt="Oil" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
+          <label class="form-check-label" for="coolant">
+            <img src="icons/coolant.png" alt="Coolant" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
+          <label class="form-check-label" for="tpms">
+            <img src="icons/tpms.png" alt="TPMS" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
+          <label class="form-check-label" for="airbag">
+            <img src="icons/airbag.png" alt="Airbag" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="abs" name="abs">
+          <label class="form-check-label" for="abs">
+            <img src="icons/abs.png" alt="ABS" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="esp" name="esp">
+          <label class="form-check-label" for="esp">
+            <img src="icons/esp.png" alt="ESP" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
+          <label class="form-check-label" for="brakeWear">
+            <img src="icons/brake_wear.png" alt="Brake Wear" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+          </label>
+        </div>
+      </div>
+      
+      <!-- Дополнительные пожелания -->
+      <div class="mt-3">
+        <p class="stable">Дополнительные пожелания:</p>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="clientParts" name="clientParts">
+          <label class="form-check-label" for="clientParts">Запчасти предоставлены клиентом</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="returnParts" name="returnParts">
+          <label class="form-check-label" for="returnParts">Вернуть старые запчасти</label>
+        </div>
+      </div>
+      
+      <!-- Перечень желаемых работ -->
+      <div class="mt-3">
+        <label for="workList" class="form-label">Перечень желаемых работ:</label>
+        <textarea class="form-control" id="workList" name="workList" rows="4"></textarea>
+      </div>
+      
+      <!-- Акт дефектів автомобіля -->
+      <h4 class="mt-4">Акт дефектів автомобіля</h4>
+      <!-- Группы контрольных показателей (2 колонки в каждой группе) -->
+      <div class="row mt-3">
+        <div class="col-md-6 col-6">
+          <label for="ptk_percent">П.ТК. (%):</label>
+          <input type="text" id="ptk_percent" name="ptk_percent" class="form-control">
+        </div>
+        <div class="col-md-6 col-6">
+          <label for="ztk_percent">З.Т.К. (%):</label>
+          <input type="text" id="ztk_percent" name="ztk_percent" class="form-control">
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-6 col-6">
+          <label for="ptd_mm">ПТД (мм):</label>
+          <input type="text" id="ptd_mm" name="ptd_mm" class="form-control">
+        </div>
+        <div class="col-md-6 col-6">
+          <label for="ztd_mm">ЗТД (мм):</label>
+          <input type="text" id="ztd_mm" name="ztd_mm" class="form-control">
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-6 col-6">
+          <label for="brakeFluid">тормозной жидкости:</label>
+          <input type="text" id="brakeFluid" name="brakeFluid" class="form-control">
+        </div>
+        <div class="col-md-6 col-6">
+          <label for="antifreeze">антифриз:</label>
+          <input type="text" id="antifreeze" name="antifreeze" class="form-control">
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-6 col-6">
+          <label for="engineOil">масла ДВС:</label>
+          <input type="text" id="engineOil" name="engineOil" class="form-control">
+        </div>
+        <div class="col-md-6 col-6">
+          <label for="transmissionOil">масла в трансмиссии:</label>
+          <input type="text" id="transmissionOil" name="transmissionOil" class="form-control">
+        </div>
+      </div>
+      
+      <!-- Таблица дефектов (без прямых линий, 3 строки по умолчанию) -->
+      <table id="detailsTable" class="mt-3">
+        <thead>
+          <tr class="table-headers">
+            <th style="width: 5%;">#</th>
+            <th style="width: 50%;">Назва деталі</th>
+            <th style="width: 10%;">Знос</th>
+            <th style="width: 10%;">Люфт</th>
+            <th style="width: 10%;">Рек. зам.</th>
+            <th style="width: 10%;">Крит. зам.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="checkbox" name="wear1"></td>
+            <td><input type="checkbox" name="looseness1"></td>
+            <td><input type="checkbox" name="recReplace1"></td>
+            <td><input type="checkbox" name="critReplace1"></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="checkbox" name="wear2"></td>
+            <td><input type="checkbox" name="looseness2"></td>
+            <td><input type="checkbox" name="recReplace2"></td>
+            <td><input type="checkbox" name="critReplace2"></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="checkbox" name="wear3"></td>
+            <td><input type="checkbox" name="looseness3"></td>
+            <td><input type="checkbox" name="recReplace3"></td>
+            <td><input type="checkbox" name="critReplace3"></td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Кнопка для добавления новой строки в таблицу дефектов -->
+      <button type="button" class="btn btn-primary mt-3" id="addRowBtn">Додати рядок</button>
+      
+      <!-- Дополнительные примечания -->
+      <div class="mt-3">
+        <label for="notes" class="form-label stable">Дополнительные примечания:</label>
+        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+      </div>
+      
+      <!-- Footer -->
+      <div class="footer mt-4">
+        <hr>
+        <p>Администрация сервиса не несёт ответственности за ценные вещи, оставленные в автомобиле.</p>
+      </div>
+    </form>
+    
+    <!-- Новый блок "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" -->
+    <div class="work-application">
+      <h2>ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
+      <!-- Таблица расчёта стоимости (3 строки по умолчанию) -->
+      <table id="workTable">
+        <thead>
+          <tr class="table-headers">
+            <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
+            <th style="width: 20%;">ціна запчастини</th>
+            <th style="width: 20%;">ціна роботи</th>
+            <th style="width: 15%;">Сума</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="number" class="form-control part-price"></td>
+            <td><input type="number" class="form-control work-price"></td>
+            <td><input type="number" class="form-control row-sum" readonly></td>
+          </tr>
+          <tr>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="number" class="form-control part-price"></td>
+            <td><input type="number" class="form-control work-price"></td>
+            <td><input type="number" class="form-control row-sum" readonly></td>
+          </tr>
+          <tr>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="number" class="form-control part-price"></td>
+            <td><input type="number" class="form-control work-price"></td>
+            <td><input type="number" class="form-control row-sum" readonly></td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- "Загальна сума" под таблицей -->
+      <div id="workTotal"></div>
+      <button type="button" class="btn btn-primary mt-3" id="addWorkRowBtn">Додати ще рядок</button>
+      
+      <!-- Блок дополнительных отметок -->
+      <div class="work-marks">
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>Контрольна обтяжка встановлених запчастин</label>
+        </div>
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>Затягування колісних болтів</label>
+          <input type="text" class="form-control" style="width: 80px; display:inline-block; vertical-align:middle;" placeholder="Nm">
+        </div>
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>підпис менедж</label>
+        </div>
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>підпис клієнта: Я прочитав і приймаю</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Функция для пересчёта суммы в строках таблицы "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
+    function recalcWorkTable() {
+      const rows = document.querySelectorAll('#workTable tbody tr');
+      let total = 0;
+      rows.forEach(row => {
+        const partPrice = parseFloat(row.querySelector('.part-price').value) || 0;
+        const workPrice = parseFloat(row.querySelector('.work-price').value) || 0;
+        const sum = partPrice + workPrice;
+        row.querySelector('.row-sum').value = sum > 0 ? sum.toFixed(2) : "";
+        total += sum;
+      });
+      document.getElementById('workTotal').textContent = total > 0 ? 'Загальна сума: ' + total.toFixed(2) : "";
+    }
+    
+    // Навешиваем обработчики для авторасчёта
+    document.querySelectorAll('.part-price, .work-price').forEach(input => {
+      input.addEventListener('input', recalcWorkTable);
+    });
+    
+    // Кнопка для добавления новой строки в таблицу "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
+    document.getElementById('addWorkRowBtn').addEventListener('click', function() {
+      const tbody = document.querySelector('#workTable tbody');
+      const newRow = tbody.lastElementChild.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(input => {
+        input.value = "";
+      });
+      tbody.appendChild(newRow);
+      newRow.querySelectorAll('.part-price, .work-price').forEach(input => {
+        input.addEventListener('input', recalcWorkTable);
+      });
+      recalcWorkTable();
+    });
+    
+    // Кнопка для добавления новой строки в таблицу "Акт дефектів автомобіля"
+    document.getElementById("addRowBtn").addEventListener("click", function() {
+      const tableBody = document.getElementById("detailsTable").querySelector("tbody");
+      const lastRow = tableBody.lastElementChild.cloneNode(true);
+      lastRow.cells[0].textContent = tableBody.rows.length + 1;
+      lastRow.querySelectorAll("input[type='text']").forEach(input => input.value = "");
+      lastRow.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+      tableBody.appendChild(lastRow);
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
