@@ -6,272 +6,190 @@
   <title>VINh AUTOSERVICE - LSD Trip</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    /* Квадратные чекбоксы для блока "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" */
+    :root {
+      --bs-body-color: white;
+    }
+    /* Класс для уменьшённых кнопок */
+    .btn-small {
+      font-size: 14px !important;
+      padding: 5px 10px !important;
+    }
+    /* Минимальные стили для квадратных чекбоксов */
     .square-checkbox {
       -webkit-appearance: none;
       appearance: none;
       width: 18px;
       height: 18px;
-      border: 2px solid #00c6ff;
+      border: 1px solid #00c6ff;
       border-radius: 3px;
       margin-right: 5px;
       vertical-align: middle;
       cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
     }
     .square-checkbox:checked {
       background-color: #00c6ff;
     }
     
-    /* Анимация движения фона – гипнотический эффект */
-    @keyframes background-flow {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 50% 50%; }
-      100% { background-position: 100% 100%; }
-    }
-    /* Лёгкое дрожание текста с уменьшенной амплитудой */
-    @keyframes shake {
-      0% { transform: translateX(0px); }
-      25% { transform: translateX(0.5px); }
-      50% { transform: translateX(-0.5px); }
-      75% { transform: translateX(0.5px); }
-      100% { transform: translateX(0px); }
-    }
-    /* Анимация неонового перелива – плавное изменение оттенков */
-    @keyframes neon-glow {
-      0% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 12px #ff00ff; }
-      50% { color: #00ffff; text-shadow: 0 0 8px #00ffff, 0 0 12px #00ffff; }
-      100% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 12px #ff00ff; }
-    }
-    /* Лёгкий эффект следа для текста */
-    @keyframes ghost-text {
-      0% { opacity: 1; text-shadow: 0 0 5px rgba(255,255,255,0.6); }
-      50% { opacity: 0.8; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
-      100% { opacity: 1; text-shadow: 0 0 5px rgba(255,255,255,0.6); }
-    }
-    /* Плавый сдвиг цвета контейнера */
-    @keyframes hueShift {
-      0% { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(45deg); }
-    }
-    
-    /* Глобальные стили для фона и текста */
+    /* Общие стили для документа + фон с изображением */
     html, body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      background: linear-gradient(135deg, #0d0d0d, #181818, #252525);
-      background-size: 200% 200%;
-      animation: background-flow 12s infinite alternate;
+      /* Градиент + фоновое изображение с cover-эффектом */
+      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('image.png') no-repeat center center fixed;
+      background-size: cover;
       color: #fff;
       overflow-x: hidden;
     }
-    /* Глобальная неоновая тень для большинства текстовых элементов */
-    body, input, textarea, .form-control, th, td, label, p {
-      text-shadow: 1px 1px 2px rgba(255,0,255,0.5),
-                   1px 1px 2px rgba(0,255,255,0.5),
-                   1px 1px 2px rgba(255,0,0,0.5);
-    }
-    /* Вводимый текст остаётся чисто белым */
-    input[type="text"], textarea {
-      text-shadow: none !important;
-    }
     
-    /* Базовый контейнер для шапки и формы (без неонового эффекта) */
-    .content {
-      width: 90%;
-      max-width: 900px;
+    /* Основные контейнеры с эффектом стекла */
+    .content, .work-application {
+      width: 98%;
       margin: 20px auto;
       padding: 20px;
-    }
-    
-    /* Неоновый контейнер для секции "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" */
-    .neon-effect {
-      background: rgba(20,20,20,0.95);
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
       backdrop-filter: blur(10px);
-      border-radius: 16px;
-      border: 2px solid #00c6ff;
-      box-shadow: 0 0 10px #00c6ff, 0 0 20px #0072ff, 0 0 30px #00c6ff;
-      padding: 30px;
-      margin: 20px auto;
-      animation: fadeIn 0.7s ease-in-out, hueShift 8s infinite linear;
-      max-width: 900px;
-      width: 90%;
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      transition: all 0.3s ease;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .content:hover, .work-application:hover {
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.6);
     }
     
-    /* Заголовок и логотип */
+    /* Шапка */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
     }
-    .header h1 {
+    .header-left {
+      text-align: left;
+    }
+    .header-left h1 {
+      color: #ff00ff;
+      text-shadow: 1px 1px 2px #ff00ff;
       margin: 0;
-      font-size: 24px;
-      /* Для стабильных надписей убираем дрожание */
-      animation: neon-glow 3s infinite alternate, ghost-text 2s infinite alternate;
+      padding: 0;
     }
-    .header img {
+    .header-left #dateTimeVin {
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    .header-right img {
       width: 80px;
       border-radius: 50%;
-      box-shadow: 0 0 15px 3px #00c6ff, 0 0 30px 6px #0072ff;
-    }
-    /* Класс для стабильных надписей */
-    .stable, .stable-text {
-      animation: none !important;
+      margin: 0;
+      padding: 0;
+      border: 2px solid #00c6ff;
     }
     
-    /* Стили для полей ввода */
+    /* Заголовки таблиц */
+    .neon-title {
+      color: #ff00ff;
+      text-shadow: 1px 1px 2px #ff00ff;
+    }
+    
+    /* Убираем лишние тени */
+    body, input, textarea, th, td, label, p {
+      text-shadow: none;
+    }
+    
+    /* Поля ввода с эффектом стекла */
     .form-control {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid #00c6ff;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0,198,255,0.5);
       color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,198,255,0.5);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      transition: background 0.3s, border-color 0.3s;
     }
     .form-control:focus {
-      background: rgba(255,255,255,0.2);
-      box-shadow: 0 0 8px #00c6ff, inset 0 0 8px rgba(0,198,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(0,198,255,0.7);
+      box-shadow: 0 0 5px rgba(0,198,255,0.7);
     }
     
-    /* Кнопки с неоновым эффектом, уменьшенная пульсация */
-    @keyframes pulse {
-      0% { transform: scale(1); box-shadow: 0 0 5px #00c6ff; }
-      50% { transform: scale(1.02); box-shadow: 0 0 8px #00c6ff; }
-      100% { transform: scale(1); box-shadow: 0 0 5px #00c6ff; }
-    }
+    /* Кнопки с неоновой подсветкой */
     .btn-primary {
-      background: linear-gradient(135deg, #005eff, #0039ff);
+      background: linear-gradient(45deg, #005eff, #00c6ff);
       border: none;
       font-weight: bold;
       color: #fff;
       padding: 10px 20px;
       font-size: 18px;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.3s ease;
-      animation: pulse 1.5s infinite ease-in-out;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 5px #00c6ff;
     }
     .btn-primary:hover {
-      transform: scale(1.03);
-      background: linear-gradient(135deg, #0080ff, #005eff);
-      box-shadow: 0 0 8px #00c6ff, 0 0 20px #0072ff;
+      background: linear-gradient(45deg, #0039ff, #00aaff);
+      box-shadow: 0 0 15px #00c6ff;
     }
     
-    /* Таблица «Акт дефектів автомобіля» – убраны прямые линии */
-    #detailsTable {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      border-radius: 16px;
+    /* Таблицы с эффектом стекла */
+    #workTable, #detailsTable {
+      border: none;
+      border-radius: 8px;
       overflow: hidden;
-      background-color: #1a1a1a;
-      border: 2px solid #00c6ff;
-      margin-bottom: 20px;
+      box-shadow: 0 0 5px #00c6ff;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
+    #workTable th, #workTable td, 
     #detailsTable th, #detailsTable td {
+      border: none;
       padding: 5px;
       text-align: center;
-      animation: ghost-text 2s infinite alternate;
     }
-    #detailsTable .table-headers th {
-      background-color: #002b55;
+    #workTable th, #detailsTable th {
+      background-color: rgba(0, 43, 85, 0.7);
     }
     
-    /* Горящие индикаторы – вывод в 3 столбца (без надписей) */
+    /* Сетка для индикаторов */
     .indicators {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-top: 15px;
+      margin: 10px 0;
     }
     .indicators .form-check label {
-      text-shadow: 0 0 4px #9b00ff;
-      transition: text-shadow 0.2s;
+      margin-bottom: 0;
     }
-    .form-check-input:checked + label,
-    .form-check-input:active + label {
-      text-shadow: 0 0 8px #ff0000;
-    }
-    
-    /* Анимация для заголовков и параграфов (умеренное дрожание, перелив и след) */
-    h2, h3, p {
-      animation: shake 0.3s infinite ease-in-out alternate, neon-glow 3s infinite alternate, ghost-text 2s infinite alternate;
-    }
-    
-    /* --- Секция "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" --- */
-    .work-application {
-      margin-top: 30px;
-    }
-    
-    /* Обновлённые стили для таблицы расчёта стоимости */
-    #workTable {
-      width: 100%;
-      border-collapse: collapse;  /* Убираем промежутки между ячейками */
-      table-layout: fixed;         /* Фиксированная ширина колонок */
-      background-color: #1a1a1a;
-      border: 2px solid #00c6ff;
-      margin-bottom: 10px;
-    }
-    #workTable th, #workTable td {
-      padding: 8px;
-      text-align: center;
-      vertical-align: middle;
-      border: 2px solid #00c6ff;
-    }
-    #workTable th {
-      background-color: #002b55;
-      color: #fff;
-    }
-    #workTable input {
-      width: 100%;
-      box-sizing: border-box;
-      text-align: center;
-    }
-    
-    /* Блок итоговой суммы – перемещён под таблицей */
-    #workTotal {
-      font-size: 18px;
-      margin-top: 10px;
-      text-align: right;
-    }
-    /* Стили для блока дополнительных отметок в заявке */
     .work-marks {
-      margin-top: 20px;
+      margin: 10px 0;
     }
     .work-marks div {
-      margin-bottom: 10px;
-    }
-    .work-marks label {
-      margin-left: 5px;
+      margin-bottom: 5px;
     }
     
-    /* --- Адаптация для мобильных устройств и планшетов --- */
-    @media (max-width:768px) {
-      .content, .neon-effect { width: 95%; padding: 20px; }
-      .header h1 { font-size: 20px; }
-      .form-control { font-size: 14px; }
+    hr {
+      border: 1px solid #00c6ff;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
-  <!-- Блок шапки и основной формы (без внешнего контейнера) -->
+  <!-- Первая секция: форма с клиентскими данными и акт дефектів -->
   <div class="content">
-    <!-- Шапка сайта -->
     <div class="header">
-      <h1 class="stable">VINh AUTOSERVICE</h1>
-      <img src="logo.png" alt="Logo">
+      <div class="header-left">
+        <h1>VINh AUTOSERVICE</h1>
+        <div id="dateTimeVin"></div>
+      </div>
+      <div class="header-right">
+        <img src="logo.png" alt="Logo">
+      </div>
     </div>
-    <!-- Основная форма -->
-    <form action="/submit" method="POST">
+    <form action="/submit" method="POST" style="width:100%;">
       <!-- Данные клиента -->
       <div class="row">
         <div class="col-md-6 col-12">
@@ -283,15 +201,15 @@
           <input type="text" id="phone" name="phone" class="form-control">
         </div>
       </div>
-      <!-- VIN (на всю ширину) -->
-      <div class="row mt-3">
+      <!-- VIN (все буквы заглавные) -->
+      <div class="row">
         <div class="col-12">
           <label for="vin">VIN номер:</label>
-          <input type="text" id="vin" name="vin" class="form-control">
+          <input type="text" id="vin" name="vin" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
         </div>
       </div>
-      <!-- Данные автомобиля (группировка в 2 колонки) -->
-      <div class="row mt-3 vehicle-info">
+      <!-- Данные автомобиля -->
+      <div class="row">
         <div class="col-md-6 col-6">
           <label for="carModel">Модель авто:</label>
           <input type="text" id="carModel" name="carModel" class="form-control">
@@ -301,7 +219,7 @@
           <input type="text" id="year" name="year" class="form-control">
         </div>
       </div>
-      <div class="row mt-3 vehicle-info">
+      <div class="row">
         <div class="col-md-6 col-6">
           <label for="plate">Госномер:</label>
           <input type="text" id="plate" name="plate" class="form-control">
@@ -312,67 +230,67 @@
         </div>
       </div>
       
-      <!-- Горящие индикаторы (3 столбца) -->
-      <div class="indicators mt-3">
+      <!-- Индикаторы (3 колонки) -->
+      <div class="indicators">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
           <label class="form-check-label" for="checkEngine">
-            <img src="icons/check_engine.png" alt="Check Engine" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/check_engine.png" alt="Check Engine" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="battery" name="battery">
           <label class="form-check-label" for="battery">
-            <img src="icons/battery.png" alt="Battery" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/battery.png" alt="Battery" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="oil" name="oil">
           <label class="form-check-label" for="oil">
-            <img src="icons/oil.png" alt="Oil" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/oil.png" alt="Oil" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
           <label class="form-check-label" for="coolant">
-            <img src="icons/coolant.png" alt="Coolant" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/coolant.png" alt="Coolant" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
           <label class="form-check-label" for="tpms">
-            <img src="icons/tpms.png" alt="TPMS" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/tpms.png" alt="TPMS" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
           <label class="form-check-label" for="airbag">
-            <img src="icons/airbag.png" alt="Airbag" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/airbag.png" alt="Airbag" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="abs" name="abs">
           <label class="form-check-label" for="abs">
-            <img src="icons/abs.png" alt="ABS" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/abs.png" alt="ABS" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="esp" name="esp">
           <label class="form-check-label" for="esp">
-            <img src="icons/esp.png" alt="ESP" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/esp.png" alt="ESP" style="width:24px; height:24px;">
           </label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
           <label class="form-check-label" for="brakeWear">
-            <img src="icons/brake_wear.png" alt="Brake Wear" style="width:24px; height:24px; margin-right:8px; vertical-align:middle;">
+            <img src="icons/brake_wear.png" alt="Brake Wear" style="width:24px; height:24px;">
           </label>
         </div>
       </div>
       
       <!-- Дополнительные пожелания -->
-      <div class="mt-3">
-        <p class="stable">Дополнительные пожелания:</p>
+      <div>
+        <p>Дополнительные пожелания:</p>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="clientParts" name="clientParts">
           <label class="form-check-label" for="clientParts">Запчасти предоставлены клиентом</label>
@@ -384,15 +302,17 @@
       </div>
       
       <!-- Перечень желаемых работ -->
-      <div class="mt-3">
-        <label for="workList" class="form-label">Перечень желаемых работ:</label>
+      <div>
+        <label for="workList">Перечень желаемых работ:</label>
         <textarea class="form-control" id="workList" name="workList" rows="4"></textarea>
       </div>
       
+      <!-- Разделитель перед Акт дефектів автомобіля -->
+      <hr>
       <!-- Акт дефектів автомобіля -->
-      <h4 class="mt-4">Акт дефектів автомобіля</h4>
-      <!-- Группа контрольных показателей, по 2 колонки -->
-      <div class="row mt-3">
+      <h4>Акт дефектів автомобіля</h4>
+      <div id="dateTimeAct" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
+      <div class="row">
         <div class="col-md-6 col-6">
           <label for="ptk_percent">П.ТК. (%):</label>
           <input type="text" id="ptk_percent" name="ptk_percent" class="form-control">
@@ -402,7 +322,7 @@
           <input type="text" id="ztk_percent" name="ztk_percent" class="form-control">
         </div>
       </div>
-      <div class="row mt-3">
+      <div class="row">
         <div class="col-md-6 col-6">
           <label for="ptd_mm">ПТД (мм):</label>
           <input type="text" id="ptd_mm" name="ptd_mm" class="form-control">
@@ -412,7 +332,7 @@
           <input type="text" id="ztd_mm" name="ztd_mm" class="form-control">
         </div>
       </div>
-      <div class="row mt-3">
+      <div class="row">
         <div class="col-md-6 col-6">
           <label for="brakeFluid">тормозной жидкости:</label>
           <input type="text" id="brakeFluid" name="brakeFluid" class="form-control">
@@ -422,7 +342,7 @@
           <input type="text" id="antifreeze" name="antifreeze" class="form-control">
         </div>
       </div>
-      <div class="row mt-3">
+      <div class="row">
         <div class="col-md-6 col-6">
           <label for="engineOil">масла ДВС:</label>
           <input type="text" id="engineOil" name="engineOil" class="form-control">
@@ -433,10 +353,10 @@
         </div>
       </div>
       
-      <!-- Таблица дефектов (без прямых линий, 3 строки по умолчанию) -->
-      <table id="detailsTable" class="mt-3">
+      <!-- Таблица дефектов автомобиля (без границ) -->
+      <table id="detailsTable" style="margin-top:10px;">
         <thead>
-          <tr class="table-headers">
+          <tr>
             <th style="width: 5%;">#</th>
             <th style="width: 50%;">Назва деталі</th>
             <th style="width: 10%;">Знос</th>
@@ -472,30 +392,28 @@
           </tr>
         </tbody>
       </table>
-      <!-- Кнопка для добавления новой строки в таблицу дефектов -->
-      <button type="button" class="btn btn-primary mt-3" id="addRowBtn">Додати рядок</button>
+      <button type="button" class="btn btn-primary btn-small" id="addRowBtn" style="margin-top:10px;">Додати рядок</button>
       
       <!-- Дополнительные примечания -->
-      <div class="mt-3">
-        <label for="notes" class="form-label stable">Дополнительные примечания:</label>
+      <div style="margin-top:10px;">
+        <label for="notes">Дополнительные примечания:</label>
         <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
       </div>
       
-      <!-- Footer -->
-      <div class="footer mt-4">
+      <div style="margin-top:10px;">
         <hr>
         <p>Администрация сервиса не несёт ответственности за ценные вещи, оставленные в автомобиле.</p>
       </div>
     </form>
   </div>
   
-  <!-- Секция "ЗАЯВКА НА ВИКОНАННЯ РОБІТ" с неоновым эффектом -->
-  <div class="work-application neon-effect">
-    <h2>ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
-    <!-- Таблица расчёта стоимости (3 строки по умолчанию) -->
-    <table id="workTable">
+  <!-- Вторая секция: ЗАЯВКА НА ВИКОНАННЯ РОБІТ -->
+  <div class="work-application">
+    <h2 style="margin:0; padding:0;">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
+    <div id="dateTimeWork" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
+    <table id="workTable" style="margin-top:10px;">
       <thead>
-        <tr class="table-headers">
+        <tr>
           <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
           <th style="width: 20%;">ціна запчастини</th>
           <th style="width: 20%;">ціна роботи</th>
@@ -505,30 +423,29 @@
       <tbody>
         <tr>
           <td><input type="text" class="form-control"></td>
-          <td><input type="number" class="form-control part-price" value=""></td>
-          <td><input type="number" class="form-control work-price" value=""></td>
-          <td><input type="number" class="form-control row-sum" value="" readonly></td>
+          <td><input type="number" class="form-control part-price"></td>
+          <td><input type="number" class="form-control work-price"></td>
+          <td><input type="number" class="form-control row-sum" readonly></td>
         </tr>
         <tr>
           <td><input type="text" class="form-control"></td>
-          <td><input type="number" class="form-control part-price" value=""></td>
-          <td><input type="number" class="form-control work-price" value=""></td>
-          <td><input type="number" class="form-control row-sum" value="" readonly></td>
+          <td><input type="number" class="form-control part-price"></td>
+          <td><input type="number" class="form-control work-price"></td>
+          <td><input type="number" class="form-control row-sum" readonly></td>
         </tr>
         <tr>
           <td><input type="text" class="form-control"></td>
-          <td><input type="number" class="form-control part-price" value=""></td>
-          <td><input type="number" class="form-control work-price" value=""></td>
-          <td><input type="number" class="form-control row-sum" value="" readonly></td>
+          <td><input type="number" class="form-control part-price"></td>
+          <td><input type="number" class="form-control work-price"></td>
+          <td><input type="number" class="form-control row-sum" readonly></td>
         </tr>
       </tbody>
     </table>
-    <!-- "Загальна сума" под таблицей -->
-    <div id="workTotal">Загальна сума: </div>
-    <button type="button" class="btn btn-primary mt-3" id="addWorkRowBtn">Додати ще рядок</button>
+    <div id="workTotal" style="margin-top:10px; text-align:right;">Загальна сума: 0</div>
+    <button type="button" class="btn btn-primary btn-small" id="addWorkRowBtn" style="margin-top:10px;">Додати рядок</button>
     
     <!-- Блок дополнительных отметок -->
-    <div class="work-marks">
+    <div class="work-marks" style="margin-top:10px;">
       <div>
         <input type="checkbox" class="square-checkbox">
         <label>Контрольна обтяжка встановлених запчастин</label>
@@ -536,7 +453,9 @@
       <div>
         <input type="checkbox" class="square-checkbox">
         <label>Затягування колісних болтів</label>
-        <input type="text" class="form-control" style="width: 80px; display:inline-block; vertical-align:middle;" placeholder="Nm">
+        <!-- Поле ввода для Nm; единица измерения выведена справа -->
+        <input type="text" class="form-control" style="width:80px; display:inline-block; vertical-align:middle;">
+        <span style="margin-left:5px;">Nm</span>
       </div>
       <div>
         <input type="checkbox" class="square-checkbox">
@@ -547,10 +466,14 @@
         <label>підпис клієнта: Я прочитав і приймаю</label>
       </div>
     </div>
+    <!-- Кнопка SEND ADMIN -->
+    <div style="text-align: left; margin-top:10px;">
+      <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">SEND ADMIN</button>
+    </div>
   </div>
   
   <script>
-    // Функция для пересчёта суммы в строках таблицы "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
+    // Функция для пересчёта суммы в таблице "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
     function recalcWorkTable() {
       const rows = document.querySelectorAll('#workTable tbody tr');
       let total = 0;
@@ -564,20 +487,16 @@
       document.getElementById('workTotal').textContent = 'Загальна сума: ' + total.toFixed(2);
     }
     
-    // Авторасчёт при изменении значений
     document.querySelectorAll('.part-price, .work-price').forEach(input => {
       input.addEventListener('input', recalcWorkTable);
     });
     
-    // Кнопка для добавления новой строки в таблицу "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
     document.getElementById('addWorkRowBtn').addEventListener('click', function() {
       const tbody = document.querySelector('#workTable tbody');
       const newRow = tbody.lastElementChild.cloneNode(true);
       newRow.querySelectorAll('input').forEach(input => {
-        if(input.classList.contains('row-sum')) {
-          input.value = "0";
-        } else if(input.type === 'number') {
-          input.value = "0";
+        if (input.classList.contains('row-sum')) {
+          input.value = "";
         } else {
           input.value = "";
         }
@@ -589,7 +508,6 @@
       recalcWorkTable();
     });
     
-    // Кнопка для добавления новой строки в таблицу "Акт дефектів автомобіля"
     document.getElementById("addRowBtn").addEventListener("click", function() {
       const tableBody = document.getElementById("detailsTable").querySelector("tbody");
       const lastRow = tableBody.lastElementChild.cloneNode(true);
@@ -598,7 +516,22 @@
       lastRow.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
       tableBody.appendChild(lastRow);
     });
+    
+    // Функция для обновления даты и времени
+    function updateDateTime() {
+      const now = new Date();
+      const formatted = now.toLocaleString();
+      const dtVin = document.getElementById('dateTimeVin');
+      const dtAct = document.getElementById('dateTimeAct');
+      const dtWork = document.getElementById('dateTimeWork');
+      if(dtVin) dtVin.textContent = formatted;
+      if(dtAct) dtAct.textContent = formatted;
+      if(dtWork) dtWork.textContent = formatted;
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
