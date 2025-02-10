@@ -37,28 +37,45 @@
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      /* Градиент + фоновое изображение с cover-эффектом */
       background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('image.png') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       overflow-x: hidden;
     }
     
-    /* Основные контейнеры с эффектом стекла */
-    .content, .work-application {
+    /* Контейнер с неоновым (радужным) эффектом.
+       Анимация длится 30 секунд и использует только цвета blue, indigo, violet, darkmagenta.
+       Радиус размытия уменьшен до 3px и 6px. */
+    .container-neon {
       width: 98%;
       margin: 20px auto;
-      padding: 20px;
+      padding: 10px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      transition: all 0.3s ease;
+      border: 2px solid;
+      animation: rainbow 30s linear infinite;
     }
-    .content:hover, .work-application:hover {
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.6);
+    @keyframes rainbow {
+      0%   { border-color: blue;        box-shadow: 0 0 3px blue,        0 0 6px blue; }
+      25%  { border-color: indigo;      box-shadow: 0 0 3px indigo,      0 0 6px indigo; }
+      50%  { border-color: violet;      box-shadow: 0 0 3px violet,      0 0 6px violet; }
+      75%  { border-color: darkmagenta; box-shadow: 0 0 3px darkmagenta, 0 0 6px darkmagenta; }
+      100% { border-color: blue;        box-shadow: 0 0 3px blue,        0 0 6px blue; }
+    }
+    
+    /* Анимированный радужный текст, синхронный с рамками.
+       Радиус размытия теней также уменьшен до 3px и 6px. */
+    .rainbow-text {
+      animation: rainbowText 30s linear infinite;
+    }
+    @keyframes rainbowText {
+      0%   { text-shadow: 0 0 3px blue,        0 0 6px blue; }
+      25%  { text-shadow: 0 0 3px indigo,      0 0 6px indigo; }
+      50%  { text-shadow: 0 0 3px violet,      0 0 6px violet; }
+      75%  { text-shadow: 0 0 3px darkmagenta, 0 0 6px darkmagenta; }
+      100% { text-shadow: 0 0 3px blue,        0 0 6px blue; }
     }
     
     /* Шапка */
@@ -71,8 +88,6 @@
       text-align: left;
     }
     .header-left h1 {
-      color: #ff00ff;
-      text-shadow: 1px 1px 2px #ff00ff;
       margin: 0;
       padding: 0;
     }
@@ -86,6 +101,8 @@
       margin: 0;
       padding: 0;
       border: 2px solid #00c6ff;
+      /* Убираем тень из логотипа */
+      box-shadow: none;
     }
     
     /* Заголовки таблиц */
@@ -178,18 +195,20 @@
   </style>
 </head>
 <body>
-  <!-- Первая секция: форма с клиентскими данными и акт дефектів -->
-  <div class="content">
-    <div class="header">
-      <div class="header-left">
-        <h1>VINh AUTOSERVICE</h1>
-        <div id="dateTimeVin"></div>
+  <!-- Обёртка формы (отправка всех данных) -->
+  <form action="/submit" method="POST" style="width:100%;">
+    <!-- Контейнер 1: VINh AUTOSERVICE + данные клиента и авто -->
+    <div class="container-neon" id="vinh-container">
+      <div class="header">
+        <div class="header-left">
+          <h1 class="rainbow-text">VINh AUTOSERVICE</h1>
+          <div id="dateTimeVin"></div>
+        </div>
+        <div class="header-right">
+          <img src="logo.png" alt="Logo">
+        </div>
       </div>
-      <div class="header-right">
-        <img src="logo.png" alt="Logo">
-      </div>
-    </div>
-    <form action="/submit" method="POST" style="width:100%;">
+      
       <!-- Данные клиента -->
       <div class="row">
         <div class="col-md-6 col-12">
@@ -201,6 +220,7 @@
           <input type="text" id="phone" name="phone" class="form-control">
         </div>
       </div>
+      
       <!-- VIN (все буквы заглавные) -->
       <div class="row">
         <div class="col-12">
@@ -208,6 +228,7 @@
           <input type="text" id="vin" name="vin" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
         </div>
       </div>
+      
       <!-- Данные автомобиля -->
       <div class="row">
         <div class="col-md-6 col-6">
@@ -307,10 +328,13 @@
         <textarea class="form-control" id="workList" name="workList" rows="4"></textarea>
       </div>
       
-      <!-- Разделитель перед Акт дефектів автомобіля -->
+      <!-- Разделитель (далее поля для акта дефектів) -->
       <hr>
-      <!-- Акт дефектів автомобіля -->
-      <h4>Акт дефектів автомобіля</h4>
+    </div>
+    
+    <!-- Контейнер 2: Акт дефектів автомобіля -->
+    <div class="container-neon" id="defects-container">
+      <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
       <div id="dateTimeAct" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
       <div class="row">
         <div class="col-md-6 col-6">
@@ -353,7 +377,7 @@
         </div>
       </div>
       
-      <!-- Таблица дефектов автомобиля (без границ) -->
+      <!-- Таблица дефектов автомобиля -->
       <table id="detailsTable" style="margin-top:10px;">
         <thead>
           <tr>
@@ -404,76 +428,77 @@
         <hr>
         <p>Администрация сервиса не несёт ответственности за ценные вещи, оставленные в автомобиле.</p>
       </div>
-    </form>
-  </div>
-  
-  <!-- Вторая секция: ЗАЯВКА НА ВИКОНАННЯ РОБІТ -->
-  <div class="work-application">
-    <h2 style="margin:0; padding:0;">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
-    <div id="dateTimeWork" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
-    <table id="workTable" style="margin-top:10px;">
-      <thead>
-        <tr>
-          <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
-          <th style="width: 20%;">ціна запчастини</th>
-          <th style="width: 20%;">ціна роботи</th>
-          <th style="width: 15%;">Сума</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input type="text" class="form-control"></td>
-          <td><input type="number" class="form-control part-price"></td>
-          <td><input type="number" class="form-control work-price"></td>
-          <td><input type="number" class="form-control row-sum" readonly></td>
-        </tr>
-        <tr>
-          <td><input type="text" class="form-control"></td>
-          <td><input type="number" class="form-control part-price"></td>
-          <td><input type="number" class="form-control work-price"></td>
-          <td><input type="number" class="form-control row-sum" readonly></td>
-        </tr>
-        <tr>
-          <td><input type="text" class="form-control"></td>
-          <td><input type="number" class="form-control part-price"></td>
-          <td><input type="number" class="form-control work-price"></td>
-          <td><input type="number" class="form-control row-sum" readonly></td>
-        </tr>
-      </tbody>
-    </table>
-    <div id="workTotal" style="margin-top:10px; text-align:right;">Загальна сума: 0</div>
-    <button type="button" class="btn btn-primary btn-small" id="addWorkRowBtn" style="margin-top:10px;">Додати рядок</button>
-    
-    <!-- Блок дополнительных отметок -->
-    <div class="work-marks" style="margin-top:10px;">
-      <div>
-        <input type="checkbox" class="square-checkbox">
-        <label>Контрольна обтяжка встановлених запчастин</label>
-      </div>
-      <div>
-        <input type="checkbox" class="square-checkbox">
-        <label>Затягування колісних болтів</label>
-        <!-- Поле ввода для Nm; единица измерения выведена справа -->
-        <input type="text" class="form-control" style="width:80px; display:inline-block; vertical-align:middle;">
-        <span style="margin-left:5px;">Nm</span>
-      </div>
-      <div>
-        <input type="checkbox" class="square-checkbox">
-        <label>підпис менедж</label>
-      </div>
-      <div>
-        <input type="checkbox" class="square-checkbox">
-        <label>підпис клієнта: Я прочитав і приймаю</label>
-      </div>
     </div>
-    <!-- Кнопка SEND ADMIN -->
-    <div style="text-align: left; margin-top:10px;">
+    
+    <!-- Контейнер 3: ЗАЯВКА НА ВИКОНАННЯ РОБІТ -->
+    <div class="container-neon" id="work-container">
+      <h2 class="rainbow-text">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
+      <div id="dateTimeWork" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
+      <table id="workTable" style="margin-top:10px;">
+        <thead>
+          <tr>
+            <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
+            <th style="width: 20%;">ціна запчастини</th>
+            <th style="width: 20%;">ціна роботи</th>
+            <th style="width: 15%;">Сума</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="number" class="form-control part-price"></td>
+            <td><input type="number" class="form-control work-price"></td>
+            <td><input type="number" class="form-control row-sum" readonly></td>
+          </tr>
+          <tr>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="number" class="form-control part-price"></td>
+            <td><input type="number" class="form-control work-price"></td>
+            <td><input type="number" class="form-control row-sum" readonly></td>
+          </tr>
+          <tr>
+            <td><input type="text" class="form-control"></td>
+            <td><input type="number" class="form-control part-price"></td>
+            <td><input type="number" class="form-control work-price"></td>
+            <td><input type="number" class="form-control row-sum" readonly></td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="workTotal" style="margin-top:10px; text-align:right;">Загальна сума: 0</div>
+      <button type="button" class="btn btn-primary btn-small" id="addWorkRowBtn" style="margin-top:10px;">Додати рядок</button>
+      
+      <!-- Блок дополнительных отметок -->
+      <div class="work-marks" style="margin-top:10px;">
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>Контрольна обтяжка встановлених запчастин</label>
+        </div>
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>Затягування колісних болтів</label>
+          <input type="text" class="form-control" style="width:80px; display:inline-block; vertical-align:middle;">
+          <span style="margin-left:5px;">Nm</span>
+        </div>
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>підпис менедж</label>
+        </div>
+        <div>
+          <input type="checkbox" class="square-checkbox">
+          <label>підпис клієнта: Я прочитав і приймаю</label>
+        </div>
+      </div>
+      <!-- Кнопка SEND ADMIN удалена из этого контейнера -->
+    </div>
+    
+    <!-- Кнопка SEND ADMIN за пределами контейнеров -->
+    <div style="text-align: left; margin:10px;">
       <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">SEND ADMIN</button>
     </div>
-  </div>
+  </form>
   
   <script>
-    // Функция для пересчёта суммы в таблице "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
+    // Пересчёт сумм в таблице "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
     function recalcWorkTable() {
       const rows = document.querySelectorAll('#workTable tbody tr');
       let total = 0;
@@ -494,13 +519,7 @@
     document.getElementById('addWorkRowBtn').addEventListener('click', function() {
       const tbody = document.querySelector('#workTable tbody');
       const newRow = tbody.lastElementChild.cloneNode(true);
-      newRow.querySelectorAll('input').forEach(input => {
-        if (input.classList.contains('row-sum')) {
-          input.value = "";
-        } else {
-          input.value = "";
-        }
-      });
+      newRow.querySelectorAll('input').forEach(input => input.value = "");
       tbody.appendChild(newRow);
       newRow.querySelectorAll('.part-price, .work-price').forEach(input => {
         input.addEventListener('input', recalcWorkTable);
@@ -517,7 +536,7 @@
       tableBody.appendChild(lastRow);
     });
     
-    // Функция для обновления даты и времени
+    // Обновление даты и времени
     function updateDateTime() {
       const now = new Date();
       const formatted = now.toLocaleString();
@@ -534,4 +553,5 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 
