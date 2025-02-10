@@ -44,7 +44,7 @@
     }
     
     /* Контейнер с неоновым (радужным) эффектом.
-       Анимация длится 30 секунд и использует только цвета blue, indigo, violet, darkmagenta.
+       Анимация длится 30 секунд и использует только цвета: dark blue, indigo, dark violet, darkmagenta.
        Радиус размытия уменьшен до 3px и 6px. */
     .container-neon {
       width: 98%;
@@ -58,24 +58,24 @@
       animation: rainbow 30s linear infinite;
     }
     @keyframes rainbow {
-      0%   { border-color: blue;        box-shadow: 0 0 3px blue,        0 0 6px blue; }
-      25%  { border-color: indigo;      box-shadow: 0 0 3px indigo,      0 0 6px indigo; }
-      50%  { border-color: violet;      box-shadow: 0 0 3px violet,      0 0 6px violet; }
-      75%  { border-color: darkmagenta; box-shadow: 0 0 3px darkmagenta, 0 0 6px darkmagenta; }
-      100% { border-color: blue;        box-shadow: 0 0 3px blue,        0 0 6px blue; }
+      0%   { border-color: darkblue;        box-shadow: 0 0 3px darkblue,        0 0 6px darkblue; }
+      25%  { border-color: indigo;          box-shadow: 0 0 3px indigo,          0 0 6px indigo; }
+      50%  { border-color: darkviolet;      box-shadow: 0 0 3px darkviolet,      0 0 6px darkviolet; }
+      75%  { border-color: #8B008B;         box-shadow: 0 0 3px #8B008B,         0 0 6px #8B008B; }
+      100% { border-color: darkblue;        box-shadow: 0 0 3px darkblue,        0 0 6px darkblue; }
     }
     
     /* Анимированный радужный текст, синхронный с рамками.
-       Радиус размытия теней также уменьшен до 3px и 6px. */
+       Радиус размытия теней уменьшен до 3px и 6px. */
     .rainbow-text {
       animation: rainbowText 30s linear infinite;
     }
     @keyframes rainbowText {
-      0%   { text-shadow: 0 0 3px blue,        0 0 6px blue; }
-      25%  { text-shadow: 0 0 3px indigo,      0 0 6px indigo; }
-      50%  { text-shadow: 0 0 3px violet,      0 0 6px violet; }
-      75%  { text-shadow: 0 0 3px darkmagenta, 0 0 6px darkmagenta; }
-      100% { text-shadow: 0 0 3px blue,        0 0 6px blue; }
+      0%   { text-shadow: 0 0 3px darkblue,        0 0 6px darkblue; }
+      25%  { text-shadow: 0 0 3px indigo,          0 0 6px indigo; }
+      50%  { text-shadow: 0 0 3px darkviolet,      0 0 6px darkviolet; }
+      75%  { text-shadow: 0 0 3px #8B008B,         0 0 6px #8B008B; }
+      100% { text-shadow: 0 0 3px darkblue,        0 0 6px darkblue; }
     }
     
     /* Шапка */
@@ -100,8 +100,8 @@
       border-radius: 50%;
       margin: 0;
       padding: 0;
-      border: 2px solid #00c6ff;
-      /* Убираем тень из логотипа */
+      /* Убрана рамка у логотипа */
+      /* border: 2px solid #00c6ff; */
       box-shadow: none;
     }
     
@@ -243,7 +243,8 @@
       <div class="row">
         <div class="col-md-6 col-6">
           <label for="plate">Госномер:</label>
-          <input type="text" id="plate" name="plate" class="form-control">
+          <!-- Госномер будет отображаться только заглавными буквами -->
+          <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
         </div>
         <div class="col-md-6 col-6">
           <label for="mileage">Пробег (км):</label>
@@ -332,7 +333,7 @@
       <hr>
     </div>
     
-    <!-- Контейнер 2: Акт дефектів автомобіля -->
+    <!-- Контейнер 2: Акт дефектів автомобиля -->
     <div class="container-neon" id="defects-container">
       <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
       <div id="dateTimeAct" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
@@ -553,5 +554,3 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
