@@ -43,9 +43,7 @@
       overflow-x: hidden;
     }
     
-    /* Контейнер с неоновым (радужным) эффектом.
-       Анимация длится 30 секунд и использует только цвета: dark blue, indigo, dark violet, darkmagenta.
-       Радиус размытия уменьшен до 3px и 6px. */
+    /* Контейнер с неоновым (радужным) эффектом */
     .container-neon {
       width: 98%;
       margin: 20px auto;
@@ -65,8 +63,7 @@
       100% { border-color: darkblue;        box-shadow: 0 0 3px darkblue,        0 0 6px darkblue; }
     }
     
-    /* Анимированный радужный текст, синхронный с рамками.
-       Радиус размытия теней уменьшен до 3px и 6px. */
+    /* Анимированный радужный текст */
     .rainbow-text {
       animation: rainbowText 30s linear infinite;
     }
@@ -100,8 +97,6 @@
       border-radius: 50%;
       margin: 0;
       padding: 0;
-      /* Убрана рамка у логотипа */
-      /* border: 2px solid #00c6ff; */
       box-shadow: none;
     }
     
@@ -133,7 +128,7 @@
       box-shadow: 0 0 5px rgba(0,198,255,0.7);
     }
     
-    /* Кнопки с неоновой подсветкой */
+    /* Кнопки с неоновой подсветкой – улучшенный вариант */
     .btn-primary {
       background: linear-gradient(45deg, #005eff, #00c6ff);
       border: none;
@@ -141,14 +136,15 @@
       color: #fff;
       padding: 10px 20px;
       font-size: 18px;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.3s, box-shadow 0.3s;
-      box-shadow: 0 0 5px #00c6ff;
+      transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+      box-shadow: 0 0 8px #00c6ff;
     }
     .btn-primary:hover {
-      background: linear-gradient(45deg, #0039ff, #00aaff);
-      box-shadow: 0 0 15px #00c6ff;
+      background: linear-gradient(45deg, #0039ff, #000000);
+      box-shadow: 0 0 20px #00c6ff;
+      transform: scale(1.02);
     }
     
     /* Таблицы с эффектом стекла */
@@ -225,7 +221,7 @@
       <div class="row">
         <div class="col-12">
           <label for="vin">VIN номер:</label>
-          <input type="text" id="vin" name="vin" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
+          <input type="text" id="vin" name="vin" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDuplicates();">
         </div>
       </div>
       
@@ -233,18 +229,17 @@
       <div class="row">
         <div class="col-md-6 col-6">
           <label for="carModel">Модель авто:</label>
-          <input type="text" id="carModel" name="carModel" class="form-control">
+          <input type="text" id="carModel" name="carModel" class="form-control" oninput="updateDuplicates();">
         </div>
         <div class="col-md-6 col-6">
           <label for="year">Год выпуска:</label>
-          <input type="text" id="year" name="year" class="form-control">
+          <input type="text" id="year" name="year" class="form-control" oninput="updateDuplicates();">
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 col-6">
           <label for="plate">Госномер:</label>
-          <!-- Госномер будет отображаться только заглавными буквами -->
-          <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
+          <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDuplicates();">
         </div>
         <div class="col-md-6 col-6">
           <label for="mileage">Пробег (км):</label>
@@ -333,9 +328,16 @@
       <hr>
     </div>
     
-    <!-- Контейнер 2: Акт дефектів автомобиля -->
+    <!-- Контейнер 2: Акт дефектів автомобіля -->
     <div class="container-neon" id="defects-container">
       <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
+      <!-- Дублирование VIN, carModel, year и Госномер -->
+      <div class="duplicate-info" style="font-size: 0.9em; margin-bottom: 10px;">
+        <strong>VIN:</strong> <span id="vin_defects"></span> |
+        <strong>Модель:</strong> <span id="carModel_defects"></span> |
+        <strong>Год:</strong> <span id="year_defects"></span> |
+        <strong>Госномер:</strong> <span id="plate_defects"></span>
+      </div>
       <div id="dateTimeAct" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
       <div class="row">
         <div class="col-md-6 col-6">
@@ -417,7 +419,11 @@
           </tr>
         </tbody>
       </table>
-      <button type="button" class="btn btn-primary btn-small" id="addRowBtn" style="margin-top:10px;">Додати рядок</button>
+      <!-- Кнопки управления для таблицы дефектов -->
+      <div style="margin-top:10px; overflow:auto;">
+        <button type="button" class="btn btn-primary btn-small" id="addRowBtn" style="margin-top:10px;">Додати рядок</button>
+        <button type="button" class="btn btn-primary btn-small" id="sendPartsBtn" style="margin-top:10px; float: right;">[send parts]</button>
+      </div>
       
       <!-- Дополнительные примечания -->
       <div style="margin-top:10px;">
@@ -434,6 +440,13 @@
     <!-- Контейнер 3: ЗАЯВКА НА ВИКОНАННЯ РОБІТ -->
     <div class="container-neon" id="work-container">
       <h2 class="rainbow-text">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
+      <!-- Дублирование VIN, carModel, year и Госномер -->
+      <div class="duplicate-info" style="font-size: 0.9em; margin-bottom: 10px;">
+        <strong>VIN:</strong> <span id="vin_work"></span> |
+        <strong>Модель:</strong> <span id="carModel_work"></span> |
+        <strong>Год:</strong> <span id="year_work"></span> |
+        <strong>Госномер:</strong> <span id="plate_work"></span>
+      </div>
       <div id="dateTimeWork" style="font-size: 0.9em; text-align: left; margin-bottom: 5px;"></div>
       <table id="workTable" style="margin-top:10px;">
         <thead>
@@ -441,7 +454,6 @@
             <th style="width: 45%;">Назва запчастини або вузла (агрегата)</th>
             <th style="width: 20%;">ціна запчастини</th>
             <th style="width: 20%;">ціна роботи</th>
-            <th style="width: 15%;">Сума</th>
           </tr>
         </thead>
         <tbody>
@@ -449,23 +461,21 @@
             <td><input type="text" class="form-control"></td>
             <td><input type="number" class="form-control part-price"></td>
             <td><input type="number" class="form-control work-price"></td>
-            <td><input type="number" class="form-control row-sum" readonly></td>
           </tr>
           <tr>
             <td><input type="text" class="form-control"></td>
             <td><input type="number" class="form-control part-price"></td>
             <td><input type="number" class="form-control work-price"></td>
-            <td><input type="number" class="form-control row-sum" readonly></td>
           </tr>
           <tr>
             <td><input type="text" class="form-control"></td>
             <td><input type="number" class="form-control part-price"></td>
             <td><input type="number" class="form-control work-price"></td>
-            <td><input type="number" class="form-control row-sum" readonly></td>
           </tr>
         </tbody>
       </table>
-      <div id="workTotal" style="margin-top:10px; text-align:right;">Загальна сума: 0</div>
+      <!-- Отображение общей суммы (без колонки в таблице) -->
+      <div id="workTotal" style="margin-top:10px; text-align:right;">Общая сумма: 0</div>
       <button type="button" class="btn btn-primary btn-small" id="addWorkRowBtn" style="margin-top:10px;">Додати рядок</button>
       
       <!-- Блок дополнительных отметок -->
@@ -489,55 +499,17 @@
           <label>підпис клієнта: Я прочитав і приймаю</label>
         </div>
       </div>
-      <!-- Кнопка SEND ADMIN удалена из этого контейнера -->
     </div>
     
-    <!-- Кнопка SEND ADMIN за пределами контейнеров -->
-    <div style="text-align: left; margin:10px;">
-      <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">SEND ADMIN</button>
+    <!-- Кнопки "Сохранить" и "добавить НАРЯД-ЗАМОВЛЕННЯ" на одном уровне -->
+    <div style="display: flex; justify-content: space-between; margin:10px;">
+      <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
+      <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
     </div>
   </form>
   
   <script>
-    // Пересчёт сумм в таблице "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
-    function recalcWorkTable() {
-      const rows = document.querySelectorAll('#workTable tbody tr');
-      let total = 0;
-      rows.forEach(row => {
-        const partPrice = parseFloat(row.querySelector('.part-price').value) || 0;
-        const workPrice = parseFloat(row.querySelector('.work-price').value) || 0;
-        const sum = partPrice + workPrice;
-        row.querySelector('.row-sum').value = sum.toFixed(2);
-        total += sum;
-      });
-      document.getElementById('workTotal').textContent = 'Загальна сума: ' + total.toFixed(2);
-    }
-    
-    document.querySelectorAll('.part-price, .work-price').forEach(input => {
-      input.addEventListener('input', recalcWorkTable);
-    });
-    
-    document.getElementById('addWorkRowBtn').addEventListener('click', function() {
-      const tbody = document.querySelector('#workTable tbody');
-      const newRow = tbody.lastElementChild.cloneNode(true);
-      newRow.querySelectorAll('input').forEach(input => input.value = "");
-      tbody.appendChild(newRow);
-      newRow.querySelectorAll('.part-price, .work-price').forEach(input => {
-        input.addEventListener('input', recalcWorkTable);
-      });
-      recalcWorkTable();
-    });
-    
-    document.getElementById("addRowBtn").addEventListener("click", function() {
-      const tableBody = document.getElementById("detailsTable").querySelector("tbody");
-      const lastRow = tableBody.lastElementChild.cloneNode(true);
-      lastRow.cells[0].textContent = tableBody.rows.length + 1;
-      lastRow.querySelectorAll("input[type='text']").forEach(input => input.value = "");
-      lastRow.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
-      tableBody.appendChild(lastRow);
-    });
-    
-    // Обновление даты и времени
+    // Обновление даты и времени во всех секциях
     function updateDateTime() {
       const now = new Date();
       const formatted = now.toLocaleString();
@@ -550,6 +522,158 @@
     }
     setInterval(updateDateTime, 1000);
     updateDateTime();
+    
+    // Функция обновления дублированных данных (VIN, carModel, year, Госномер)
+    function updateDuplicates() {
+      const vinValue = document.getElementById("vin").value;
+      const carModelValue = document.getElementById("carModel").value;
+      const yearValue = document.getElementById("year").value;
+      const plateValue = document.getElementById("plate").value;
+      document.getElementById("vin_defects").textContent = vinValue;
+      document.getElementById("carModel_defects").textContent = carModelValue;
+      document.getElementById("year_defects").textContent = yearValue;
+      document.getElementById("plate_defects").textContent = plateValue;
+      document.getElementById("vin_work").textContent = vinValue;
+      document.getElementById("carModel_work").textContent = carModelValue;
+      document.getElementById("year_work").textContent = yearValue;
+      document.getElementById("plate_work").textContent = plateValue;
+    }
+    
+    // Привязываем обновление к изменениям в полях VIN, carModel, year, Госномер
+    document.getElementById("vin").addEventListener("input", updateDuplicates);
+    document.getElementById("carModel").addEventListener("input", updateDuplicates);
+    document.getElementById("year").addEventListener("input", updateDuplicates);
+    document.getElementById("plate").addEventListener("input", updateDuplicates);
+    updateDuplicates();
+    
+    // Функция пересчёта общей суммы в таблице "ЗАЯВКА НА ВИКОНАННЯ РОБІТ"
+    function recalcWorkTable() {
+      const rows = document.querySelectorAll('#workTable tbody tr');
+      let total = 0;
+      rows.forEach(row => {
+        const partPrice = parseFloat(row.querySelector('.part-price').value) || 0;
+        const workPrice = parseFloat(row.querySelector('.work-price').value) || 0;
+        total += partPrice + workPrice;
+      });
+      document.getElementById('workTotal').textContent = 'Общая сумма: ' + total.toFixed(2);
+    }
+    
+    // Добавляем обработчики для пересчёта при изменении полей в таблице работ
+    document.querySelectorAll('.part-price, .work-price').forEach(input => {
+      input.addEventListener('input', recalcWorkTable);
+    });
+    
+    // Обработчик кнопки "Додати рядок" для таблицы дефектов автомобиля
+    document.getElementById("addRowBtn").addEventListener("click", function() {
+      const tableBody = document.getElementById("detailsTable").querySelector("tbody");
+      const lastRow = tableBody.lastElementChild.cloneNode(true);
+      lastRow.cells[0].textContent = tableBody.rows.length + 1;
+      lastRow.querySelectorAll("input[type='text']").forEach(input => input.value = "");
+      lastRow.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+      tableBody.appendChild(lastRow);
+    });
+    
+    // Обработчик кнопки "Додати рядок" для таблицы заявок (работ)
+    document.getElementById('addWorkRowBtn').addEventListener('click', function() {
+      const tbody = document.querySelector('#workTable tbody');
+      const newRow = tbody.lastElementChild.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(input => input.value = "");
+      tbody.appendChild(newRow);
+      // При добавлении новой строки обновляем обработчики для новых полей
+      newRow.querySelectorAll('.part-price, .work-price').forEach(input => {
+        input.addEventListener('input', recalcWorkTable);
+      });
+      recalcWorkTable();
+    });
+    
+    // Обработчик кнопки [send parts] для отправки данных в отдел запчастей (ADMIN2)
+    document.getElementById("sendPartsBtn").addEventListener("click", function() {
+      // Собираем данные из секции VINh и Акт дефектів
+      const vin = document.getElementById("vin").value;
+      const ptk_percent = document.getElementById("ptk_percent").value;
+      const ztk_percent = document.getElementById("ztk_percent").value;
+      const ptd_mm = document.getElementById("ptd_mm").value;
+      const ztd_mm = document.getElementById("ztd_mm").value;
+      const brakeFluid = document.getElementById("brakeFluid").value;
+      const antifreeze = document.getElementById("antifreeze").value;
+      const transmissionOil = document.getElementById("transmissionOil").value;
+      const notes = document.getElementById("notes").value;
+      
+      // Собираем данные из таблицы дефектов
+      const details = [];
+      const rows = document.querySelectorAll("#detailsTable tbody tr");
+      rows.forEach(function(row) {
+        const partName = row.cells[1].querySelector("input").value;
+        const wear = row.cells[2].querySelector("input").checked;
+        const looseness = row.cells[3].querySelector("input").checked;
+        const recReplace = row.cells[4].querySelector("input").checked;
+        const critReplace = row.cells[5].querySelector("input").checked;
+        details.push({
+          partName: partName,
+          wear: wear,
+          looseness: looseness,
+          recReplace: recReplace,
+          critReplace: critReplace
+        });
+      });
+      
+      const payload = {
+        vin: vin,
+        ptk_percent: ptk_percent,
+        ztk_percent: ztk_percent,
+        ptd_mm: ptd_mm,
+        ztd_mm: ztd_mm,
+        brakeFluid: brakeFluid,
+        antifreeze: antifreeze,
+        transmissionOil: transmissionOil,
+        details: details,
+        notes: notes
+      };
+      
+      fetch("/vin.com/send_parts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.status === "success") {
+          alert("Сообщение отправлено в отдел запчастей");
+        } else {
+          alert("Ошибка отправки: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error("Ошибка:", error);
+        alert("Произошла ошибка при отправке сообщения в отдел запчастей");
+      });
+    });
+    
+    // Обработчик кнопки "Сохранить" (отправка данных в ADMIN)
+    document.getElementById("sendAdminBtn").addEventListener("click", function() {
+      fetch("/vin.com/send_admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.status === "success") {
+          alert("Ваши данные сохранены");
+        } else {
+          alert("Ошибка: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error("Ошибка:", error);
+        alert("Произошла ошибка при отправке данных");
+      });
+    });
+    
+    // (Дополнительно) Обработчик кнопки "добавить НАРЯД-ЗАМОВЛЕННЯ"
+    document.getElementById("addOrderBtn").addEventListener("click", function() {
+      // Здесь можно реализовать необходимую логику для создания нового наряда/замовлення.
+      alert("Функция добавления НАРЯД-ЗАМОВЛЕННЯ пока не реализована.");
+    });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
