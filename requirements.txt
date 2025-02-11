@@ -1,1 +1,6 @@
+Flask
 gunicorn==23.0.0
+Flask-SQLAlchemy
+Flask-WTF
+python-dotenv  # Для загрузки .env-файлов
+
