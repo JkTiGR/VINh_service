@@ -6,3 +6,4 @@ python-dotenv  # Для загрузки .env-файлов
 
 requests
 requests
+flask_login
