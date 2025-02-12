@@ -4,3 +4,5 @@ Flask-SQLAlchemy
 Flask-WTF
 python-dotenv  # Для загрузки .env-файлов
 
+requests
+requests
