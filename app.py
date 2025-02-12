@@ -1,13 +1,12 @@
 import os
 import logging
 import requests
-from threading import Thread
 from flask import Flask, request, render_template, redirect, jsonify, Blueprint, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+# from telegram import Update
+# from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from flask_migrate import Migrate
 import models
 
@@ -40,6 +39,11 @@ login_manager.login_view = "vin_bp.login"
 @login_manager.user_loader
 def load_user(user_id):
     return models.User.query.get(int(user_id))
+
+# Добавляем маршрут для корневого URL, который перенаправляет на /vin.com/
+@app.route("/")
+def index_redirect():
+    return redirect(url_for('vin_bp.index'))
 
 # Регистрируем Blueprint для веб-интерфейса с префиксом /vin.com
 vin_bp = Blueprint('vin_bp', __name__, url_prefix='/vin.com')
@@ -110,8 +114,6 @@ def submit_order():
     models.db.session.commit()
     return jsonify({'status': 'success', 'order_id': new_client.id})
 
-# Обновлённый маршрут: теперь при вызове отправляется уведомление администратору с chat_id 7371111768,
-# а в случае успеха возвращается сообщение "Ваши данные сохранены"
 @vin_bp.route('/send_admin', methods=['POST'])
 @login_required
 def send_admin():
@@ -129,7 +131,9 @@ def send_admin():
 # Регистрируем Blueprint
 app.register_blueprint(vin_bp)
 
-# Обработчики для Telegram-бота
+# --- Telegram-бот: отключён для продакшена ---
+"""
+# Асинхронные обработчики для Telegram-бота
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Добро пожаловать в CRM VINh AUTOSERVICE!")
 
@@ -162,16 +166,27 @@ async def create_client(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Извините, я не понимаю эту команду.")
 
-# Если запускаем приложение напрямую (не через Gunicorn/systemd), то запускаем встроенный сервер и Telegram-бот
 if __name__ == "__main__":
     with app.app_context():
         models.db.create_all()
-    # Запуск встроенного сервера Flask на порту 5001 с режимом отладки (только для разработки!)
-    flask_thread = Thread(target=lambda: app.run(host="0.0.0.0", port=5001, debug=True, threaded=True, use_reloader=False))
+    # Запуск встроенного сервера Flask на порту 5001 с режимом отладки (для разработки)
+    from threading import Thread
+    def run_flask():
+        app.run(host="0.0.0.0", port=5001, debug=True, threaded=True, use_reloader=False)
+    flask_thread = Thread(target=run_flask)
     flask_thread.start()
-    # Запуск Telegram-бота
+    # Запуск Telegram-бота (для разработки)
+    from telegram.ext import ApplicationBuilder, CommandHandler
     telegram_app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
     telegram_app.add_handler(CommandHandler("start", start))
     telegram_app.add_handler(CommandHandler("create", create_client))
     telegram_app.add_handler(CommandHandler("unknown", unknown))
     telegram_app.run_polling()
+"""
+
+# Для продакшена: используется gunicorn, поэтому этот блок не выполняется.
+if __name__ == "__main__":
+    with app.app_context():
+        models.db.create_all()
+    app.run(host="0.0.0.0", port=5001, debug=True)
+

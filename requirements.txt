@@ -1,11 +1,9 @@
 Flask
 gunicorn==23.0.0
-Flask-SQLAlchemy
-Flask-WTF
-python-dotenv  # Для загрузки .env-файлов
-
-requests
-requests
-flask_login
-python-telegram-bot
+Flask-Login
 Flask-Migrate
+python-dotenv
+Flask-SQLAlchemy
+requests
+# Другие зависимости, если они используются
+

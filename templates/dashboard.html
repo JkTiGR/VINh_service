@@ -65,7 +65,8 @@
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('image.png') no-repeat center center fixed;
+      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
+                  url('image.png') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       overflow-x: hidden;
@@ -126,8 +127,8 @@
       box-shadow: 0 0 20px #00c6ff;
       transform: scale(1.02);
     }
-    /* Таблицы */
-    #workTable, #detailsTable {
+    /* Таблицы – используем классы вместо id для внутренней уникальности */
+    .work-table, .details-table {
       border: none;
       border-radius: 8px;
       overflow: hidden;
@@ -137,13 +138,13 @@
       -webkit-backdrop-filter: blur(5px);
       margin-bottom: 20px;
     }
-    #workTable th, #workTable td,
-    #detailsTable th, #detailsTable td {
+    .work-table th, .work-table td,
+    .details-table th, .details-table td {
       border: none;
       padding: 5px;
       text-align: center;
     }
-    #workTable th, #detailsTable th {
+    .work-table th, .details-table th {
       background-color: rgba(0,43,85,0.7);
     }
     /* Сетка для индикаторов */
@@ -153,11 +154,46 @@
       gap: 10px;
     }
     hr { border: 1px solid #00c6ff; margin: 10px 0; }
+    
+    /* Новое меню – кнопка-меню в верхнем правом углу */
+    .menu-dropdown {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+    .menu-dropdown button {
+      background: transparent;
+      border: none;
+    }
+    .menu-dropdown img {
+      width: 30px;
+      height: 30px;
+    }
   </style>
 </head>
 <body>
+  <!-- Кнопка меню в верхнем правом углу -->
+  <div class="menu-dropdown dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+      <img src="MenuIcons.png" alt="Menu">
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+      <li><a class="dropdown-item" href="#">HOME</a></li>
+      <li><a class="dropdown-item" href="#">Запис na STO</a></li>
+      <li><a class="dropdown-item" href="#">Автозапчасти</a></li>
+      <li><a class="dropdown-item" href="#">Послуги</a></li>
+      <li><a class="dropdown-item" href="#">Малярка</a></li>
+      <li><a class="dropdown-item" href="#">Евакуатор</a></li>
+      <li><a class="dropdown-item" href="#">Придбати авто</a></li>
+      <li><a class="dropdown-item" href="#">Контакти</a></li>
+      <li><a class="dropdown-item" href="#">Про компанію</a></li>
+      <li><a class="dropdown-item" href="#">Выйти</a></li>
+    </ul>
+  </div>
+  
   <form action="/submit" method="POST" style="width:100%;">
-    <!-- Оборачиваем все основные секции в контейнер с классом "order" -->
+    <!-- Оригинальный заказ (обёрнут в контейнер "order") -->
     <div class="order">
       <!-- Секция VINh AUTOSERVICE -->
       <div id="vinh-container" style="margin:20px;">
@@ -329,7 +365,7 @@
           </div>
         </div>
         <!-- Таблица деталей -->
-        <table id="detailsTable" style="margin-top:10px;">
+        <table class="details-table" style="margin-top:10px;">
           <thead>
             <tr>
               <th style="width:5%;">#</th>
@@ -403,7 +439,7 @@
           <strong>Госномер:</strong> <span id="plate_work"></span>
         </div>
         <div id="dateTimeWork" style="font-size:0.9em; margin-bottom:5px;"></div>
-        <table id="workTable" style="margin-top:10px;">
+        <table class="work-table" style="margin-top:10px;">
           <thead>
             <tr>
               <th style="width:45%;">Назва запчастини або вузла (агрегата)</th>
@@ -429,7 +465,7 @@
             </tr>
           </tbody>
         </table>
-        <div id="workTotal" style="margin-top:10px; text-align:right;">Общая сумма: 0</div>
+        <div class="work-total" style="margin-top:10px; text-align:right;">Общая сумма: 0</div>
         <button type="button" class="btn btn-primary btn-small add-work-row-btn" style="margin-top:10px;">Додати рядок</button>
       </div>
       
@@ -456,7 +492,7 @@
         </div>
       </div>
       
-      <!-- Блок кнопок для основного заказа -->
+      <!-- Блок кнопок для оригинального заказа -->
       <div style="display:flex; justify-content: space-between; margin:10px;">
         <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
         <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
@@ -465,7 +501,7 @@
   </form>
   
   <script>
-    // Обновление даты и времени (глобально)
+    // Глобальное обновление даты и времени
     function updateDateTime() {
       const now = new Date();
       const formatted = now.toLocaleString();
@@ -479,7 +515,7 @@
     setInterval(updateDateTime, 1000);
     updateDateTime();
     
-    // Обновление дублированных данных (оригинал)
+    // Глобальное обновление дублированных данных
     function updateDuplicates() {
       const vinValue = document.getElementById("vin").value;
       const carModelValue = document.getElementById("carModel").value;
@@ -500,34 +536,34 @@
     document.getElementById("plate").addEventListener("input", updateDuplicates);
     updateDuplicates();
     
-    // Функция пересчёта суммы внутри заданного контейнера заказа
+    // Функция пересчёта суммы внутри заказа (по контейнеру)
     function recalcWorkTableForContainer(container) {
-      const rows = container.querySelectorAll("table#workTable tbody tr");
+      const rows = container.querySelectorAll("table.work-table tbody tr");
       let total = 0;
       rows.forEach(row => {
         const partPrice = parseFloat(row.querySelector(".part-price").value) || 0;
         const workPrice = parseFloat(row.querySelector(".work-price").value) || 0;
         total += partPrice + workPrice;
       });
-      const workTotalElem = container.querySelector("#workTotal");
+      const workTotalElem = container.querySelector(".work-total");
       if (workTotalElem) {
         workTotalElem.textContent = "Общая сумма: " + total.toFixed(2);
       }
     }
     
-    // Функция переинициализации обработчиков внутри контейнера заказа
+    // Функция переинициализации обработчиков внутри заказа
     function reinitializeOrderEventsForContainer(orderContainer) {
-      // Для полей калькулятора внутри этого заказа
+      // Назначаем обработчики для калькулятора внутри этого заказа
       orderContainer.querySelectorAll(".part-price, .work-price").forEach(input => {
         input.addEventListener("input", function() {
           recalcWorkTableForContainer(orderContainer);
         });
       });
       
-      // Обработчик для кнопки "Додати рядок" в таблице деталей внутри заказа
+      // Обработчик для кнопок "Додати рядок" в таблице деталей внутри заказа
       orderContainer.querySelectorAll(".add-row-btn").forEach(btn => {
         btn.addEventListener("click", function() {
-          const tableBody = orderContainer.querySelector("#detailsTable tbody");
+          const tableBody = orderContainer.querySelector("table.details-table tbody");
           if (!tableBody) return;
           const lastRow = tableBody.lastElementChild.cloneNode(true);
           lastRow.cells[0].textContent = tableBody.rows.length + 1;
@@ -537,10 +573,10 @@
         });
       });
       
-      // Обработчик для кнопки "Додати рядок" в таблице работ внутри заказа
+      // Обработчик для кнопок "Додати рядок" в таблице работ внутри заказа
       orderContainer.querySelectorAll(".add-work-row-btn").forEach(btn => {
         btn.addEventListener("click", function() {
-          const tbody = orderContainer.querySelector("#workTable tbody");
+          const tbody = orderContainer.querySelector("table.work-table tbody");
           if (!tbody) return;
           const newRow = tbody.lastElementChild.cloneNode(true);
           newRow.querySelectorAll("input").forEach(input => input.value = "");
@@ -554,8 +590,8 @@
         });
       });
       
-      // Сброс "Общая сумма" для этого заказа
-      const workTotalElem = orderContainer.querySelector("#workTotal");
+      // Сброс значения "Общая сумма" для этого заказа
+      const workTotalElem = orderContainer.querySelector(".work-total");
       if (workTotalElem) {
         workTotalElem.textContent = "Общая сумма: 0";
       }
@@ -567,90 +603,7 @@
       reinitializeOrderEventsForContainer(originalOrder);
     }
     
-    // Обработчики для оригинальных кнопок, если они существуют (на случай, если в оригинале не обёрнуто в .order)
-    // Если у вас в оригинале уже есть элементы с классами .add-row-btn и .add-work-row-btn, они будут работать через делегирование
-    
-    // Отправка данных в отдел запчастей (send parts) – глобально (оригинал)
-    document.getElementById("sendPartsBtn").addEventListener("click", function() {
-      const vin = document.getElementById("vin").value;
-      const ptk_percent = document.getElementById("ptk_percent").value;
-      const ztk_percent = document.getElementById("ztk_percent").value;
-      const ptd_mm = document.getElementById("ptd_mm").value;
-      const ztd_mm = document.getElementById("ztd_mm").value;
-      const brakeFluid = document.getElementById("brakeFluid").value;
-      const antifreeze = document.getElementById("antifreeze").value;
-      const transmissionOil = document.getElementById("transmissionOil").value;
-      const notes = document.getElementById("notes").value;
-      
-      const details = [];
-      document.querySelectorAll("#detailsTable tbody tr").forEach(function(row) {
-        const partName = row.cells[1].querySelector("input").value;
-        const wear = row.cells[2].querySelector("input").checked;
-        const looseness = row.cells[3].querySelector("input").checked;
-        const recReplace = row.cells[4].querySelector("input").checked;
-        const critReplace = row.cells[5].querySelector("input").checked;
-        details.push({
-          partName: partName,
-          wear: wear,
-          looseness: looseness,
-          recReplace: recReplace,
-          critReplace: critReplace
-        });
-      });
-      
-      const payload = {
-        vin: vin,
-        ptk_percent: ptk_percent,
-        ztk_percent: ztk_percent,
-        ptd_mm: ptd_mm,
-        ztd_mm: ztd_mm,
-        brakeFluid: brakeFluid,
-        antifreeze: antifreeze,
-        transmissionOil: transmissionOil,
-        details: details,
-        notes: notes
-      };
-      
-      fetch("/vin.com/send_parts_admin2", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "success") {
-          alert("Сообщение отправлено в отдел запчастей (admin_2)");
-        } else {
-          alert("Ошибка отправки: " + data.message);
-        }
-      })
-      .catch(error => {
-        console.error("Ошибка:", error);
-        alert("Произошла ошибка при отправке сообщения в отдел запчастей");
-      });
-    });
-    
-    // Отправка данных в ADMIN (глобально для оригинала)
-    document.getElementById("sendAdminBtn").addEventListener("click", function() {
-      fetch("/vin.com/send_admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "success") {
-          alert("Ваши данные сохранены");
-        } else {
-          alert("Ошибка: " + data.message);
-        }
-      })
-      .catch(error => {
-        console.error("Ошибка:", error);
-        alert("Произошла ошибка при отправке данных");
-      });
-    });
-    
-    // Обработчик кнопки "добавить НАРЯД-ЗАМОВЛЕННЯ" – клонирование всего заказа
+    // Обработчик для кнопки "добавить НАРЯД-ЗАМОВЛЕННЯ" – клонирование всего заказа
     function addOrderHandler() {
       const sectionIds = [
         "vinh-container",
@@ -659,7 +612,6 @@
         "work-container",
         "control-signatures-container"
       ];
-      // Создаем новый контейнер заказа
       const newOrder = document.createElement("div");
       newOrder.classList.add("order");
       
@@ -667,9 +619,9 @@
         const section = document.getElementById(id);
         if (section) {
           const clone = section.cloneNode(true);
-          clone.removeAttribute("id"); // удаляем id из клона
+          clone.removeAttribute("id");
           if (id === "vinh-container") {
-            // Для секции VINh AUTOSERVICE оставляем только основные поля:
+            // Оставляем только основные поля: clientName, phone, vin, carModel, year, plate
             const allowedNames = ["clientName", "phone", "vin", "carModel", "year", "plate"];
             clone.querySelectorAll("input, textarea").forEach(el => {
               if (!allowedNames.includes(el.name)) {
@@ -692,7 +644,7 @@
         }
       });
       
-      // Создаем блок с кнопками для нового заказа
+      // Добавляем блок с кнопками для нового заказа
       const orderButtons = document.createElement("div");
       orderButtons.style.display = "flex";
       orderButtons.style.justifyContent = "space-between";
@@ -710,15 +662,14 @@
       addOrderBtnClone.type = "button";
       addOrderBtnClone.className = "btn btn-primary btn-small";
       addOrderBtnClone.textContent = "добавить НАРЯД-ЗАМОВЛЕННЯ";
-      // Используем тот же обработчик для добавления нового наряда из клона
       addOrderBtnClone.addEventListener("click", addOrderHandler);
       
       orderButtons.appendChild(saveBtn);
       orderButtons.appendChild(addOrderBtnClone);
       newOrder.appendChild(orderButtons);
       
-      // Найдем элемент "workTotal" внутри нового заказа и сбросим его
-      const workTotalElem = newOrder.querySelector("#workTotal");
+      // Сброс значения "Общая сумма" в новом заказе
+      const workTotalElem = newOrder.querySelector(".work-total");
       if (workTotalElem) {
         workTotalElem.textContent = "Общая сумма: 0";
       }
@@ -726,7 +677,7 @@
       // Добавляем новый заказ в конец формы
       document.querySelector("form").appendChild(newOrder);
       
-      // Переинициализируем обработчики для элементов внутри нового заказа
+      // Переинициализируем обработчики для нового заказа
       reinitializeOrderEventsForContainer(newOrder);
     }
     
