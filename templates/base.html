@@ -2,15 +2,22 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Мой сайт</title>
-    <!-- Другие метатеги и подключения стилей -->
+    <title>Название сайта</title>
+    <!-- Подключение CSS-файлов -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <header>
-        <!-- Здесь выводим логотип -->
+        <!-- Вставьте логотип здесь -->
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Логотип">
+        <!-- Можно добавить навигационное меню и другие элементы шапки -->
     </header>
+    
     <!-- Основное содержимое страницы -->
     {% block content %}{% endblock %}
+    
+    <!-- Подключение JavaScript -->
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>
+
