@@ -5,8 +5,6 @@ from flask import Flask, request, render_template, redirect, jsonify, Blueprint,
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-# from telegram import Update
-# from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from flask_migrate import Migrate
 import models
 
@@ -40,7 +38,7 @@ login_manager.login_view = "vin_bp.login"
 def load_user(user_id):
     return models.User.query.get(int(user_id))
 
-# Добавляем маршрут для корневого URL, который перенаправляет на /vin.com/
+# Перенаправление корневого URL на /vin.com/
 @app.route("/")
 def index_redirect():
     return redirect(url_for('vin_bp.index'))
@@ -93,6 +91,7 @@ def register():
 @vin_bp.route('/dashboard/<plate>')
 @login_required
 def dashboard(plate):
+    # Пользователь может просматривать только свой дашборд
     if current_user.plate != plate:
         return redirect(url_for('vin_bp.dashboard', plate=current_user.plate))
     return render_template('dashboard.html', plate=plate)
@@ -100,6 +99,7 @@ def dashboard(plate):
 @vin_bp.route('/submit', methods=['POST'])
 @login_required
 def submit_order():
+    # Обработка отправки заказа. Данные могут приходить в JSON или форме.
     data = request.get_json() if request.is_json else request.form
     client_data = {
         'name': data.get('clientName'),
@@ -107,7 +107,8 @@ def submit_order():
         'vin': data.get('vin'),
         'car_model': data.get('carModel', 'Не указана'),
         'year': int(data.get('year', 0)),
-        'mileage': int(data.get('mileage', 0))
+        'mileage': int(data.get('mileage', 0)),
+        'plate': data.get('plate', '').upper()
     }
     new_client = models.Client(**client_data)
     models.db.session.add(new_client)
@@ -117,6 +118,7 @@ def submit_order():
 @vin_bp.route('/send_admin', methods=['POST'])
 @login_required
 def send_admin():
+    # Отправка уведомления администратору через Telegram с ссылкой на дашборд пользователя
     plate = current_user.plate
     link = f"http://127.0.0.1:5001/vin.com/dashboard/{plate}"
     admin_chat = "7371111768"
@@ -128,65 +130,25 @@ def send_admin():
     else:
         return jsonify({'status': 'error', 'message': r.text}), 500
 
+# Новый маршрут для CRM админа: здесь администратор может ввести госномер и просмотреть данные заказов пользователя.
+@vin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
+@login_required
+def admin_dashboard():
+    # Проверяем, что текущий пользователь является администратором.
+    if not getattr(current_user, 'is_admin', False):
+        return "Access Denied", 403
+    dashboard_data = None
+    plate = None
+    if request.method == 'POST':
+        plate = request.form.get('plate', '').upper()
+        dashboard_data = models.Client.query.filter_by(plate=plate).order_by(models.Client.id.desc()).first()
+    return render_template('admin_dashboard.html', dashboard=dashboard_data, plate=plate)
+
 # Регистрируем Blueprint
 app.register_blueprint(vin_bp)
 
-# --- Telegram-бот: отключён для продакшена ---
-"""
-# Асинхронные обработчики для Telegram-бота
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Добро пожаловать в CRM VINh AUTOSERVICE!")
-
-async def create_client(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    args = context.args
-    if len(args) < 2:
-        await update.message.reply_text("Использование: /create Имя Телефон [VIN]")
-        return
-    name = args[0]
-    phone = args[1]
-    vin = args[2] if len(args) > 2 else "Не указан"
-    api_url = "http://127.0.0.1:5001/vin.com/submit"
-    payload = {
-        "clientName": name,
-        "phone": phone,
-        "vin": vin,
-        "carModel": "Не указана",
-        "year": 0,
-        "mileage": 0
-    }
-    try:
-        response = requests.post(api_url, json=payload)
-        if response.status_code == 200:
-            await update.message.reply_text(f"Клиент {name} успешно создан!")
-        else:
-            await update.message.reply_text(f"Ошибка: {response.text}")
-    except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка: {e}")
-
-async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Извините, я не понимаю эту команду.")
-
-if __name__ == "__main__":
-    with app.app_context():
-        models.db.create_all()
-    # Запуск встроенного сервера Flask на порту 5001 с режимом отладки (для разработки)
-    from threading import Thread
-    def run_flask():
-        app.run(host="0.0.0.0", port=5001, debug=True, threaded=True, use_reloader=False)
-    flask_thread = Thread(target=run_flask)
-    flask_thread.start()
-    # Запуск Telegram-бота (для разработки)
-    from telegram.ext import ApplicationBuilder, CommandHandler
-    telegram_app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
-    telegram_app.add_handler(CommandHandler("start", start))
-    telegram_app.add_handler(CommandHandler("create", create_client))
-    telegram_app.add_handler(CommandHandler("unknown", unknown))
-    telegram_app.run_polling()
-"""
-
-# Для продакшена: используется gunicorn, поэтому этот блок не выполняется.
+# Для продакшена: запуск приложения через gunicorn, здесь – для разработки.
 if __name__ == "__main__":
     with app.app_context():
         models.db.create_all()
     app.run(host="0.0.0.0", port=5001, debug=True)
-

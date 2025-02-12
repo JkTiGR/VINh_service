@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>CRM Admin Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      input { padding: 5px; font-size: 16px; }
+      button { padding: 5px 10px; font-size: 16px; }
+      pre { background: #f4f4f4; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>CRM Панель администратора</h1>
+    <form method="post">
+       <label for="plate">Введите госномер:</label>
+       <input type="text" id="plate" name="plate" required>
+       <button type="submit">Найти</button>
+    </form>
+    {% if dashboard %}
+      <h2>Данные для госномера: {{ plate }}</h2>
+      <pre>{{ dashboard.data | safe }}</pre>
+    {% elif plate %}
+      <p>Записи для госномера "{{ plate }}" не найдены.</p>
+    {% endif %}
+</body>
+</html>
