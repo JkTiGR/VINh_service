@@ -2,11 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}VINh Service{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    {% block head %}{% endblock %}
+    <title>Мой сайт</title>
+    <!-- Другие метатеги и подключения стилей -->
 </head>
 <body>
+    <header>
+        <!-- Здесь выводим логотип -->
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Логотип">
+    </header>
+    <!-- Основное содержимое страницы -->
     {% block content %}{% endblock %}
 </body>
 </html>
