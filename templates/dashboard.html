@@ -66,7 +66,7 @@
       padding: 0;
       min-height: 100vh;
       background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
-                  url('image.png') no-repeat center center fixed;
+                  url('{{ url_for("static", filename="img/image.png") }}') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       overflow-x: hidden;
@@ -176,7 +176,7 @@
   <!-- Кнопка меню в верхнем правом углу -->
   <div class="menu-dropdown dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-      <img src="MenuIcons.png" alt="Menu">
+      <img src="{{ url_for('static', filename='img/MenuIcons.png') }}" alt="Menu">
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
       <li><a class="dropdown-item" href="#">HOME</a></li>
@@ -203,7 +203,7 @@
             <div id="dateTimeVin"></div>
           </div>
           <div class="header-right">
-            <img src="logo.png" alt="Logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
           </div>
         </div>
         <!-- Данные клиента -->
@@ -259,55 +259,55 @@
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
             <label class="form-check-label" for="checkEngine">
-              <img src="icons/check_engine.png" alt="Check Engine" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/check_engine.png') }}" alt="Check Engine" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="battery" name="battery">
             <label class="form-check-label" for="battery">
-              <img src="icons/battery.png" alt="Battery" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/battery.png') }}" alt="Battery" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="oil" name="oil">
             <label class="form-check-label" for="oil">
-              <img src="icons/oil.png" alt="Oil" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/oil.png') }}" alt="Oil" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
             <label class="form-check-label" for="coolant">
-              <img src="icons/coolant.png" alt="Coolant" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/coolant.png') }}" alt="Coolant" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
             <label class="form-check-label" for="tpms">
-              <img src="icons/tpms.png" alt="TPMS" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/tpms.png') }}" alt="TPMS" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
             <label class="form-check-label" for="airbag">
-              <img src="icons/airbag.png" alt="Airbag" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/airbag.png') }}" alt="Airbag" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="abs" name="abs">
             <label class="form-check-label" for="abs">
-              <img src="icons/abs.png" alt="ABS" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/abs.png') }}" alt="ABS" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="esp" name="esp">
             <label class="form-check-label" for="esp">
-              <img src="icons/esp.png" alt="ESP" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/esp.png') }}" alt="ESP" style="width:24px; height:24px;">
             </label>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
             <label class="form-check-label" for="brakeWear">
-              <img src="icons/brake_wear.png" alt="Brake Wear" style="width:24px; height:24px;">
+              <img src="{{ url_for('static', filename='icons/brake_wear.png') }}" alt="Brake Wear" style="width:24px; height:24px;">
             </label>
           </div>
         </div>
