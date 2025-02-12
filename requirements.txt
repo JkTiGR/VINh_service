@@ -8,3 +8,4 @@ requests
 requests
 flask_login
 python-telegram-bot
+Flask-Migrate
