@@ -2,6 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <!-- Мета-тег для адаптивности -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VINhservice + NASA Font</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
@@ -290,6 +292,30 @@
     footer p {
       font-size: 14px;
     }
+
+    /* Медиазапросы для адаптивности */
+    @media (max-width: 576px) {
+      .publication {
+        width: 100%;
+      }
+      .mobile-menu {
+        width: 80%;
+      }
+      #map {
+        height: 300px;
+      }
+      .logo-circle {
+        width: 50px;
+        height: 50px;
+      }
+      .tagline {
+        font-size: 12px;
+      }
+      .btn-custom {
+        font-size: 14px;
+        padding: 10px 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -328,19 +354,19 @@
   <main>
     <!-- Блок кнопок -->
     <div class="buttons-container">
-      <a href="https://goo.gl/maps/FUSE5cQxtYKwdTmTA" class="btn-custom" target="_blank">
+      <a href="https://maps.app.goo.gl/tLyvHSJ4TqdXnrib8" class="btn-custom" target="_blank">
         <span>📍</span> google maps &gt;
       </a>
       <a href="https://maps.apple.com/..." class="btn-custom" target="_blank">
         <span>📍</span> apple maps &gt;
       </a>
-      <a href="tel:+1234567890" class="btn-custom">
+      <a href="tel:+380730010298" class="btn-custom">
         <span>📞</span> telephone
       </a>
-      <a href="tg://resolve?domain=..." class="btn-custom" target="_blank">
+      <a href="https://t.me/VINhservice" class="btn-custom" target="_blank">
         <span>✈️</span> telegram
       </a>
-      <a href="viber://chat?number=..." class="btn-custom" target="_blank">
+      <a href="viber://chat?number=380730010298" class="btn-custom" target="_blank">
         <span>💬</span> viber
       </a>
       <a href="https://instagram.com/..." class="btn-custom" target="_blank">

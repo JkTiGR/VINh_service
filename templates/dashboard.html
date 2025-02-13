@@ -26,7 +26,7 @@
     .sidebar {
       position: fixed;
       top: 0;
-      right: -300px; /* Меню изначально скрыто за правой границей */
+      right: -300px;
       width: 300px;
       height: 100vh;
       background: rgba(255, 255, 255, 0.1);
@@ -80,7 +80,7 @@
       width: 30px;
       height: 30px;
     }
-    /* Прочие стили (оставляем без изменений) */
+    /* Прочие стили */
     .btn-small {
       font-size: 14px !important;
       padding: 5px 10px !important;
@@ -179,6 +179,7 @@
       transform: scale(1.02);
     }
     .work-table, .details-table {
+      width: 100%;
       border: none;
       border-radius: 8px;
       overflow: hidden;
@@ -187,7 +188,6 @@
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
       margin-bottom: 20px;
-      width: 100%; /* Таблица стала шире */
     }
     .work-table th, .work-table td,
     .details-table th, .details-table td {
@@ -204,17 +204,22 @@
       gap: 10px;
     }
     hr { border: 1px solid #00c6ff; margin: 10px 0; }
-    
-    /* Адаптивность для смартфонов и компьютеров */
+
+    /* Media Queries для адаптивности */
     @media (max-width: 768px) {
-      .header, .menu-toggle {
-        font-size: 20px;
+      main {
+        margin: 10px;
+        padding: 15px;
       }
       .sidebar {
-        width: 200px;
+        width: 220px;
+        right: -220px;
       }
-      .indicators {
-        grid-template-columns: repeat(2, 1fr);
+      .sidebar.active {
+        right: 0;
+      }
+      .header-right img {
+        width: 60px;
       }
       .work-table, .details-table {
         font-size: 14px;
@@ -223,11 +228,11 @@
   </style>
 </head>
 <body>
-  <!-- Боковое меню (Sidebar) с обновлёнными навигационными ссылками -->
+  <!-- Боковое меню (Sidebar) -->
   <div id="sidebar" class="sidebar">
     <ul>
       <li><a href="{{ url_for('vin_bp.index') }}">Home</a></li>
-      <li><a href="https://calendar.google.com/calendar/embed?src=jediservice.ua%40gmail.com&ctz=Europe%2FKiev" target="_blank">Расписание</a></li>
+      <li><a href="https://calendar.google.com/calendar/embed?src=jediservice.ua%40gmail.com&amp;ctz=Europe%2FKiev" target="_blank">Расписание</a></li>
       <li><a href="{{ url_for('vin_bp.diag') }}">Диагностика</a></li>
       <li><a href="{{ url_for('vin_bp.remont') }}">Ремонт</a></li>
       <li><a href="{{ url_for('vin_bp.parts') }}">Запчасти</a></li>
@@ -247,7 +252,7 @@
   
   <!-- Основное содержимое страницы (Dashboard) -->
   <div class="container" style="padding-top: 60px;">
-    <form action="/submit" method="POST" style="width:100%;">
+    <form action="{{ url_for('vin_bp.submit_order') }}" method="POST" style="width:100%;">
       <!-- Контейнер с данными заказа -->
       <div class="order">
         <!-- Секция VINh AUTOSERVICE -->
@@ -281,24 +286,21 @@
           </div>
           <!-- Данные автомобиля -->
           <div class="row" style="margin-top:10px;">
-            <div class="col-md-6 col-12">
+            <div class="col-md-6 col-6">
               <label for="carModel">Модель авто:</label>
               <input type="text" id="carModel" name="carModel" class="form-control" oninput="updateDuplicates();">
             </div>
-            <div class="col-md-6 col-12">
+            <div class="col-md-6 col-6">
               <label for="year">Год выпуска:</label>
               <input type="text" id="year" name="year" class="form-control" oninput="updateDuplicates();">
             </div>
           </div>
           <div class="row" style="margin-top:10px;">
-            <div class="col-md-6 col-12">
+            <div class="col-md-6 col-6">
               <label for="plate">Госномер:</label>
-              <input type="text" id="plate" name="plate" class="form-control" 
-                     value="{{ plate }}" 
-                     style="text-transform: uppercase;" 
-                     oninput="this.value = this.value.replace(/\s+/g, '').toUpperCase(); updateDuplicates();">
+              <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.replace(/\s+/g, '').toUpperCase(); updateDuplicates();" value="{{ plate }}">
             </div>
-            <div class="col-md-6 col-12">
+            <div class="col-md-6 col-6">
               <label for="mileage">Пробег (км):</label>
               <input type="text" id="mileage" name="mileage" class="form-control">
             </div>
@@ -423,46 +425,44 @@
             </div>
           </div>
           <!-- Таблица деталей -->
-          <div class="table-responsive">
-            <table class="details-table" style="margin-top:10px; width:100%;">
-              <thead>
-                <tr>
-                  <th style="width:5%;">#</th>
-                  <th style="width:50%;">Назва деталі</th>
-                  <th style="width:10%;"><span class="legend-square legend-green"></span></th>
-                  <th style="width:10%;"><span class="legend-square legend-black"></span></th>
-                  <th style="width:10%;"><span class="legend-square legend-yellow"></span></th>
-                  <th style="width:10%;"><span class="legend-square legend-red"></span></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td><input type="text" class="form-control"></td>
-                  <td><input type="checkbox" name="wear1" class="checkbox-green"></td>
-                  <td><input type="checkbox" name="looseness1" class="checkbox-black"></td>
-                  <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
-                  <td><input type="checkbox" name="critReplace1" class="checkbox-red"></td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td><input type="text" class="form-control"></td>
-                  <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
-                  <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
-                  <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
-                  <td><input type="checkbox" name="critReplace2" class="checkbox-red"></td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td><input type="text" class="form-control"></td>
-                  <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
-                  <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
-                  <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
-                  <td><input type="checkbox" name="critReplace3" class="checkbox-red"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <table class="details-table" style="margin-top:10px; width: 100%;">
+            <thead>
+              <tr>
+                <th style="width:5%;">#</th>
+                <th style="width:60%;">Назва запчастини або вузла (агрегата)</th>
+                <th style="width:10%;"><span class="legend-square legend-green"></span></th>
+                <th style="width:10%;"><span class="legend-square legend-black"></span></th>
+                <th style="width:10%;"><span class="legend-square legend-yellow"></span></th>
+                <th style="width:10%;"><span class="legend-square legend-red"></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" name="wear1" class="checkbox-green"></td>
+                <td><input type="checkbox" name="looseness1" class="checkbox-black"></td>
+                <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
+                <td><input type="checkbox" name="critReplace1" class="checkbox-red"></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
+                <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
+                <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
+                <td><input type="checkbox" name="critReplace2" class="checkbox-red"></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
+                <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
+                <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
+                <td><input type="checkbox" name="critReplace3" class="checkbox-red"></td>
+              </tr>
+            </tbody>
+          </table>
           <!-- Легенда под таблицей -->
           <div class="table-legend" style="text-align:right; margin-top:5px;">
             <span class="legend-square legend-green"></span>Знос
@@ -499,7 +499,7 @@
             <strong>Госномер:</strong> <span id="plate_work"></span>
           </div>
           <div id="dateTimeWork" style="font-size:0.9em; margin-bottom:5px;"></div>
-          <table class="work-table" style="margin-top:10px; width:100%;">
+          <table class="work-table" style="margin-top:10px;">
             <thead>
               <tr>
                 <th style="width:45%;">Назва запчастини або вузла (агрегата)</th>
@@ -554,6 +554,7 @@
         
         <!-- Блок кнопок -->
         <div style="display:flex; justify-content: space-between; margin:10px;">
+          <!-- Кнопка "Сохранить" теперь вызывает функцию saveDashboardData, которая отправляет данные на сервер через корректный маршрут -->
           <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
           <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
         </div>
@@ -563,7 +564,7 @@
   
   <!-- JavaScript -->
   <script>
-    // Функция переключения бокового меню
+    /* Бургер-меню */
     const menuButton = document.getElementById('menuButton');
     const sidebar = document.getElementById('sidebar');
     menuButton.addEventListener('click', function(event) {
@@ -576,7 +577,7 @@
       }
     });
 
-    // Обновление даты и времени
+    /* Обновление даты и времени */
     function updateDateTime() {
       const now = new Date();
       const formatted = now.toLocaleString();
@@ -590,7 +591,7 @@
     setInterval(updateDateTime, 1000);
     updateDateTime();
     
-    // Функция для обновления дублированных полей (VIN, модель, год, госномер)
+    /* Обновление дублированных полей (VIN, модель, год, госномер) */
     function updateDuplicates() {
       const vinValue = document.getElementById("vin").value;
       const carModelValue = document.getElementById("carModel").value;
@@ -611,7 +612,7 @@
     document.getElementById("plate").addEventListener("input", updateDuplicates);
     updateDuplicates();
     
-    // Функция пересчёта общей суммы работ в таблице
+    /* Пересчет общей суммы работ в таблице */
     function recalcWorkTableForContainer(container) {
       const rows = container.querySelectorAll("table.work-table tbody tr");
       let total = 0;
@@ -626,7 +627,7 @@
       }
     }
     
-    // Переинициализация обработчиков для контейнера заказа
+    /* Переинициализация обработчиков для контейнера заказа */
     function reinitializeOrderEventsForContainer(orderContainer) {
       orderContainer.querySelectorAll(".part-price, .work-price").forEach(input => {
         input.addEventListener("input", function() {
@@ -668,13 +669,13 @@
       }
     }
     
-    // Инициализация для оригинального заказа
+    /* Инициализация для оригинального заказа */
     const originalOrder = document.querySelector(".order");
     if (originalOrder) {
       reinitializeOrderEventsForContainer(originalOrder);
     }
     
-    // Функция для клонирования заказа (добавление нового)
+    /* Функция для клонирования заказа (добавление нового) */
     function addOrderHandler() {
       const sectionIds = [
         "vinh-container",
@@ -747,7 +748,7 @@
     
     document.getElementById("addOrderBtn").addEventListener("click", addOrderHandler);
     
-    // Функция для сбора данных формы в объект
+    /* Функция для сбора данных формы в объект */
     function collectFormData() {
       const formData = {};
       document.querySelectorAll('form input, form textarea').forEach(el => {
@@ -762,10 +763,10 @@
       return formData;
     }
     
-    // Функция для сохранения данных дашборда на сервере
+    /* Функция для сохранения данных дашборда на сервере */
     function saveDashboardData() {
       const data = collectFormData();
-      fetch('/api/dashboard', {
+      fetch("{{ url_for('vin_bp.submit_order') }}", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -784,10 +785,10 @@
       });
     }
     
-    // Привязка кнопки "Сохранить" к сохранению данных на сервере
+    /* Привязка кнопки "Сохранить" к сохранению данных на сервере */
     document.getElementById('sendAdminBtn').addEventListener('click', saveDashboardData);
     
-    // Функция для загрузки данных дашборда с сервера по госномеру
+    /* Функция для загрузки данных дашборда с сервера по госномеру */
     function loadDashboardData() {
       const plate = document.getElementById('plate').value;
       if (plate) {
@@ -797,7 +798,6 @@
             if (data.error) {
               console.log('Данные для данного госномера не найдены');
             } else {
-              // Заполняем поля формы полученными данными
               for (const key in data) {
                 const element = document.getElementById(key);
                 if (element) {
@@ -815,7 +815,6 @@
       }
     }
     
-    // При загрузке страницы, если поле "Госномер" не пустое, загружаем данные с сервера
     window.addEventListener('load', function() {
       if (document.getElementById('plate').value) {
         loadDashboardData();
@@ -826,3 +825,4 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

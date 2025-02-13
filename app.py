@@ -27,7 +27,7 @@ migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = "vin_bp.login"
 
-# Модели
+# Модели (определены здесь, чтобы не требовать отдельного файла models.py)
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     plate = db.Column(db.String(20), unique=True, nullable=False)
@@ -134,6 +134,12 @@ def admin_dashboard():
         dashboard_data = Client.query.filter_by(plate=plate).order_by(Client.id.desc()).first()
     return render_template('admin_dashboard.html', dashboard=dashboard_data, plate=plate)
 
+def safe_int(val):
+    try:
+        return int(val.strip()) if val and val.strip() != '' else 0
+    except Exception:
+        return 0
+
 # Маршрут для сохранения заказа (/submit)
 @vin_bp.route('/submit', methods=['POST'])
 @login_required
@@ -145,8 +151,8 @@ def submit_order():
             'phone': data.get('phone'),
             'vin': data.get('vin'),
             'car_model': data.get('carModel') or "Не указана",
-            'year': int(data.get('year', 0)),
-            'mileage': int(data.get('mileage', 0)),
+            'year': safe_int(data.get('year', '0')),
+            'mileage': safe_int(data.get('mileage', '0')),
             'plate': data.get('plate', '').replace(" ", "").upper()
         }
     except Exception as e:
@@ -174,7 +180,7 @@ def send_admin():
     else:
         return jsonify({'status': 'error', 'message': r.text}), 500
 
-# Новые маршруты
+# Новые маршруты для навигации
 @vin_bp.route('/home')
 def home():
     return render_template('home.html')
@@ -216,16 +222,15 @@ def forgot_password():
         plate = request.form.get('plate', '').replace(" ", "").upper()
         user = User.query.filter_by(plate=plate).first()
         if user:
-            # Реализуйте логику отправки инструкций по восстановлению пароля (например, по email или SMS)
+            # Здесь можно реализовать отправку инструкций (например, по email)
             message = "Инструкции по восстановлению пароля отправлены"
         else:
             error = "Пользователь с данным госномером не найден"
     return render_template('forgot_password.html', error=error, message=message)
 
-# Регистрируем Blueprint
 app.register_blueprint(vin_bp)
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
+        db.create_all()  # При необходимости удалите старую базу crm.db
     app.run(host="0.0.0.0", port=5003)
