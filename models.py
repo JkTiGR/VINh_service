@@ -3,8 +3,6 @@ from datetime import datetime
 from flask_login import UserMixin
 
 # Инициализация базы данных
-
-
 db = SQLAlchemy()
 
 class User(db.Model, UserMixin):

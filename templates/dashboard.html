@@ -17,7 +17,7 @@
       padding: 0;
       min-height: 100vh;
       background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
-                  url('../static/img/image.png') no-repeat center center fixed;
+                  url("{{ url_for('static', filename='img/image.png') }}") no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       overflow-x: hidden;
@@ -29,10 +29,10 @@
       right: -300px; /* Меню изначально скрыто за правой границей */
       width: 300px;
       height: 100vh;
-      background: rgba(255, 255, 255, 0.1); /* Полупрозрачный фон */
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
-      backdrop-filter: blur(10px);          /* Эффект размытия заднего фона */
-      -webkit-backdrop-filter: blur(10px);    /* Для Safari */
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       border: 1px solid rgba(255, 255, 255, 0.18);
       padding: 20px;
@@ -80,7 +80,7 @@
       width: 30px;
       height: 30px;
     }
-    /* Прочие стили (из исходного кода) */
+    /* Прочие стили (оставляем без изменений) */
     .btn-small {
       font-size: 14px !important;
       padding: 5px 10px !important;
@@ -187,6 +187,7 @@
       backdrop-filter: blur(5px);
       -webkit-backdrop-filter: blur(5px);
       margin-bottom: 20px;
+      width: 100%; /* Таблица стала шире */
     }
     .work-table th, .work-table td,
     .details-table th, .details-table td {
@@ -203,28 +204,44 @@
       gap: 10px;
     }
     hr { border: 1px solid #00c6ff; margin: 10px 0; }
+    
+    /* Адаптивность для смартфонов и компьютеров */
+    @media (max-width: 768px) {
+      .header, .menu-toggle {
+        font-size: 20px;
+      }
+      .sidebar {
+        width: 200px;
+      }
+      .indicators {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .work-table, .details-table {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Боковое меню (Sidebar) -->
+  <!-- Боковое меню (Sidebar) с обновлёнными навигационными ссылками -->
   <div id="sidebar" class="sidebar">
     <ul>
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Расписание</a></li>
-      <li><a href="#">Диагностика</a></li>
-      <li><a href="#">Ремонт</a></li>
-      <li><a href="#">Запчасти</a></li>
-      <li><a href="#">Мойка</a></li>
-      <li><a href="#">Шиномонтаж</a></li>
-      <li><a href="#">Контакт</a></li>
-      <li><a href="#">Выйти</a></li>
+      <li><a href="{{ url_for('vin_bp.index') }}">Home</a></li>
+      <li><a href="https://calendar.google.com/calendar/embed?src=jediservice.ua%40gmail.com&ctz=Europe%2FKiev" target="_blank">Расписание</a></li>
+      <li><a href="{{ url_for('vin_bp.diag') }}">Диагностика</a></li>
+      <li><a href="{{ url_for('vin_bp.remont') }}">Ремонт</a></li>
+      <li><a href="{{ url_for('vin_bp.parts') }}">Запчасти</a></li>
+      <li><a href="{{ url_for('vin_bp.wash') }}">Мойка</a></li>
+      <li><a href="{{ url_for('vin_bp.shino') }}">Шиномонтаж</a></li>
+      <li><a href="{{ url_for('vin_bp.VK') }}">Контакт</a></li>
+      <li><a href="{{ url_for('vin_bp.visit') }}">Выйти</a></li>
     </ul>
   </div>
   
   <!-- Кнопка-триггер для бокового меню -->
   <div class="menu-toggle">
     <button id="menuButton">
-      <img src="./menu_icon.png" alt="Menu">
+      <img src="{{ url_for('static', filename='img/menu_icon.png') }}" alt="Menu">
     </button>
   </div>
   
@@ -241,7 +258,7 @@
               <div id="dateTimeVin"></div>
             </div>
             <div class="header-right">
-              <img src="../static/logo.png" alt="Logo">
+              <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
             </div>
           </div>
           <!-- Данные клиента -->
@@ -264,21 +281,24 @@
           </div>
           <!-- Данные автомобиля -->
           <div class="row" style="margin-top:10px;">
-            <div class="col-md-6 col-6">
+            <div class="col-md-6 col-12">
               <label for="carModel">Модель авто:</label>
               <input type="text" id="carModel" name="carModel" class="form-control" oninput="updateDuplicates();">
             </div>
-            <div class="col-md-6 col-6">
+            <div class="col-md-6 col-12">
               <label for="year">Год выпуска:</label>
               <input type="text" id="year" name="year" class="form-control" oninput="updateDuplicates();">
             </div>
           </div>
           <div class="row" style="margin-top:10px;">
-            <div class="col-md-6 col-6">
+            <div class="col-md-6 col-12">
               <label for="plate">Госномер:</label>
-              <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDuplicates();">
+              <input type="text" id="plate" name="plate" class="form-control" 
+                     value="{{ plate }}" 
+                     style="text-transform: uppercase;" 
+                     oninput="this.value = this.value.replace(/\s+/g, '').toUpperCase(); updateDuplicates();">
             </div>
-            <div class="col-md-6 col-6">
+            <div class="col-md-6 col-12">
               <label for="mileage">Пробег (км):</label>
               <input type="text" id="mileage" name="mileage" class="form-control">
             </div>
@@ -297,55 +317,55 @@
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
               <label class="form-check-label" for="checkEngine">
-                <img src="../../icons/check_engine.png" alt="Check Engine" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/check_engine.png') }}" alt="Check Engine" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="battery" name="battery">
               <label class="form-check-label" for="battery">
-                <img src="../../icons/battery.png" alt="Battery" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/battery.png') }}" alt="Battery" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="oil" name="oil">
               <label class="form-check-label" for="oil">
-                <img src="../../icons/oil.png" alt="Oil" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/oil.png') }}" alt="Oil" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
               <label class="form-check-label" for="coolant">
-                <img src="../../icons/coolant.png" alt="Coolant" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/coolant.png') }}" alt="Coolant" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
               <label class="form-check-label" for="tpms">
-                <img src="../../icons/tpms.png" alt="TPMS" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/tpms.png') }}" alt="TPMS" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
               <label class="form-check-label" for="airbag">
-                <img src="../../icons/airbag.png" alt="Airbag" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/airbag.png') }}" alt="Airbag" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="abs" name="abs">
               <label class="form-check-label" for="abs">
-                <img src="../../icons/abs.png" alt="ABS" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/abs.png') }}" alt="ABS" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="esp" name="esp">
               <label class="form-check-label" for="esp">
-                <img src="../../icons/esp.png" alt="ESP" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/esp.png') }}" alt="ESP" style="width:24px; height:24px;">
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
               <label class="form-check-label" for="brakeWear">
-                <img src="../../icons/brake_wear.png" alt="Brake Wear" style="width:24px; height:24px;">
+                <img src="{{ url_for('static', filename='icons/brake_wear.png') }}" alt="Brake Wear" style="width:24px; height:24px;">
               </label>
             </div>
           </div>
@@ -403,44 +423,46 @@
             </div>
           </div>
           <!-- Таблица деталей -->
-          <table class="details-table" style="margin-top:10px;">
-            <thead>
-              <tr>
-                <th style="width:5%;">#</th>
-                <th style="width:50%;">Назва деталі</th>
-                <th style="width:10%;"><span class="legend-square legend-green"></span></th>
-                <th style="width:10%;"><span class="legend-square legend-black"></span></th>
-                <th style="width:10%;"><span class="legend-square legend-yellow"></span></th>
-                <th style="width:10%;"><span class="legend-square legend-red"></span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="checkbox" name="wear1" class="checkbox-green"></td>
-                <td><input type="checkbox" name="looseness1" class="checkbox-black"></td>
-                <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
-                <td><input type="checkbox" name="critReplace1" class="checkbox-red"></td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
-                <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
-                <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
-                <td><input type="checkbox" name="critReplace2" class="checkbox-red"></td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
-                <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
-                <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
-                <td><input type="checkbox" name="critReplace3" class="checkbox-red"></td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="details-table" style="margin-top:10px; width:100%;">
+              <thead>
+                <tr>
+                  <th style="width:5%;">#</th>
+                  <th style="width:50%;">Назва деталі</th>
+                  <th style="width:10%;"><span class="legend-square legend-green"></span></th>
+                  <th style="width:10%;"><span class="legend-square legend-black"></span></th>
+                  <th style="width:10%;"><span class="legend-square legend-yellow"></span></th>
+                  <th style="width:10%;"><span class="legend-square legend-red"></span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><input type="text" class="form-control"></td>
+                  <td><input type="checkbox" name="wear1" class="checkbox-green"></td>
+                  <td><input type="checkbox" name="looseness1" class="checkbox-black"></td>
+                  <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
+                  <td><input type="checkbox" name="critReplace1" class="checkbox-red"></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><input type="text" class="form-control"></td>
+                  <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
+                  <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
+                  <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
+                  <td><input type="checkbox" name="critReplace2" class="checkbox-red"></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><input type="text" class="form-control"></td>
+                  <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
+                  <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
+                  <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
+                  <td><input type="checkbox" name="critReplace3" class="checkbox-red"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <!-- Легенда под таблицей -->
           <div class="table-legend" style="text-align:right; margin-top:5px;">
             <span class="legend-square legend-green"></span>Знос
@@ -477,7 +499,7 @@
             <strong>Госномер:</strong> <span id="plate_work"></span>
           </div>
           <div id="dateTimeWork" style="font-size:0.9em; margin-bottom:5px;"></div>
-          <table class="work-table" style="margin-top:10px;">
+          <table class="work-table" style="margin-top:10px; width:100%;">
             <thead>
               <tr>
                 <th style="width:45%;">Назва запчастини або вузла (агрегата)</th>
@@ -532,7 +554,6 @@
         
         <!-- Блок кнопок -->
         <div style="display:flex; justify-content: space-between; margin:10px;">
-          <!-- Кнопка "Сохранить" отправляет данные на сервер -->
           <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
           <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
         </div>

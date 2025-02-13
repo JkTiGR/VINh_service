@@ -1,9 +1,7 @@
-Flask
-gunicorn==21.2.0
-Flask-Login
-Flask-Migrate
-python-dotenv
-Flask-SQLAlchemy
-requests
-# Другие зависимости, если они используются
+Flask==3.1.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-Migrate==4.0.7
+gunicorn==20.1.0
+python-dotenv==1.0.1
 
