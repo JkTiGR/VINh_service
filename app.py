@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_migrate import Migrate
-import models
+from models import db, User, Client
 
 # Определяем базовую директорию проекта
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,12 +22,13 @@ if not os.path.exists(instance_folder):
 
 # Создаем Flask-приложение
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'crm.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'instance', 'crm.db')}"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "default-secret-key")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Инициализируем базу данных и миграции
-models.db.init_app(app)
-migrate = Migrate(app, models.db)
+db.init_app(app)
+migrate = Migrate(app, db)
 
 # Настраиваем Flask-Login
 login_manager = LoginManager()
@@ -36,7 +37,7 @@ login_manager.login_view = "vin_bp.login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return models.User.query.get(int(user_id))
+    return User.query.get(int(user_id))
 
 # Перенаправление корневого URL на /vin.com/
 @app.route("/")
@@ -55,7 +56,7 @@ def login():
     if request.method == 'POST':
         plate = request.form.get('plate', '').upper()
         password = request.form.get('password')
-        user = models.User.query.filter_by(plate=plate).first()
+        user = User.query.filter_by(plate=plate).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('vin_bp.dashboard', plate=plate))
@@ -66,7 +67,11 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('vin_bp.login'))
+    return redirect(url_for('vin_bp.visit'))
+
+@vin_bp.route('/visit')
+def visit():
+    return render_template('visit.html')
 
 @vin_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -78,12 +83,12 @@ def register():
             return render_template('register.html', error="Госномер обязателен")
         if password != confirm_password:
             return render_template('register.html', error="Пароли не совпадают")
-        if models.User.query.filter_by(plate=plate).first():
+        if User.query.filter_by(plate=plate).first():
             return render_template('register.html', error="Пользователь с таким госномером уже существует")
         hashed_password = generate_password_hash(password)
-        new_user = models.User(plate=plate, password=hashed_password)
-        models.db.session.add(new_user)
-        models.db.session.commit()
+        new_user = User(plate=plate, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
         login_user(new_user)
         return redirect(url_for('vin_bp.dashboard', plate=plate))
     return render_template('register.html')
@@ -110,9 +115,9 @@ def submit_order():
         'mileage': int(data.get('mileage', 0)),
         'plate': data.get('plate', '').upper()
     }
-    new_client = models.Client(**client_data)
-    models.db.session.add(new_client)
-    models.db.session.commit()
+    new_client = Client(**client_data)
+    db.session.add(new_client)
+    db.session.commit()
     return jsonify({'status': 'success', 'order_id': new_client.id})
 
 @vin_bp.route('/send_admin', methods=['POST'])
@@ -121,16 +126,21 @@ def send_admin():
     # Отправка уведомления администратору через Telegram с ссылкой на дашборд пользователя
     plate = current_user.plate
     link = f"http://127.0.0.1:5001/vin.com/dashboard/{plate}"
-    admin_chat = "7371111768"
-    send_url = f"https://api.telegram.org/bot{os.getenv('TELEGRAM_TOKEN')}/sendMessage"
+    admin_chat = os.getenv('ADMIN_CHAT_ID', "7371111768")
+    telegram_token = os.getenv('TELEGRAM_TOKEN')
+
+    if not telegram_token:
+        return jsonify({'status': 'error', 'message': 'TELEGRAM_TOKEN не задан'}), 500
+
+    send_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
     payload = {"chat_id": admin_chat, "text": f"Новый заказ: {link}"}
     r = requests.post(send_url, json=payload)
+    
     if r.status_code == 200:
         return jsonify({'status': 'success', 'message': 'Ваши данные сохранены'})
     else:
         return jsonify({'status': 'error', 'message': r.text}), 500
 
-# Новый маршрут для CRM админа: здесь администратор может ввести госномер и просмотреть данные заказов пользователя.
 @vin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
 @login_required
 def admin_dashboard():
@@ -141,14 +151,15 @@ def admin_dashboard():
     plate = None
     if request.method == 'POST':
         plate = request.form.get('plate', '').upper()
-        dashboard_data = models.Client.query.filter_by(plate=plate).order_by(models.Client.id.desc()).first()
+        dashboard_data = Client.query.filter_by(plate=plate).order_by(Client.id.desc()).first()
     return render_template('admin_dashboard.html', dashboard=dashboard_data, plate=plate)
 
 # Регистрируем Blueprint
 app.register_blueprint(vin_bp)
 
-# Для продакшена: запуск приложения через gunicorn, здесь – для разработки.
+# Запуск приложения
 if __name__ == "__main__":
     with app.app_context():
-        models.db.create_all()
+        db.create_all()
     app.run(host="0.0.0.0", port=5001, debug=True)
+

@@ -2,24 +2,36 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VINhservice – Обслуживание</title>
+  <title>VINhservice + NASA Font</title>
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
   <style>
-    /* Глобальные стили, как на dashboard */
+    /* Подключаем NASA-шрифт */
+    @font-face {
+      font-family: 'NASA';
+      src: url('fonts/NASA.woff2') format('woff2'),
+           url('fonts/NASA.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    /* Глобальные стили */
     html, body {
-      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
+      font-family: 'NASA', sans-serif; /* <-- Шрифт NASA */
       background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
                   url('img/image.png') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       overflow-x: hidden;
     }
-    /* Шапка с эффектом glassmorphism */
+
+    /* Шапка (glassmorphism) */
     header {
       width: 100%;
       position: relative;
@@ -66,6 +78,7 @@
       user-select: none;
       color: #fff;
     }
+
     /* Мобильное меню */
     .mobile-menu {
       position: fixed;
@@ -102,7 +115,7 @@
     .mobile-menu li a:hover {
       background: rgba(0,198,255,0.2);
     }
-    /* Красная кнопка "X" для закрытия мобильного меню */
+    /* Красная кнопка "X" */
     .menu-close {
       position: absolute;
       top: 15px;
@@ -117,6 +130,7 @@
       cursor: pointer;
       z-index: 1000;
     }
+
     /* Основной контент */
     main {
       width: 100%;
@@ -155,6 +169,7 @@
       box-shadow: 0 0 20px #00c6ff;
       transform: scale(1.02);
     }
+
     .services {
       display: flex;
       flex-wrap: wrap;
@@ -176,7 +191,8 @@
       background: #fff;
       color: #000;
     }
-    /* Секция публикаций */
+
+    /* Публикации */
     .publications {
       margin-top: 30px;
     }
@@ -207,6 +223,7 @@
       border-radius: 10px;
       margin-bottom: 10px;
     }
+
     /* Секция Google Maps Reviews & Photos */
     #google-maps-reviews {
       margin-top: 30px;
@@ -228,6 +245,44 @@
       margin: 5px;
       border-radius: 10px;
     }
+
+    /* Секция Place ID Finder */
+    #place-id-finder {
+      margin-top: 30px;
+    }
+    #place-id-finder h2 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    #map2 {
+      width: 100%;
+      height: 60vh; /* Высота второй карты */
+      margin-bottom: 15px;
+    }
+    #pac-input2 {
+      margin-bottom: 10px;
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+      color: #000;
+    }
+    #infowindow-content2 {
+      display: none;
+      margin-bottom: 10px;
+      background-color: #f1f1f1;
+      color: #000;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    #infowindow-content2.visible {
+      display: block;
+    }
+
     /* Подвал */
     footer {
       width: 100%;
@@ -268,14 +323,13 @@
       <li><a href="#wash">Мойка</a></li>
       <li><a href="#tires">Шиномонтаж</a></li>
       <li><a href="#contact">Контакт</a></li>
-      <li><a href="{{ url_for('logout') }}" class="btn btn-danger">Выйти</a>
-
+      <li><a href="#logout">Войти</a></li>
     </ul>
   </nav>
 
   <!-- Основной контент -->
   <main>
-    <!-- Кнопки в порядке как на скриншоте -->
+    <!-- Блок кнопок -->
     <div class="buttons-container">
       <a href="https://goo.gl/maps/FUSE5cQxtYKwdTmTA" class="btn-custom" target="_blank">
         <span>📍</span> google maps &gt;
@@ -308,7 +362,7 @@
       <a href="#wash" class="service-link">Мойка</a>
     </div>
 
-    <!-- Секция публикаций -->
+    <!-- Публикации -->
     <section class="publications">
       <h2>Новые публикации</h2>
       <div class="pub-container">
@@ -364,6 +418,24 @@
         <div id="photos"></div>
       </div>
     </section>
+
+    <!-- Секция Place ID Finder -->
+    <section id="place-id-finder">
+      <h2>Place ID Finder</h2>
+      <input
+        id="pac-input2"
+        type="text"
+        placeholder="Введите название места..."
+      />
+      <div id="map2"></div>
+
+      <!-- Информационное окно -->
+      <div id="infowindow-content2">
+        <div><strong>Название:</strong> <span id="place-name2"></span></div>
+        <div><strong>Place ID:</strong> <span id="place-id2"></span></div>
+        <div><strong>Адрес:</strong> <span id="place-address2"></span></div>
+      </div>
+    </section>
   </main>
 
   <!-- Подвал -->
@@ -372,13 +444,29 @@
   </footer>
 
   <!-- Модальное окно плеера для публикаций -->
-  <div class="modal fade" id="playerModal" tabindex="-1" aria-labelledby="playerModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="playerModal"
+    tabindex="-1"
+    aria-labelledby="playerModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content bg-transparent border-0">
         <div class="modal-body p-0 position-relative">
-          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close btn-close-white position-absolute top-0 end-0 m-3"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
           <div class="ratio ratio-16x9">
-            <iframe id="playerIframe" src="" allowfullscreen style="border:0;"></iframe>
+            <iframe
+              id="playerIframe"
+              src=""
+              allowfullscreen
+              style="border: 0"
+            ></iframe>
           </div>
         </div>
       </div>
@@ -387,60 +475,67 @@
 
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
+
   <script>
+    /* Бургер-меню */
     function toggleMenu() {
       const menu = document.getElementById('mobile-menu');
       menu.classList.toggle('open');
     }
 
-    // Обработка клика по публикациям для открытия плеера
-    document.querySelectorAll('.publication-link').forEach(link => {
-      link.addEventListener('click', function(e) {
+    /* Модальное окно для публикаций */
+    document.querySelectorAll('.publication-link').forEach((link) => {
+      link.addEventListener('click', function (e) {
         e.preventDefault();
         const url = this.getAttribute('data-url');
         document.getElementById('playerIframe').src = url;
-        const playerModal = new bootstrap.Modal(document.getElementById('playerModal'));
+        const playerModal = new bootstrap.Modal(
+          document.getElementById('playerModal')
+        );
         playerModal.show();
       });
     });
 
-    // Очищаем src плеера при закрытии модального окна
-    document.getElementById('playerModal').addEventListener('hidden.bs.modal', function () {
-      document.getElementById('playerIframe').src = "";
-    });
-  </script>
+    document
+      .getElementById('playerModal')
+      .addEventListener('hidden.bs.modal', function () {
+        document.getElementById('playerIframe').src = '';
+      });
 
-  <!-- Google Maps API: интеграция Google Places для получения отзывов и фото -->
-  <script>
+    /* ---------- Инициализация КАРТ  ---------- */
+
+    let map;     // первая карта (Отзывы/фото)
+    let map2;    // вторая карта (Place ID Finder)
+
+    // callback=initMap
     function initMap() {
-      // Создаем карту, центрированную на выбранном месте (укажите свои координаты или используйте API для геокодирования)
-      const map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 40.7128, lng: -74.0060 }, // Пример координат
-        zoom: 15
+      /* 1) Первая карта */
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 40.7128, lng: -74.0060 }, // Пример: Нью-Йорк
+        zoom: 15,
       });
 
       const service = new google.maps.places.PlacesService(map);
       const request = {
         placeId: '9822169454101237680', // Замените на реальный Place ID
-        fields: ['name', 'reviews', 'photos']
+        fields: ['name', 'reviews', 'photos'],
       };
 
-      service.getDetails(request, function(place, status) {
+      service.getDetails(request, function (place, status) {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-          // Отображаем отзывы
+          // Отзывы
           const reviewsDiv = document.getElementById('reviews');
           if (place.reviews) {
-            place.reviews.forEach(review => {
+            place.reviews.forEach((review) => {
               const reviewElement = document.createElement('div');
               reviewElement.innerHTML = `<strong>${review.author_name}</strong> (${review.rating}/5): ${review.text}`;
               reviewsDiv.appendChild(reviewElement);
             });
           }
-          // Отображаем фотографии
+          // Фото
           const photosDiv = document.getElementById('photos');
           if (place.photos) {
-            place.photos.forEach(photo => {
+            place.photos.forEach((photo) => {
               const img = document.createElement('img');
               img.src = photo.getUrl({ maxWidth: 200, maxHeight: 200 });
               photosDiv.appendChild(img);
@@ -450,9 +545,90 @@
           console.error('Ошибка получения данных: ' + status);
         }
       });
+
+      /* 2) Вторая карта (Place ID Finder) */
+      map2 = new google.maps.Map(document.getElementById('map2'), {
+        center: { lat: 40.7128, lng: -74.0060 },
+        zoom: 13,
+      });
+
+      const input2 = document.getElementById('pac-input2');
+      const searchBox2 = new google.maps.places.SearchBox(input2);
+
+      map2.addListener('bounds_changed', () => {
+        searchBox2.setBounds(map2.getBounds());
+      });
+
+      let marker2 = new google.maps.Marker({ map: map2 });
+      let infowindow2 = new google.maps.InfoWindow();
+      const infowindowContent2 = document.getElementById('infowindow-content2');
+
+      // При выборе места
+      searchBox2.addListener('places_changed', () => {
+        const places = searchBox2.getPlaces();
+        if (places.length === 0) return;
+
+        const place = places[0];
+        if (!place.geometry || !place.geometry.location) return;
+
+        if (place.geometry.viewport) {
+          map2.fitBounds(place.geometry.viewport);
+        } else {
+          map2.setCenter(place.geometry.location);
+          map2.setZoom(17);
+        }
+
+        marker2.setPosition(place.geometry.location);
+        marker2.setVisible(true);
+
+        showPlaceInfo2(place);
+      });
+
+      // Клик по карте
+      map2.addListener('click', (event) => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: event.latLng }, (results, status) => {
+          if (status === 'OK' && results[0]) {
+            const placeId = results[0].place_id;
+            marker2.setPosition(event.latLng);
+            marker2.setVisible(true);
+
+            const service2 = new google.maps.places.PlacesService(map2);
+            service2.getDetails({ placeId }, (placeResult, serviceStatus) => {
+              if (serviceStatus === google.maps.places.PlacesServiceStatus.OK) {
+                showPlaceInfo2(placeResult);
+              } else {
+                console.error('Не удалось получить детали места:', serviceStatus);
+              }
+            });
+          }
+        });
+      });
+
+      function showPlaceInfo2(place) {
+        document.getElementById('place-name2').textContent = place.name || '';
+        document.getElementById('place-id2').textContent = place.place_id || '';
+        document.getElementById('place-address2').textContent =
+          place.formatted_address || place.vicinity || '';
+
+        infowindowContent2.classList.add('visible');
+        infowindow2.setContent(infowindowContent2);
+        if (place.geometry && place.geometry.location) {
+          infowindow2.open(map2);
+          infowindow2.setPosition(place.geometry.location);
+        }
+      }
     }
   </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7MVX1KZsA8iVfSZA57Zkn2WbtTS6ANEI&libraries=places&callback=initMap" async defer></script>
+
+  <!-- Google Maps API: укажите ваш ключ -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg
+          &libraries=places
+          &callback=initMap"
+    async
+    defer
+  ></script>
 </body>
 </html>
 
