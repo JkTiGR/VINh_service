@@ -1,458 +1,807 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VINhservice – Обслуживание</title>
-  <!-- Bootstrap CSS -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VINh AUTOSERVICE - Dashboard</title>
+  <!-- Подключаем Bootstrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    /* Глобальные стили, как на dashboard */
+    /* Глобальные стили */
+    :root {
+      --bs-body-color: white;
+    }
     html, body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
       background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
-                  url('img/image.png') no-repeat center center fixed;
+                  url('../static/img/image.png') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       overflow-x: hidden;
     }
-    /* Шапка с эффектом glassmorphism */
-    header {
-      width: 100%;
-      position: relative;
-      z-index: 10;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-    .header-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-circle {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.3);
-    }
-    .logo-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .tagline {
-      font-size: 14px;
-      text-align: center;
-      line-height: 1.4;
-    }
-    .burger {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 24px;
-      cursor: pointer;
-      user-select: none;
-      color: #fff;
-    }
-    /* Мобильное меню */
-    .mobile-menu {
+    /* Стили для бокового меню (Sidebar) в стиле glassmorphism */
+    .sidebar {
       position: fixed;
       top: 0;
+      right: -300px; /* Меню изначально скрыто за правой границей */
+      width: 300px;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.1); /* Полупрозрачный фон */
+      border-radius: 15px;
+      backdrop-filter: blur(10px);          /* Эффект размытия заднего фона */
+      -webkit-backdrop-filter: blur(10px);    /* Для Safari */
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 20px;
+      transition: right 0.3s ease;
+      z-index: 1100;
+    }
+    .sidebar.active {
       right: 0;
-      width: 250px;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-left: 1px solid rgba(255,255,255,0.3);
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 999;
-      padding-top: 80px;
+      animation: fadeIn 0.3s;
     }
-    .mobile-menu.open {
-      transform: translateX(0);
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-    .mobile-menu ul {
+    .sidebar ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
-    .mobile-menu li a {
-      display: block;
-      padding: 15px 20px;
+    .sidebar ul li {
+      margin: 15px 0;
+    }
+    .sidebar ul li a {
       color: #fff;
       text-decoration: none;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      transition: background 0.3s;
-      font-size: 16px;
+      font-size: 18px;
+      transition: color 0.3s;
     }
-    .mobile-menu li a:hover {
-      background: rgba(0,198,255,0.2);
+    .sidebar ul li a:hover {
+      color: #00c6ff;
     }
-    /* Красная кнопка "X" для закрытия мобильного меню */
-    .menu-close {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: #ff0000;
+    /* Кнопка-триггер для бокового меню */
+    .menu-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1200;
+    }
+    .menu-toggle button {
+      background: transparent;
       border: none;
-      color: #fff;
-      font-size: 20px;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
       cursor: pointer;
-      z-index: 1000;
     }
-    /* Основной контент */
-    main {
-      width: 100%;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.1);
+    .menu-toggle img {
+      width: 30px;
+      height: 30px;
+    }
+    /* Прочие стили (из исходного кода) */
+    .btn-small {
+      font-size: 14px !important;
+      padding: 5px 10px !important;
+    }
+    .square-checkbox {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1px solid #00c6ff;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+      cursor: pointer;
+      background: rgba(255,255,255,0.1);
+    }
+    .square-checkbox:checked {
+      background-color: #00c6ff;
+    }
+    .legend-square {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+      margin-right: 5px;
+      border: 1px solid #fff;
+    }
+    .legend-green { background-color: green; }
+    .legend-black { background-color: black; }
+    .legend-yellow { background-color: yellow; }
+    .legend-red { background-color: red; }
+    .table-legend { font-size: 14px; }
+    .checkbox-green:checked { accent-color: green; }
+    .checkbox-black:checked { accent-color: black; }
+    .checkbox-yellow:checked { accent-color: yellow; }
+    .checkbox-red:checked { accent-color: red; }
+    .glass-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 15px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 15px;
+      margin: 20px;
     }
-    .buttons-container {
+    .rainbow-text {
+      animation: rainbowText 30s linear infinite;
+    }
+    @keyframes rainbowText {
+      0%   { text-shadow: 0 0 3px darkblue, 0 0 6px darkblue; }
+      25%  { text-shadow: 0 0 3px indigo, 0 0 6px indigo; }
+      50%  { text-shadow: 0 0 3px darkviolet, 0 0 6px darkviolet; }
+      75%  { text-shadow: 0 0 3px #8B008B, 0 0 6px #8B008B; }
+      100% { text-shadow: 0 0 3px darkblue, 0 0 6px darkblue; }
+    }
+    .header {
       display: flex;
-      flex-direction: column;
-      gap: 15px;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
-    .btn-custom {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+    .header-left { text-align: left; }
+    .header-left h1 { margin: 0; padding: 0; }
+    .header-left #dateTimeVin { font-size: 0.9em; margin-top: 5px; }
+    .header-right img { width: 80px; border-radius: 50%; margin: 0; padding: 0; }
+    .form-control {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(0,198,255,0.5);
+      color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,198,255,0.5);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .form-control:focus {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(0,198,255,0.7);
+      box-shadow: 0 0 5px rgba(0,198,255,0.7);
+    }
+    .btn-primary {
       background: linear-gradient(45deg, #005eff, #00c6ff);
       border: none;
-      border-radius: 12px;
+      font-weight: bold;
       color: #fff;
-      padding: 12px 16px;
-      font-size: 16px;
-      text-decoration: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 12px;
+      cursor: pointer;
       transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
       box-shadow: 0 0 8px #00c6ff;
     }
-    .btn-custom:hover {
+    .btn-primary:hover {
       background: linear-gradient(45deg, #0039ff, #000000);
       box-shadow: 0 0 20px #00c6ff;
       transform: scale(1.02);
     }
-    .services {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
+    .work-table, .details-table {
+      border: none;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 5px #00c6ff;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       margin-bottom: 20px;
     }
-    .service-link {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid #fff;
-      border-radius: 12px;
-      color: #fff;
-      padding: 10px 16px;
-      text-decoration: none;
-      transition: background 0.3s, color 0.3s;
-      font-size: 14px;
-    }
-    .service-link:hover {
-      background: #fff;
-      color: #000;
-    }
-    /* Секция публикаций */
-    .publications {
-      margin-top: 30px;
-    }
-    .publications h2 {
-      font-size: 20px;
-      margin-bottom: 15px;
+    .work-table th, .work-table td,
+    .details-table th, .details-table td {
+      border: none;
+      padding: 5px;
       text-align: center;
     }
-    .pub-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
+    .work-table th, .details-table th {
+      background-color: rgba(0,43,85,0.7);
     }
-    .publication {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 15px;
-      padding: 15px;
-      width: calc(50% - 15px);
-      text-align: center;
-      font-size: 14px;
+    .indicators {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
-    .publication img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    /* Секция Google Maps Reviews & Photos */
-    #google-maps-reviews {
-      margin-top: 30px;
-    }
-    #google-maps-reviews h2 {
-      font-size: 20px;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    #place-details h3 {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-    #reviews div {
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-      padding: 10px 0;
-    }
-    #photos img {
-      margin: 5px;
-      border-radius: 10px;
-    }
-    /* Подвал */
-    footer {
-      width: 100%;
-      text-align: center;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 10px;
-      margin-top: 20px;
-    }
-    footer p {
-      font-size: 14px;
-    }
+    hr { border: 1px solid #00c6ff; margin: 10px 0; }
   </style>
 </head>
 <body>
-  <!-- Шапка -->
-  <header>
-    <div class="burger" onclick="toggleMenu()">☰</div>
-    <div class="header-content">
-      <div class="logo-circle">
-        <img src="images/logo.png" alt="VINhservice Logo">
-      </div>
-      <p class="tagline">
-        VINhservice – Обслуживание на уровне<br/>
-        официального дилера по цене обычного сервиса
-      </p>
-    </div>
-  </header>
-
-  <!-- Мобильное меню -->
-  <nav class="mobile-menu" id="mobile-menu">
-    <button class="menu-close" onclick="toggleMenu()">X</button>
+  <!-- Боковое меню (Sidebar) -->
+  <div id="sidebar" class="sidebar">
     <ul>
-      <li><a href="#home">Home</a></li>
-      <li><a href="#schedule">Расписание</a></li>
-      <li><a href="#diagnostics">Диагностика</a></li>
-      <li><a href="#repair">Ремонт</a></li>
-      <li><a href="#parts">Запчасти</a></li>
-      <li><a href="#wash">Мойка</a></li>
-      <li><a href="#tires">Шиномонтаж</a></li>
-      <li><a href="#contact">Контакт</a></li>
-      <li><a href="{{ url_for('logout') }}" class="btn btn-danger">Выйти</a>
-
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Расписание</a></li>
+      <li><a href="#">Диагностика</a></li>
+      <li><a href="#">Ремонт</a></li>
+      <li><a href="#">Запчасти</a></li>
+      <li><a href="#">Мойка</a></li>
+      <li><a href="#">Шиномонтаж</a></li>
+      <li><a href="#">Контакт</a></li>
+      <li><a href="#">Выйти</a></li>
     </ul>
-  </nav>
-
-  <!-- Основной контент -->
-  <main>
-    <!-- Кнопки в порядке как на скриншоте -->
-    <div class="buttons-container">
-      <a href="https://goo.gl/maps/FUSE5cQxtYKwdTmTA" class="btn-custom" target="_blank">
-        <span>📍</span> google maps &gt;
-      </a>
-      <a href="https://maps.apple.com/..." class="btn-custom" target="_blank">
-        <span>📍</span> apple maps &gt;
-      </a>
-      <a href="tel:+1234567890" class="btn-custom">
-        <span>📞</span> telephone
-      </a>
-      <a href="tg://resolve?domain=..." class="btn-custom" target="_blank">
-        <span>✈️</span> telegram
-      </a>
-      <a href="viber://chat?number=..." class="btn-custom" target="_blank">
-        <span>💬</span> viber
-      </a>
-      <a href="https://instagram.com/..." class="btn-custom" target="_blank">
-        <span>📷</span> instagram
-      </a>
-      <a href="https://tiktok.com/..." class="btn-custom" target="_blank">
-        <span>🎵</span> tiktok
-      </a>
-    </div>
-
-    <!-- Кнопки-сервисы (нижний ряд) -->
-    <div class="services">
-      <a href="#diagnostics" class="service-link">Диагностика</a>
-      <a href="#repair" class="service-link">Ремонт</a>
-      <a href="#parts" class="service-link">Запчасти</a>
-      <a href="#wash" class="service-link">Мойка</a>
-    </div>
-
-    <!-- Секция публикаций -->
-    <section class="publications">
-      <h2>Новые публикации</h2>
-      <div class="pub-container">
-        <!-- TikTok публикации -->
-        <div class="publication">
-          <h3>TikTok</h3>
-          <a href="#" class="publication-link" data-url="https://www.tiktok.com/@jedi.ua/video/7366389719569075474?lang=ru-RU">
-            <img src="images/tiktok1.png" alt="TikTok Видео 1">
-          </a>
-        </div>
-        <div class="publication">
-          <h3>TikTok</h3>
-          <a href="#" class="publication-link" data-url="https://www.tiktok.com/@jedi.ua/video/7366389055942085895?lang=ru-RU">
-            <img src="images/tiktok2.png" alt="TikTok Видео 2">
-          </a>
-        </div>
-        <div class="publication">
-          <h3>TikTok</h3>
-          <a href="#" class="publication-link" data-url="https://www.tiktok.com/@jedi.ua/video/7365854115253030151?lang=ru-RU">
-            <img src="images/tiktok3.png" alt="TikTok Видео 3">
-          </a>
-        </div>
-        <!-- Instagram публикации -->
-        <div class="publication">
-          <h3>Instagram</h3>
-          <a href="#" class="publication-link" data-url="https://www.instagram.com/p/CucBEtZIhGT/">
-            <img src="images/instagram1.png" alt="Instagram Пост 1">
-          </a>
-        </div>
-        <div class="publication">
-          <h3>Instagram</h3>
-          <a href="#" class="publication-link" data-url="https://www.instagram.com/p/DE_Ua0eIeMp/">
-            <img src="images/instagram2.png" alt="Instagram Пост 2">
-          </a>
-        </div>
-        <div class="publication">
-          <h3>Instagram</h3>
-          <a href="#" class="publication-link" data-url="https://www.instagram.com/p/C6cAedNMZZy/?img_index=1">
-            <img src="images/instagram3.png" alt="Instagram Пост 3">
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Секция Google Maps: Отзывы и фото -->
-    <section id="google-maps-reviews">
-      <h2>Отзывы и фото с Google Maps</h2>
-      <div id="map" style="height:400px; width:100%; margin-bottom:20px;"></div>
-      <div id="place-details">
-        <h3>Отзывы</h3>
-        <div id="reviews"></div>
-        <h3>Фото</h3>
-        <div id="photos"></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Подвал -->
-  <footer>
-    <p>© 2025 VINhservice. Все права защищены.</p>
-  </footer>
-
-  <!-- Модальное окно плеера для публикаций -->
-  <div class="modal fade" id="playerModal" tabindex="-1" aria-labelledby="playerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content bg-transparent border-0">
-        <div class="modal-body p-0 position-relative">
-          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
-          <div class="ratio ratio-16x9">
-            <iframe id="playerIframe" src="" allowfullscreen style="border:0;"></iframe>
+  </div>
+  
+  <!-- Кнопка-триггер для бокового меню -->
+  <div class="menu-toggle">
+    <button id="menuButton">
+      <img src="./menu_icon.png" alt="Menu">
+    </button>
+  </div>
+  
+  <!-- Основное содержимое страницы (Dashboard) -->
+  <div class="container" style="padding-top: 60px;">
+    <form action="/submit" method="POST" style="width:100%;">
+      <!-- Контейнер с данными заказа -->
+      <div class="order">
+        <!-- Секция VINh AUTOSERVICE -->
+        <div id="vinh-container" style="margin:20px;">
+          <div class="header">
+            <div class="header-left">
+              <h1 class="rainbow-text">VINh AUTOSERVICE</h1>
+              <div id="dateTimeVin"></div>
+            </div>
+            <div class="header-right">
+              <img src="../static/logo.png" alt="Logo">
+            </div>
+          </div>
+          <!-- Данные клиента -->
+          <div class="row">
+            <div class="col-md-6 col-12">
+              <label for="clientName">Имя клиента:</label>
+              <input type="text" id="clientName" name="clientName" class="form-control">
+            </div>
+            <div class="col-md-6 col-12">
+              <label for="phone">Телефон:</label>
+              <input type="text" id="phone" name="phone" class="form-control">
+            </div>
+          </div>
+          <!-- VIN -->
+          <div class="row" style="margin-top:10px;">
+            <div class="col-12">
+              <label for="vin">VIN номер:</label>
+              <input type="text" id="vin" name="vin" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDuplicates();">
+            </div>
+          </div>
+          <!-- Данные автомобиля -->
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="carModel">Модель авто:</label>
+              <input type="text" id="carModel" name="carModel" class="form-control" oninput="updateDuplicates();">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="year">Год выпуска:</label>
+              <input type="text" id="year" name="year" class="form-control" oninput="updateDuplicates();">
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="plate">Госномер:</label>
+              <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDuplicates();">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="mileage">Пробег (км):</label>
+              <input type="text" id="mileage" name="mileage" class="form-control">
+            </div>
+          </div>
+          <!-- Перечень желаемых работ -->
+          <div id="workList-container" style="margin-top:15px;">
+            <label for="workList">Перечень желаемых работ:</label>
+            <textarea class="form-control" id="workList" name="workList" rows="3"></textarea>
           </div>
         </div>
+        
+        <!-- Секция Индикаторы -->
+        <div id="indicators-container" class="glass-card">
+          <h4>Индикаторы</h4>
+          <div class="indicators">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
+              <label class="form-check-label" for="checkEngine">
+                <img src="../../icons/check_engine.png" alt="Check Engine" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="battery" name="battery">
+              <label class="form-check-label" for="battery">
+                <img src="../../icons/battery.png" alt="Battery" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="oil" name="oil">
+              <label class="form-check-label" for="oil">
+                <img src="../../icons/oil.png" alt="Oil" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
+              <label class="form-check-label" for="coolant">
+                <img src="../../icons/coolant.png" alt="Coolant" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
+              <label class="form-check-label" for="tpms">
+                <img src="../../icons/tpms.png" alt="TPMS" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
+              <label class="form-check-label" for="airbag">
+                <img src="../../icons/airbag.png" alt="Airbag" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="abs" name="abs">
+              <label class="form-check-label" for="abs">
+                <img src="../../icons/abs.png" alt="ABS" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="esp" name="esp">
+              <label class="form-check-label" for="esp">
+                <img src="../../icons/esp.png" alt="ESP" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
+              <label class="form-check-label" for="brakeWear">
+                <img src="../../icons/brake_wear.png" alt="Brake Wear" style="width:24px; height:24px;">
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Секция Акт дефектів автомобіля -->
+        <div id="defects-container" class="section" style="margin:20px;">
+          <hr>
+          <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
+          <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
+            <strong>VIN:</strong> <span id="vin_defects"></span> |
+            <strong>Модель:</strong> <span id="carModel_defects"></span> |
+            <strong>Год:</strong> <span id="year_defects"></span> |
+            <strong>Госномер:</strong> <span id="plate_defects"></span>
+          </div>
+          <div id="dateTimeAct" style="font-size:0.9em; margin-bottom:5px;"></div>
+          <div class="row">
+            <div class="col-md-6 col-6">
+              <label for="ptk_percent">П.Т.К. (%):</label>
+              <input type="text" id="ptk_percent" name="ptk_percent" class="form-control">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="ztk_percent">З.Т.К. (%):</label>
+              <input type="text" id="ztk_percent" name="ztk_percent" class="form-control">
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="ptd_mm">ПТД (мм):</label>
+              <input type="text" id="ptd_mm" name="ptd_mm" class="form-control">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="ztd_mm">ЗТД (мм):</label>
+              <input type="text" id="ztd_mm" name="ztd_mm" class="form-control">
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="brakeFluid">тормозной жидкости:</label>
+              <input type="text" id="brakeFluid" name="brakeFluid" class="form-control">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="antifreeze">антифриз:</label>
+              <input type="text" id="antifreeze" name="antifreeze" class="form-control">
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="engineOil">масла ДВС:</label>
+              <input type="text" id="engineOil" name="engineOil" class="form-control">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="transmissionOil">масла в трансмиссии:</label>
+              <input type="text" id="transmissionOil" name="transmissionOil" class="form-control">
+            </div>
+          </div>
+          <!-- Таблица деталей -->
+          <table class="details-table" style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th style="width:5%;">#</th>
+                <th style="width:50%;">Назва деталі</th>
+                <th style="width:10%;"><span class="legend-square legend-green"></span></th>
+                <th style="width:10%;"><span class="legend-square legend-black"></span></th>
+                <th style="width:10%;"><span class="legend-square legend-yellow"></span></th>
+                <th style="width:10%;"><span class="legend-square legend-red"></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" name="wear1" class="checkbox-green"></td>
+                <td><input type="checkbox" name="looseness1" class="checkbox-black"></td>
+                <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
+                <td><input type="checkbox" name="critReplace1" class="checkbox-red"></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
+                <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
+                <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
+                <td><input type="checkbox" name="critReplace2" class="checkbox-red"></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
+                <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
+                <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
+                <td><input type="checkbox" name="critReplace3" class="checkbox-red"></td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- Легенда под таблицей -->
+          <div class="table-legend" style="text-align:right; margin-top:5px;">
+            <span class="legend-square legend-green"></span>Знос
+            <span class="legend-square legend-black" style="margin-left:10px;"></span>Люфт
+            <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. зам.
+            <span class="legend-square legend-red" style="margin-left:10px;"></span>Крит. зам.
+          </div>
+          <!-- Кнопка для добавления строки -->
+          <div style="margin-top:10px;">
+            <button type="button" class="btn btn-primary btn-small add-row-btn">Додати рядок</button>
+          </div>
+          <!-- Блок "Дополнительные примечания" -->
+          <div style="margin-top:10px;">
+            <label for="notes">Дополнительные примечания:</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+          </div>
+          <!-- Блок с текстом ответственности и кнопкой "send parts" -->
+          <div style="margin-top:10px; text-align:right;">
+            <p style="margin:0; font-size:0.9em;">
+              Администрация сервиса не несёт ответственности за ценные вещи, оставленные в автомобиле.
+            </p>
+            <button type="button" class="btn btn-primary btn-small" id="sendPartsBtn" style="margin-top:5px;">send parts</button>
+          </div>
+        </div>
+        
+        <!-- Секция ЗАЯВКА НА ВИКОНАННЯ РОБІТ -->
+        <div id="work-container" class="section" style="margin:20px;">
+          <hr>
+          <h2 class="rainbow-text">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
+          <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
+            <strong>VIN:</strong> <span id="vin_work"></span> |
+            <strong>Модель:</strong> <span id="carModel_work"></span> |
+            <strong>Год:</strong> <span id="year_work"></span> |
+            <strong>Госномер:</strong> <span id="plate_work"></span>
+          </div>
+          <div id="dateTimeWork" style="font-size:0.9em; margin-bottom:5px;"></div>
+          <table class="work-table" style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th style="width:45%;">Назва запчастини або вузла (агрегата)</th>
+                <th style="width:20%;">ціна запчастини</th>
+                <th style="width:20%;">ціна роботи</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="number" class="form-control part-price"></td>
+                <td><input type="number" class="form-control work-price"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="number" class="form-control part-price"></td>
+                <td><input type="number" class="form-control work-price"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="number" class="form-control part-price"></td>
+                <td><input type="number" class="form-control work-price"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="work-total" style="margin-top:10px; text-align:right;">Общая сумма: 0</div>
+          <button type="button" class="btn btn-primary btn-small add-work-row-btn" style="margin-top:10px;">Додати рядок</button>
+        </div>
+        
+        <!-- Секция Контрольные отметки и подписи -->
+        <div id="control-signatures-container" class="glass-card">
+          <h4>Контрольные отметки и подписи</h4>
+          <div>
+            <input type="checkbox" class="square-checkbox" id="checkParts">
+            <label for="checkParts">Контрольна обтяжка встановлених запчастин</label>
+          </div>
+          <div style="margin-top:10px;">
+            <input type="checkbox" class="square-checkbox" id="tightenWheels">
+            <label for="tightenWheels">Затягування колісних болтів</label>
+            <input type="text" class="form-control" style="width:80px; display:inline-block; vertical-align:middle;" id="nmValue">
+            <span style="margin-left:5px;">Nm</span>
+          </div>
+          <div style="margin-top:10px;">
+            <input type="checkbox" class="square-checkbox" id="managerSignature">
+            <label for="managerSignature">підпис менедж</label>
+          </div>
+          <div style="margin-top:10px;">
+            <input type="checkbox" class="square-checkbox" id="clientSignature">
+            <label for="clientSignature">підпис клієнта: Я прочитав і приймаю</label>
+          </div>
+        </div>
+        
+        <!-- Блок кнопок -->
+        <div style="display:flex; justify-content: space-between; margin:10px;">
+          <!-- Кнопка "Сохранить" отправляет данные на сервер -->
+          <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
+          <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
-
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
+  <!-- JavaScript -->
   <script>
-    function toggleMenu() {
-      const menu = document.getElementById('mobile-menu');
-      menu.classList.toggle('open');
+    // Функция переключения бокового меню
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+    menuButton.addEventListener('click', function(event) {
+      event.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
+    document.addEventListener('click', function(event) {
+      if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Обновление даты и времени
+    function updateDateTime() {
+      const now = new Date();
+      const formatted = now.toLocaleString();
+      const dtVin = document.getElementById('dateTimeVin');
+      const dtAct = document.getElementById('dateTimeAct');
+      const dtWork = document.getElementById('dateTimeWork');
+      if (dtVin) dtVin.textContent = formatted;
+      if (dtAct) dtAct.textContent = formatted;
+      if (dtWork) dtWork.textContent = formatted;
     }
-
-    // Обработка клика по публикациям для открытия плеера
-    document.querySelectorAll('.publication-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const url = this.getAttribute('data-url');
-        document.getElementById('playerIframe').src = url;
-        const playerModal = new bootstrap.Modal(document.getElementById('playerModal'));
-        playerModal.show();
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+    
+    // Функция для обновления дублированных полей (VIN, модель, год, госномер)
+    function updateDuplicates() {
+      const vinValue = document.getElementById("vin").value;
+      const carModelValue = document.getElementById("carModel").value;
+      const yearValue = document.getElementById("year").value;
+      const plateValue = document.getElementById("plate").value;
+      document.getElementById("vin_defects").textContent = vinValue;
+      document.getElementById("carModel_defects").textContent = carModelValue;
+      document.getElementById("year_defects").textContent = yearValue;
+      document.getElementById("plate_defects").textContent = plateValue;
+      document.getElementById("vin_work").textContent = vinValue;
+      document.getElementById("carModel_work").textContent = carModelValue;
+      document.getElementById("year_work").textContent = yearValue;
+      document.getElementById("plate_work").textContent = plateValue;
+    }
+    document.getElementById("vin").addEventListener("input", updateDuplicates);
+    document.getElementById("carModel").addEventListener("input", updateDuplicates);
+    document.getElementById("year").addEventListener("input", updateDuplicates);
+    document.getElementById("plate").addEventListener("input", updateDuplicates);
+    updateDuplicates();
+    
+    // Функция пересчёта общей суммы работ в таблице
+    function recalcWorkTableForContainer(container) {
+      const rows = container.querySelectorAll("table.work-table tbody tr");
+      let total = 0;
+      rows.forEach(row => {
+        const partPrice = parseFloat(row.querySelector(".part-price").value) || 0;
+        const workPrice = parseFloat(row.querySelector(".work-price").value) || 0;
+        total += partPrice + workPrice;
       });
-    });
-
-    // Очищаем src плеера при закрытии модального окна
-    document.getElementById('playerModal').addEventListener('hidden.bs.modal', function () {
-      document.getElementById('playerIframe').src = "";
-    });
-  </script>
-
-  <!-- Google Maps API: интеграция Google Places для получения отзывов и фото -->
-  <script>
-    function initMap() {
-      // Создаем карту, центрированную на выбранном месте (укажите свои координаты или используйте API для геокодирования)
-      const map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 40.7128, lng: -74.0060 }, // Пример координат
-        zoom: 15
+      const workTotalElem = container.querySelector(".work-total");
+      if (workTotalElem) {
+        workTotalElem.textContent = "Общая сумма: " + total.toFixed(2);
+      }
+    }
+    
+    // Переинициализация обработчиков для контейнера заказа
+    function reinitializeOrderEventsForContainer(orderContainer) {
+      orderContainer.querySelectorAll(".part-price, .work-price").forEach(input => {
+        input.addEventListener("input", function() {
+          recalcWorkTableForContainer(orderContainer);
+        });
       });
-
-      const service = new google.maps.places.PlacesService(map);
-      const request = {
-        placeId: '9822169454101237680', // Замените на реальный Place ID
-        fields: ['name', 'reviews', 'photos']
-      };
-
-      service.getDetails(request, function(place, status) {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-          // Отображаем отзывы
-          const reviewsDiv = document.getElementById('reviews');
-          if (place.reviews) {
-            place.reviews.forEach(review => {
-              const reviewElement = document.createElement('div');
-              reviewElement.innerHTML = `<strong>${review.author_name}</strong> (${review.rating}/5): ${review.text}`;
-              reviewsDiv.appendChild(reviewElement);
+      
+      orderContainer.querySelectorAll(".add-row-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const tableBody = orderContainer.querySelector("table.details-table tbody");
+          if (!tableBody) return;
+          const lastRow = tableBody.lastElementChild.cloneNode(true);
+          lastRow.cells[0].textContent = tableBody.rows.length + 1;
+          lastRow.querySelectorAll("input[type='text']").forEach(input => input.value = "");
+          lastRow.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+          tableBody.appendChild(lastRow);
+        });
+      });
+      
+      orderContainer.querySelectorAll(".add-work-row-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const tbody = orderContainer.querySelector("table.work-table tbody");
+          if (!tbody) return;
+          const newRow = tbody.lastElementChild.cloneNode(true);
+          newRow.querySelectorAll("input").forEach(input => input.value = "");
+          tbody.appendChild(newRow);
+          newRow.querySelectorAll(".part-price, .work-price").forEach(input => {
+            input.addEventListener("input", function() {
+              recalcWorkTableForContainer(orderContainer);
+            });
+          });
+          recalcWorkTableForContainer(orderContainer);
+        });
+      });
+      
+      const workTotalElem = orderContainer.querySelector(".work-total");
+      if (workTotalElem) {
+        workTotalElem.textContent = "Общая сумма: 0";
+      }
+    }
+    
+    // Инициализация для оригинального заказа
+    const originalOrder = document.querySelector(".order");
+    if (originalOrder) {
+      reinitializeOrderEventsForContainer(originalOrder);
+    }
+    
+    // Функция для клонирования заказа (добавление нового)
+    function addOrderHandler() {
+      const sectionIds = [
+        "vinh-container",
+        "indicators-container",
+        "defects-container",
+        "work-container",
+        "control-signatures-container"
+      ];
+      const newOrder = document.createElement("div");
+      newOrder.classList.add("order");
+      
+      sectionIds.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+          const clone = section.cloneNode(true);
+          clone.removeAttribute("id");
+          if (id === "vinh-container") {
+            const allowedNames = ["clientName", "phone", "vin", "carModel", "year", "plate"];
+            clone.querySelectorAll("input, textarea").forEach(el => {
+              if (!allowedNames.includes(el.name)) {
+                el.value = "";
+                if (el.type === "checkbox" || el.type === "radio") {
+                  el.checked = false;
+                }
+              }
+            });
+          } else {
+            clone.querySelectorAll("input, textarea").forEach(el => {
+              el.value = "";
+              if (el.type === "checkbox" || el.type === "radio") {
+                el.checked = false;
+              }
             });
           }
-          // Отображаем фотографии
-          const photosDiv = document.getElementById('photos');
-          if (place.photos) {
-            place.photos.forEach(photo => {
-              const img = document.createElement('img');
-              img.src = photo.getUrl({ maxWidth: 200, maxHeight: 200 });
-              photosDiv.appendChild(img);
-            });
-          }
-        } else {
-          console.error('Ошибка получения данных: ' + status);
+          newOrder.appendChild(clone);
         }
       });
+      
+      const orderButtons = document.createElement("div");
+      orderButtons.style.display = "flex";
+      orderButtons.style.justifyContent = "space-between";
+      orderButtons.style.marginTop = "10px";
+      
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "btn btn-primary btn-small";
+      saveBtn.textContent = "Сохранить";
+      saveBtn.addEventListener("click", function() {
+        alert("Новый наряд сохранён (функция сохранения должна быть реализована на сервере)");
+      });
+      
+      const addOrderBtnClone = document.createElement("button");
+      addOrderBtnClone.type = "button";
+      addOrderBtnClone.className = "btn btn-primary btn-small";
+      addOrderBtnClone.textContent = "добавить НАРЯД-ЗАМОВЛЕННЯ";
+      addOrderBtnClone.addEventListener("click", addOrderHandler);
+      
+      orderButtons.appendChild(saveBtn);
+      orderButtons.appendChild(addOrderBtnClone);
+      newOrder.appendChild(orderButtons);
+      
+      const workTotalElem = newOrder.querySelector(".work-total");
+      if (workTotalElem) {
+        workTotalElem.textContent = "Общая сумма: 0";
+      }
+      
+      document.querySelector("form").appendChild(newOrder);
+      reinitializeOrderEventsForContainer(newOrder);
     }
+    
+    document.getElementById("addOrderBtn").addEventListener("click", addOrderHandler);
+    
+    // Функция для сбора данных формы в объект
+    function collectFormData() {
+      const formData = {};
+      document.querySelectorAll('form input, form textarea').forEach(el => {
+        if (el.id) {
+          if (el.type === 'checkbox') {
+            formData[el.id] = el.checked;
+          } else {
+            formData[el.id] = el.value;
+          }
+        }
+      });
+      return formData;
+    }
+    
+    // Функция для сохранения данных дашборда на сервере
+    function saveDashboardData() {
+      const data = collectFormData();
+      fetch('/api/dashboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.message) {
+          alert('Данные успешно сохранены!');
+        } else {
+          alert('Ошибка сохранения: ' + result.error);
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при сохранении данных.');
+      });
+    }
+    
+    // Привязка кнопки "Сохранить" к сохранению данных на сервере
+    document.getElementById('sendAdminBtn').addEventListener('click', saveDashboardData);
+    
+    // Функция для загрузки данных дашборда с сервера по госномеру
+    function loadDashboardData() {
+      const plate = document.getElementById('plate').value;
+      if (plate) {
+        fetch('/api/dashboard?plate=' + encodeURIComponent(plate))
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              console.log('Данные для данного госномера не найдены');
+            } else {
+              // Заполняем поля формы полученными данными
+              for (const key in data) {
+                const element = document.getElementById(key);
+                if (element) {
+                  if (element.type === 'checkbox') {
+                    element.checked = data[key];
+                  } else {
+                    element.value = data[key];
+                  }
+                }
+              }
+              updateDuplicates();
+            }
+          })
+          .catch(error => console.error('Ошибка загрузки данных:', error));
+      }
+    }
+    
+    // При загрузке страницы, если поле "Госномер" не пустое, загружаем данные с сервера
+    window.addEventListener('load', function() {
+      if (document.getElementById('plate').value) {
+        loadDashboardData();
+      }
+    });
   </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7MVX1KZsA8iVfSZA57Zkn2WbtTS6ANEI&libraries=places&callback=initMap" async defer></script>
+  <!-- Подключаем Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

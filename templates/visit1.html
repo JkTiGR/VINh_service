@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VINhservice – Обслуживание</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    /* Глобальные стили, как на dashboard */
+    html, body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
+                  url('img/image.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    /* Шапка с эффектом glassmorphism */
+    header {
+      width: 100%;
+      position: relative;
+      z-index: 10;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .header-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .logo-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tagline {
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .burger {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+      color: #fff;
+    }
+    /* Мобильное меню */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 250px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-left: 1px solid rgba(255,255,255,0.3);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 999;
+      padding-top: 80px;
+    }
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
+    .mobile-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .mobile-menu li a {
+      display: block;
+      padding: 15px 20px;
+      color: #fff;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      transition: background 0.3s;
+      font-size: 16px;
+    }
+    .mobile-menu li a:hover {
+      background: rgba(0,198,255,0.2);
+    }
+    /* Красная кнопка "X" для закрытия мобильного меню */
+    .menu-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #ff0000;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    /* Основной контент */
+    main {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 15px;
+    }
+    .buttons-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .btn-custom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(45deg, #005eff, #00c6ff);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 16px;
+      text-decoration: none;
+      transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+      box-shadow: 0 0 8px #00c6ff;
+    }
+    .btn-custom:hover {
+      background: linear-gradient(45deg, #0039ff, #000000);
+      box-shadow: 0 0 20px #00c6ff;
+      transform: scale(1.02);
+    }
+    .services {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .service-link {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #fff;
+      border-radius: 12px;
+      color: #fff;
+      padding: 10px 16px;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s;
+      font-size: 14px;
+    }
+    .service-link:hover {
+      background: #fff;
+      color: #000;
+    }
+    /* Секция публикаций */
+    .publications {
+      margin-top: 30px;
+    }
+    .publications h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .pub-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    .publication {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 15px;
+      padding: 15px;
+      width: calc(50% - 15px);
+      text-align: center;
+      font-size: 14px;
+    }
+    .publication img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    /* Секция Google Maps Reviews & Photos */
+    #google-maps-reviews {
+      margin-top: 30px;
+    }
+    #google-maps-reviews h2 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    #place-details h3 {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #reviews div {
+      border-bottom: 1px solid rgba(255,255,255,0.3);
+      padding: 10px 0;
+    }
+    #photos img {
+      margin: 5px;
+      border-radius: 10px;
+    }
+    /* Подвал */
+    footer {
+      width: 100%;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      margin-top: 20px;
+    }
+    footer p {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Шапка -->
+  <header>
+    <div class="burger" onclick="toggleMenu()">☰</div>
+    <div class="header-content">
+      <div class="logo-circle">
+        <img src="images/logo.png" alt="VINhservice Logo">
+      </div>
+      <p class="tagline">
+        VINhservice – Обслуживание на уровне<br/>
+        официального дилера по цене обычного сервиса
+      </p>
+    </div>
+  </header>
+
+  <!-- Мобильное меню -->
+  <nav class="mobile-menu" id="mobile-menu">
+    <button class="menu-close" onclick="toggleMenu()">X</button>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#schedule">Расписание</a></li>
+      <li><a href="#diagnostics">Диагностика</a></li>
+      <li><a href="#repair">Ремонт</a></li>
+      <li><a href="#parts">Запчасти</a></li>
+      <li><a href="#wash">Мойка</a></li>
+      <li><a href="#tires">Шиномонтаж</a></li>
+      <li><a href="#contact">Контакт</a></li>
+      <li><a href="{{ url_for('logout') }}" class="btn btn-danger">Выйти</a>
+
+    </ul>
+  </nav>
+
+  <!-- Основной контент -->
+  <main>
+    <!-- Кнопки в порядке как на скриншоте -->
+    <div class="buttons-container">
+      <a href="https://goo.gl/maps/FUSE5cQxtYKwdTmTA" class="btn-custom" target="_blank">
+        <span>📍</span> google maps &gt;
+      </a>
+      <a href="https://maps.apple.com/..." class="btn-custom" target="_blank">
+        <span>📍</span> apple maps &gt;
+      </a>
+      <a href="tel:+1234567890" class="btn-custom">
+        <span>📞</span> telephone
+      </a>
+      <a href="tg://resolve?domain=..." class="btn-custom" target="_blank">
+        <span>✈️</span> telegram
+      </a>
+      <a href="viber://chat?number=..." class="btn-custom" target="_blank">
+        <span>💬</span> viber
+      </a>
+      <a href="https://instagram.com/..." class="btn-custom" target="_blank">
+        <span>📷</span> instagram
+      </a>
+      <a href="https://tiktok.com/..." class="btn-custom" target="_blank">
+        <span>🎵</span> tiktok
+      </a>
+    </div>
+
+    <!-- Кнопки-сервисы (нижний ряд) -->
+    <div class="services">
+      <a href="#diagnostics" class="service-link">Диагностика</a>
+      <a href="#repair" class="service-link">Ремонт</a>
+      <a href="#parts" class="service-link">Запчасти</a>
+      <a href="#wash" class="service-link">Мойка</a>
+    </div>
+
+    <!-- Секция публикаций -->
+    <section class="publications">
+      <h2>Новые публикации</h2>
+      <div class="pub-container">
+        <!-- TikTok публикации -->
+        <div class="publication">
+          <h3>TikTok</h3>
+          <a href="#" class="publication-link" data-url="https://www.tiktok.com/@jedi.ua/video/7366389719569075474?lang=ru-RU">
+            <img src="images/tiktok1.png" alt="TikTok Видео 1">
+          </a>
+        </div>
+        <div class="publication">
+          <h3>TikTok</h3>
+          <a href="#" class="publication-link" data-url="https://www.tiktok.com/@jedi.ua/video/7366389055942085895?lang=ru-RU">
+            <img src="images/tiktok2.png" alt="TikTok Видео 2">
+          </a>
+        </div>
+        <div class="publication">
+          <h3>TikTok</h3>
+          <a href="#" class="publication-link" data-url="https://www.tiktok.com/@jedi.ua/video/7365854115253030151?lang=ru-RU">
+            <img src="images/tiktok3.png" alt="TikTok Видео 3">
+          </a>
+        </div>
+        <!-- Instagram публикации -->
+        <div class="publication">
+          <h3>Instagram</h3>
+          <a href="#" class="publication-link" data-url="https://www.instagram.com/p/CucBEtZIhGT/">
+            <img src="images/instagram1.png" alt="Instagram Пост 1">
+          </a>
+        </div>
+        <div class="publication">
+          <h3>Instagram</h3>
+          <a href="#" class="publication-link" data-url="https://www.instagram.com/p/DE_Ua0eIeMp/">
+            <img src="images/instagram2.png" alt="Instagram Пост 2">
+          </a>
+        </div>
+        <div class="publication">
+          <h3>Instagram</h3>
+          <a href="#" class="publication-link" data-url="https://www.instagram.com/p/C6cAedNMZZy/?img_index=1">
+            <img src="images/instagram3.png" alt="Instagram Пост 3">
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Секция Google Maps: Отзывы и фото -->
+    <section id="google-maps-reviews">
+      <h2>Отзывы и фото с Google Maps</h2>
+      <div id="map" style="height:400px; width:100%; margin-bottom:20px;"></div>
+      <div id="place-details">
+        <h3>Отзывы</h3>
+        <div id="reviews"></div>
+        <h3>Фото</h3>
+        <div id="photos"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Подвал -->
+  <footer>
+    <p>© 2025 VINhservice. Все права защищены.</p>
+  </footer>
+
+  <!-- Модальное окно плеера для публикаций -->
+  <div class="modal fade" id="playerModal" tabindex="-1" aria-labelledby="playerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-transparent border-0">
+        <div class="modal-body p-0 position-relative">
+          <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="ratio ratio-16x9">
+            <iframe id="playerIframe" src="" allowfullscreen style="border:0;"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('open');
+    }
+
+    // Обработка клика по публикациям для открытия плеера
+    document.querySelectorAll('.publication-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = this.getAttribute('data-url');
+        document.getElementById('playerIframe').src = url;
+        const playerModal = new bootstrap.Modal(document.getElementById('playerModal'));
+        playerModal.show();
+      });
+    });
+
+    // Очищаем src плеера при закрытии модального окна
+    document.getElementById('playerModal').addEventListener('hidden.bs.modal', function () {
+      document.getElementById('playerIframe').src = "";
+    });
+  </script>
+
+  <!-- Google Maps API: интеграция Google Places для получения отзывов и фото -->
+  <script>
+    function initMap() {
+      // Создаем карту, центрированную на выбранном месте (укажите свои координаты или используйте API для геокодирования)
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 40.7128, lng: -74.0060 }, // Пример координат
+        zoom: 15
+      });
+
+      const service = new google.maps.places.PlacesService(map);
+      const request = {
+        placeId: '9822169454101237680', // Замените на реальный Place ID
+        fields: ['name', 'reviews', 'photos']
+      };
+
+      service.getDetails(request, function(place, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          // Отображаем отзывы
+          const reviewsDiv = document.getElementById('reviews');
+          if (place.reviews) {
+            place.reviews.forEach(review => {
+              const reviewElement = document.createElement('div');
+              reviewElement.innerHTML = `<strong>${review.author_name}</strong> (${review.rating}/5): ${review.text}`;
+              reviewsDiv.appendChild(reviewElement);
+            });
+          }
+          // Отображаем фотографии
+          const photosDiv = document.getElementById('photos');
+          if (place.photos) {
+            place.photos.forEach(photo => {
+              const img = document.createElement('img');
+              img.src = photo.getUrl({ maxWidth: 200, maxHeight: 200 });
+              photosDiv.appendChild(img);
+            });
+          }
+        } else {
+          console.error('Ошибка получения данных: ' + status);
+        }
+      });
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7MVX1KZsA8iVfSZA57Zkn2WbtTS6ANEI&libraries=places&callback=initMap" async defer></script>
+</body>
+</html>
+
