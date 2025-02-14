@@ -249,10 +249,10 @@ def forgot_password():
             error = "Пользователь с данным госномером не найден"
     return render_template('forgot_password.html', error=error, message=message)
 
+# Обработка запроса favicon: возвращаем пустой ответ с кодом 204 (No Content)
 @app.route('/favicon.ico')
 def favicon():
     return redirect(url_for('static', filename='img/favicon.ico'))
-
 
 # Универсальные обработчики ошибок
 @app.errorhandler(404)
@@ -274,5 +274,5 @@ app.register_blueprint(vin_bp)
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Если необходимо, можно удалить старую базу crm.db
-    app.run(host="0.0.0.0", port=5003)
+    app.run(host="0.0.0.0", port=5003, debug=True)
 
