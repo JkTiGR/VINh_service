@@ -297,7 +297,7 @@
           </div>
           <div class="row" style="margin-top:10px;">
             <div class="col-md-6 col-6">
-              <label for="plate">Госномер:</label>
+              <label for="plate">Номерний знак:</label>
               <input type="text" id="plate" name="plate" class="form-control" style="text-transform: uppercase;" oninput="this.value = this.value.replace(/\s+/g, '').toUpperCase(); updateDuplicates();" value="{{ plate }}">
             </div>
             <div class="col-md-6 col-6">
@@ -378,10 +378,10 @@
           <hr>
           <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
           <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
-            <strong>VIN:</strong> <span id="vin_defects"></span> |
-            <strong>Модель:</strong> <span id="carModel_defects"></span> |
-            <strong>Год:</strong> <span id="year_defects"></span> |
-            <strong>Госномер:</strong> <span id="plate_defects"></span>
+            <strong>|</strong> <span id="vin_defects"></span>
+            <strong>|</strong> <span id="carModel_defects"></span>
+            <strong>|</strong> <span id="year_defects"></span>
+            <strong>|</strong> <span id="plate_defects"></span>
           </div>
           <div id="dateTimeAct" style="font-size:0.9em; margin-bottom:5px;"></div>
           <div class="row">
@@ -467,8 +467,8 @@
           <div class="table-legend" style="text-align:right; margin-top:5px;">
             <span class="legend-square legend-green"></span>Знос
             <span class="legend-square legend-black" style="margin-left:10px;"></span>Люфт
-            <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. зам.
-            <span class="legend-square legend-red" style="margin-left:10px;"></span>Крит. зам.
+            <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. замена
+            <span class="legend-square legend-red" style="margin-left:10px;"></span>критический замена
           </div>
           <!-- Кнопка для добавления строки -->
           <div style="margin-top:10px;">
@@ -493,10 +493,10 @@
           <hr>
           <h2 class="rainbow-text">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
           <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
-            <strong>VIN:</strong> <span id="vin_work"></span> |
-            <strong>Модель:</strong> <span id="carModel_work"></span> |
-            <strong>Год:</strong> <span id="year_work"></span> |
-            <strong>Госномер:</strong> <span id="plate_work"></span>
+            <strong>|</strong> <span id="vin_work"></span> 
+            <strong>|</strong> <span id="carModel_work"></span> 
+            <strong>|</strong> <span id="year_work"></span> 
+            <strong>|</strong> <span id="plate_work"></span>
           </div>
           <div id="dateTimeWork" style="font-size:0.9em; margin-bottom:5px;"></div>
           <table class="work-table" style="margin-top:10px;">
