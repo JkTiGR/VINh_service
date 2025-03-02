@@ -119,9 +119,15 @@ def register():
 @vin_bp.route('/dashboard/<plate>')
 @login_required
 def dashboard(plate):
+    # Логирование перед проверкой
+    app.logger.info(f"Запрос на dashboard: Текущий пользователь: {current_user.plate}, Запрошенный plate: {plate}")
+
     if current_user.plate != plate:
+        app.logger.warning(f"Несоответствие plate! Ожидалось {current_user.plate}, но получено {plate}")
         return redirect(url_for('vin_bp.dashboard', plate=current_user.plate))
+
     return render_template('dashboard.html', plate=plate)
+
 
 # Административная панель (admin_dashboard.html)
 @vin_bp.route('/admin_dashboard', methods=['GET', 'POST'])
@@ -270,6 +276,9 @@ def internal_error(error):
     return render_template('500.html'), 500
 
 app.register_blueprint(vin_bp)
+
+app.logger.info(f"current_user: {current_user.__dict__}")
+
 
 if __name__ == '__main__':
     with app.app_context():
