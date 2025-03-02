@@ -1,45 +1,31 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List
 import sqlite3
+from liqpay import get_liqpay_url  # ✅ Теперь функция найдена!
+
+DB_PATH = "crm.db"  # ✅ Указываем путь вручную
+
+
 
 app = FastAPI()
-
-# База данных SQLite (замените на PostgreSQL, если нужно)
 DB_PATH = "crm.db"
 
-class Client(BaseModel):
-    id: int
-    name: str
-    phone: str
-    vin: str
-
-# Функция для подключения к базе данных
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-# Создание клиента
-@app.post("/clients/")
-def create_client(client: Client):
+@app.get("/payment/{order_id}")
+def generate_payment_link(order_id: int):
+    """Генерация ссылки на оплату заказа через LiqPay."""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO clients (id, name, phone, vin) VALUES (?, ?, ?, ?)",
-                   (client.id, client.name, client.phone, client.vin))
-    conn.commit()
+    order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
     conn.close()
-    return {"message": f"Клиент {client.name} создан!"}
 
-# Получение списка клиентов
-@app.get("/clients/", response_model=List[Client])
-def get_clients():
-    conn = get_db_connection()
-    clients = conn.execute("SELECT * FROM clients").fetchall()
-    conn.close()
-    return [dict(client) for client in clients]
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
 
-# Запуск сервера FastAPI
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    if order["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Оплата невозможна (статус заказа не 'pending')")
+
+    payment_url = get_liqpay_url(order_id, order["total_price"], "UAH")
+    return {"order_id": order_id, "payment_url": payment_url}

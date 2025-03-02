@@ -1,3 +1,13 @@
+-- Удаляем старые таблицы (если существуют)
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS clients;
+DROP TABLE IF EXISTS vehicles;
+DROP TABLE IF EXISTS parts;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS suppliers;
+DROP TABLE IF EXISTS stock_deliveries;
+
 -- Таблица пользователей (администраторы и клиенты)
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -8,7 +18,7 @@ CREATE TABLE users (
     is_admin BOOLEAN DEFAULT 0
 );
 
--- Таблица клиентов (можно объединить с users, если нужно)
+-- Таблица клиентов
 CREATE TABLE clients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -31,19 +41,19 @@ CREATE TABLE vehicles (
     FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE
 );
 
--- Таблица автозапчастей
+-- Каталог автозапчастей
 CREATE TABLE parts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    article TEXT UNIQUE NOT NULL,  -- Артикул детали
-    name TEXT NOT NULL,            -- Название детали
-    brand TEXT NOT NULL,           -- Производитель
-    price REAL NOT NULL,           -- Цена
-    stock INTEGER NOT NULL,        -- Количество на складе
-    description TEXT,              -- Описание
-    image_url TEXT                 -- Ссылка на изображение
+    article TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    brand TEXT NOT NULL,
+    price REAL NOT NULL,
+    stock INTEGER NOT NULL,
+    description TEXT,
+    image_url TEXT
 );
 
--- Таблица заказов клиентов
+-- Заказы клиентов
 CREATE TABLE orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
@@ -55,7 +65,7 @@ CREATE TABLE orders (
     FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE
 );
 
--- Таблица деталей заказа (связка заказов и запчастей)
+-- Детали заказа (запчасти, входящие в заказ)
 CREATE TABLE order_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id INTEGER NOT NULL,
@@ -66,7 +76,7 @@ CREATE TABLE order_items (
     FOREIGN KEY (part_id) REFERENCES parts (id) ON DELETE CASCADE
 );
 
--- Таблица поставщиков
+-- Поставщики запчастей
 CREATE TABLE suppliers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -76,7 +86,7 @@ CREATE TABLE suppliers (
     address TEXT
 );
 
--- Таблица поставок запчастей
+-- История поставок запчастей
 CREATE TABLE stock_deliveries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     supplier_id INTEGER NOT NULL,
