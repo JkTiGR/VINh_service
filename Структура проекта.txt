@@ -1,49 +1,126 @@
 VINh_service/
+├── .env
+├── .gitignore
+├── .nojekyll
+├── .vscode/
+│   └── launch.json
+├── Procfile
+├── __init__.py
+├── api.py
 ├── app.py
+├── bot.py
+├── index.html
 ├── instance/
-│   └── crm.db
+│   ├── crm.db
+│   └── schema.sql
+├── liqpay.py
+├── migrations/
+│   ├── README
+│   ├── alembic.ini
+│   ├── env.py
+│   ├── script.py.mako
+│   └── __pycache__/
+│       └── env.cpython-312.pyc
 ├── models.py
+├── nohup.out
 ├── requirements.txt
 ├── static/
-│   ├── css/
-│   │   └── style.css
-│   ├── img/
-│   │   ├── image.png
-│   │   └── logo.png
-│   └── js/
-│       └── main.js  (при необходимости)
-└── templates/
-    ├── base.html
-    ├── visit.html
-    ├── login.html
-    ├── register.html
-    ├── dashboard.html
-    └── admin_dashboard.html
-
+│   ├── css/
+│   │   └── styles.css
+│   ├── fonts/
+│   │   ├── NASA.woff2
+│   │   └── NASA1.woff2
+│   ├── icons/
+│   │   ├── 1.png
+│   │   ├── abs.png
+│   │   ├── airbag.png
+│   │   ├── battery.png
+│   │   ├── brake_warning_light_icon.jpg
+│   │   ├── brake_wear.png
+│   │   ├── check_engine.png
+│   │   ├── coolant.png
+│   │   ├── esp.png
+│   │   ├── f.png
+│   │   ├── g.png
+│   │   ├── martor-eps-768x320.jpg
+│   │   ├── oil.png
+│   │   ├── s.png
+│   │   └── tpms.png
+│   ├── img/
+│   │   ├── favicon.ico
+│   │   ├── favicon2.ico
+│   │   ├── fon_login.png
+│   │   ├── fon_regist.png
+│   │   ├── icons/
+│   │   │   ├── 1.png
+│   │   │   ├── abs.png
+│   │   │   ├── airbag.png
+│   │   │   ├── battery.png
+│   │   │   ├── brake_warning_light_icon.jpg
+│   │   │   ├── brake_wear.png
+│   │   │   ├── check_engine.png
+│   │   │   ├── coolant.png
+│   │   │   ├── esp.png
+│   │   │   ├── f.png
+│   │   │   ├── g.png
+│   │   │   ├── logo.png
+│   │   │   ├── martor-eps-768x320.jpg
+│   │   │   ├── oil.png
+│   │   │   ├── s.png
+│   │   │   └── tpms.png
+│   │   ├── image.png
+│   │   ├── logo.png
+│   │   ├── logo2.png
+│   │   ├── logo3.png
+│   │   └── menu_icon.png
+│   └── logo.png
+├── templates/
+│   ├── 404.html
+│   ├── 500.html
+│   ├── Untitled-1.ini
+│   ├── admin_dashboard.html
+│   ├── base.html
+│   ├── dashboard.html
+│   ├── login.html
+│   ├── register.html
+│   └── visit.html
+└── "Структура проекта.txt"
 
 #########################################################################
 home.html, diag.html, remont.html, parts.html, wash.html, 
 shino.html, VK.html 
 
-
 Чтобы включить изменения (включая удалённые файлы) в коммит, выполните команду:
 
+```sh
 git add -A
+```
 
 или, если хотите добавить все изменения в текущем каталоге:
 
-git add
+```sh
+git add .
+```
 
 После этого проверьте статус командой:
 
+```sh
 git status
+```
 
 и затем выполните:
 
+```sh
 git commit -m "Ваше описание изменений"
+```
 
 И, наконец, отправьте изменения на GitHub:
 
+```sh
 git push origin main
+```
 
 Это позволит зафиксировать все изменения в вашем проекте.
+
+##########################################
+git ls-files
