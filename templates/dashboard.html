@@ -439,7 +439,7 @@
             <tbody>
               <tr>
                 <td>1</td>
-                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control" name="part1"></td>
                 <td><input type="checkbox" name="wear1" class="checkbox-green"></td>
                 <td><input type="checkbox" name="looseness1" class="checkbox-black"></td>
                 <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
@@ -447,7 +447,7 @@
               </tr>
               <tr>
                 <td>2</td>
-                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control" name="part2"></td>
                 <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
                 <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
                 <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
@@ -455,7 +455,7 @@
               </tr>
               <tr>
                 <td>3</td>
-                <td><input type="text" class="form-control"></td>
+                <td><input type="text" class="form-control" name="part3"></td>
                 <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
                 <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
                 <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
@@ -468,7 +468,7 @@
             <span class="legend-square legend-green"></span>Знос
             <span class="legend-square legend-black" style="margin-left:10px;"></span>Люфт
             <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. замена
-            <span class="legend-square legend-red" style="margin-left:10px;"></span>критический замена
+            <span class="legend-square legend-red" style="margin-left:10px;"></span>Критический замена
           </div>
           <!-- Кнопка для добавления строки -->
           <div style="margin-top:10px;">
@@ -481,9 +481,7 @@
           </div>
           <!-- Блок с текстом ответственности и кнопкой "send parts" -->
           <div style="margin-top:10px; text-align:right;">
-            <p style="margin:0; font-size:0.9em;">
-              Администрация сервиса.
-            </p>
+            <p style="margin:0; font-size:0.9em;">Администрация сервиса.</p>
             <button type="button" class="btn btn-primary btn-small" id="sendPartsBtn" style="margin-top:5px;">send parts</button>
           </div>
         </div>
@@ -504,7 +502,7 @@
               <tr>
                 <th style="width:45%;">Назва запчастини або вузла</th>
                 <th style="width:20%;">ціна запчастини</th>
-                <th style="width:20%;">ціна роботи</th>
+                <th style="width:20%;">ціна работы</th>
               </tr>
             </thead>
             <tbody>
@@ -554,7 +552,6 @@
         
         <!-- Блок кнопок -->
         <div style="display:flex; justify-content: space-between; margin:10px;">
-          <!-- Кнопка "Сохранить" теперь вызывает функцию saveDashboardData, которая отправляет данные на сервер через корректный маршрут -->
           <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
           <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
         </div>
@@ -564,6 +561,10 @@
   
   <!-- JavaScript -->
   <script>
+    // Telegram настройки
+    const ADMIN_CHAT_ID = "-1002239976197";
+    const BOT_TOKEN = "8099553216:AAEE3Ctou3yY4ddwVbXiUfHgfT7PeZyUyhA";
+    
     /* Бургер-меню */
     const menuButton = document.getElementById('menuButton');
     const sidebar = document.getElementById('sidebar');
@@ -819,6 +820,71 @@
       if (document.getElementById('plate').value) {
         loadDashboardData();
       }
+    });
+    
+    /* Функция отправки сообщения с данными формы в Telegram */
+    document.getElementById('sendPartsBtn').addEventListener('click', function() {
+      // Собираем данные из формы
+      const clientName = document.getElementById('clientName').value;
+      const phone = document.getElementById('phone').value;
+      const vin = document.getElementById('vin').value;
+      const carModel = document.getElementById('carModel').value;
+      const year = document.getElementById('year').value;
+      const plate = document.getElementById('plate').value;
+      const mileage = document.getElementById('mileage').value;
+      const workList = document.getElementById('workList').value;
+      
+      // Пример сбора данных индикаторов
+      const indicators = [];
+      ['checkEngine','battery','oil','coolant','tpms','airbag','abs','esp','brakeWear'].forEach(id => {
+        if(document.getElementById(id).checked) {
+          indicators.push(id);
+        }
+      });
+      
+      // Пример сбора названий запчастей (из таблицы деталей)
+      const partNames = [];
+      document.querySelectorAll("table.details-table tbody tr").forEach(row => {
+        const input = row.querySelector("input[type='text']");
+        if(input && input.value.trim() !== "") {
+          partNames.push(input.value.trim());
+        }
+      });
+      
+      // Формируем сообщение
+      const message = 
+        `Имя клиента: ${clientName}\n` +
+        `Телефон: ${phone}\n` +
+        `VIN номер: ${vin}\n` +
+        `Модель авто: ${carModel}\n` +
+        `Год выпуска: ${year}\n` +
+        `Номерний знак: ${plate}\n` +
+        `Пробег (км): ${mileage}\n` +
+        `Перечень желаемых работ: ${workList}\n` +
+        `Индикаторы: ${indicators.join(", ")}\n` +
+        `Назва запчастини або вузла: ${partNames.join(", ")}`;
+      
+      // Отправляем сообщение через Telegram Bot API
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: ADMIN_CHAT_ID,
+          text: message
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok) {
+          alert('Сообщение отправлено администратору!');
+        } else {
+          alert('Ошибка отправки: ' + data.description);
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка при отправке сообщения:', error);
+        alert('Ошибка при отправке данных.');
+      });
     });
   </script>
   <!-- Подключаем Bootstrap JS -->

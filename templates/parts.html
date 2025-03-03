@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
+  <title>Поиск автозапчастей</title>
+  <style>
+    :root {
+      --dark-bg: #1a1a1a;
+      --dark-card: rgba(30, 30, 30, 0.9);
+      --glass-bg: rgba(30, 30, 30, 0.5);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-color: #fff;
+      --accent-color: #007bff;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--dark-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      padding: 20px;
+      background: var(--glass-bg);
+      border-radius: 15px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      margin-top: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+
+    /* Общие стили только для select и текстовых полей */
+    select,
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      background: var(--dark-card);
+      color: var(--text-color);
+      font-size: 1rem;
+      position: relative;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+      outline: none;
+    }
+
+    select:focus,
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="password"]:focus,
+    input[type="email"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Стили, исправляющие чекбоксы */
+    input[type="checkbox"] {
+      width: auto;
+      padding: 0;
+      box-shadow: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Группа для поля VIN и кнопки «Сканировать VIN» */
+    .vin-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vin-group input {
+      flex: 1;
+    }
+
+    button.scan-btn {
+      padding: 8px 12px;
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button.scan-btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    button.stop-btn, button.send-btn {
+      padding: 10px 20px;
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 10px;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button.stop-btn:hover, button.send-btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    #results {
+      margin-top: 20px;
+      color: var(--text-color);
+    }
+
+    .category-tree {
+      margin-top: 15px;
+      background: var(--dark-card);
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow);
+      padding: 10px;
+    }
+
+    .category-item {
+      margin-left: 10px;
+      margin-bottom: 10px;
+    }
+
+    .category-header {
+      cursor: pointer;
+      padding: 10px;
+      background: rgba(40, 40, 40, 0.7);
+      border-radius: 8px;
+      margin-bottom: 5px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(5px);
+      transition: background-color 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .category-header:hover {
+      background: rgba(50, 50, 50, 0.7);
+    }
+
+    .category-header span {
+      margin-left: 10px; /* Отступ между текстом и знаком */
+    }
+
+    /* При развёрнутой категории используем одну колонку для чекбоксов */
+    .category-content {
+      display: none;
+      margin-left: 15px;
+      padding: 5px;
+    }
+
+    .category-content.show {
+      display: block;
+    }
+
+    .category-content label {
+      display: block; /* Каждый чекбокс в отдельной строке */
+      margin-bottom: 5px; /* Отступ между строками */
+      white-space: normal; /* Разрешаем перенос текста */
+    }
+
+    /* Адаптация для смартфонов */
+    @media (max-width: 480px) {
+      .container {
+        width: 95%;
+        padding: 15px;
+      }
+
+      select, input, button {
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+
+      .category-header, .category-content label {
+        font-size: 0.9rem;
+        padding: 8px;
+      }
+
+      button.scan-btn {
+        width: auto;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+
+      button.stop-btn, button.send-btn {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      /* На мобильных устройствах сохраняем одну колонку */
+      .category-content label {
+        white-space: normal;
+        width: 100%;
+      }
+
+      /* Группа VIN становится вертикальной */
+      .vin-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      /* На мобильных устройствах знаки "+" и "X" могут быть меньше для экономии места */
+      .category-header span {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ЛОГОТИП -->
+    <div class="header-flex" style="display: flex; align-items: center;">
+      <h1 style="margin-right: 10px;">VINh автозапчастей</h1>
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+    </div>    
+
+    <div class="form-group">
+      <label for="make">Марка авто:</label>
+      <select id="make" onchange="updateModels()">
+        <option value="">Выберите марку</option>
+        <option value="Acura">Acura</option>
+        <option value="Alfa Romeo">Alfa Romeo</option>
+        <option value="Audi">Audi</option>
+        <option value="BMW">BMW</option>
+        <option value="Chery">Chery</option>
+        <option value="Chevrolet">Chevrolet</option>
+        <option value="Chrysler">Chrysler</option>
+        <option value="Citroen">Citroen</option>
+        <option value="Dacia">Dacia</option>
+        <option value="Daewoo">Daewoo</option>
+        <option value="Daihatsu">Daihatsu</option>
+        <option value="Dodge">Dodge</option>
+        <option value="Fiat">Fiat</option>
+        <option value="Ford">Ford</option>
+        <option value="Geely">Geely</option>
+        <option value="Honda">Honda</option>
+        <option value="Hyundai">Hyundai</option>
+        <option value="Isuzu">Isuzu</option>
+        <option value="Jeep">Jeep</option>
+        <option value="KIA">KIA</option>
+        <option value="Lada">Lada</option>
+        <option value="Land Rover">Land Rover</option>
+        <option value="Lexus">Lexus</option>
+        <option value="Mazda">Mazda</option>
+        <option value="Mercedes">Mercedes</option>
+        <option value="Mini">Mini</option>
+        <option value="Mitsubishi">Mitsubishi</option>
+        <option value="Nissan">Nissan</option>
+        <option value="Opel">Opel</option>
+        <option value="Peugeot">Peugeot</option>
+        <option value="Porsche">Porsche</option>
+        <option value="Renault">Renault</option>
+        <option value="Seat">Seat</option>
+        <option value="Skoda">Skoda</option>
+        <option value="Smart">Smart</option>
+        <option value="Ssangyong">Ssangyong</option>
+        <option value="Subaru">Subaru</option>
+        <option value="Suzuki">Suzuki</option>
+        <option value="Tesla">Tesla</option>
+        <option value="Toyota">Toyota</option>
+        <option value="UAZ">UAZ</option>
+        <option value="Volkswagen">Volkswagen</option>
+        <option value="Volvo">Volvo</option>
+        <option value="ZAZ">ZAZ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="model">Модель:</label>
+      <select id="model">
+        <option value="">Выберите модель</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="year">Год выпуска:</label>
+      <select id="year">
+        <option value="">Выберите год</option>
+        <script>
+          const currentYear = new Date().getFullYear();
+          for (let i = currentYear; i >= 1980; i--) {
+            document.write(`<option value="${i}">${i}</option>`);
+          }
+        </script>
+      </select>
+    </div>
+    <!-- Группа для поля VIN и кнопки «Сканировать VIN» -->
+    <div class="form-group vin-group">
+      <label for="vin"></label>
+      <div style="display: flex; gap: 10px; width: 100%;">
+        <input type="text" id="vin" placeholder="VIN code">
+        <button class="scan-btn" onclick="startScanner()">scan VIN</button>
+      </div>
+    </div>
+    <!-- Контейнер для сканера VIN -->
+    <div id="scanner-container" style="display:none; margin-top: 15px; background: var(--dark-card); border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: var(--shadow);">
+      <video id="scanner-video" autoplay style="width: 100%; max-width: 100%; border-radius: 10px;"></video>
+      <button class="stop-btn" onclick="stopScanner()">Остановить сканирование</button>
+    </div>
+
+    <div class="form-group">
+      <label>Выбор запчастей:</label>
+      <div class="category-tree" id="category-tree">
+
+        <!-- Детали для ТО -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('to')">Детали для ТО <span id="to-sign">+</span></div>
+          <div class="category-content" id="to">
+            <label><input type="checkbox" name="part" value="Фильтр масляный"> Фильтр масляный</label>
+            <label><input type="checkbox" name="part" value="Фильтр воздушный"> Фильтр воздушный</label>
+            <label><input type="checkbox" name="part" value="Фильтр салонный"> Фильтр салонный</label>
+            <label><input type="checkbox" name="part" value="Фильтр трансмиссионный"> Фильтр трансмиссионный</label>
+            <label><input type="checkbox" name="part" value="Фильтр ГУР"> Фильтр ГУР</label>
+            <label><input type="checkbox" name="part" value="Комплект фильтров"> Комплект фильтров</label>
+            <label><input type="checkbox" name="part" value="Свечи зажигания"> Свечи зажигания</label>
+            <label><input type="checkbox" name="part" value="Ремень поликлиновый"> Ремень поликлиновый</label>
+            <label><input type="checkbox" name="part" value="Насос системы охлаждения"> Насос системы охлаждения</label>
+            <label><input type="checkbox" name="part" value="Термостат"> Термостат</label>
+            <label><input type="checkbox" name="part" value="Тормозные колодки"> Тормозные колодки</label>
+            <label><input type="checkbox" name="part" value="Щетки стеклоочистителя"> Щетки стеклоочистителя</label>
+          </div>
+        </div>
+
+        <!-- Двигатель -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('engine')">Двигатель <span id="engine-sign">+</span></div>
+          <div class="category-content" id="engine">
+            <label><input type="checkbox" name="part" value="Двигатель в сборе"> Двигатель в сборе</label>
+            <label><input type="checkbox" name="part" value="Головка цилиндра"> Головка цилиндра</label>
+            <label><input type="checkbox" name="part" value="Крышка маслозаливной горловины"> Крышка маслозаливной горловины</label>
+            <label><input type="checkbox" name="part" value="Крышка клапанная"> Крышка клапанная</label>
+            <label><input type="checkbox" name="part" value="Прокладка клапанной крышки"> Прокладка клапанной крышки</label>
+            <label><input type="checkbox" name="part" value="Прокладка головки цилиндра"> Прокладка головки цилиндра</label>
+            <label><input type="checkbox" name="part" value="Болт головки блока цилиндра"> Болт головки блока цилиндра</label>
+          </div>
+        </div>
+
+        <!-- Блок-картер -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('block')">Блок-картер <span id="block-sign">+</span></div>
+          <div class="category-content" id="block">
+            <label><input type="checkbox" name="part" value="Кривошепношатунный механизм"> Кривошепношатунный механизм</label>
+          </div>
+        </div>
+
+        <!-- Коленчатый вал -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('crankshaft')">Коленчатый вал <span id="crankshaft-sign">+</span></div>
+          <div class="category-content" id="crankshaft">
+            <label><input type="checkbox" name="part" value="Вкладыш подшипника коленвала"> Вкладыш подшипника коленвала</label>
+            <label><input type="checkbox" name="part" value="Диск коленвала"> Диск коленвала</label>
+          </div>
+        </div>
+
+        <!-- Шатун -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('connectingRod')">Шатун <span id="connectingRod-sign">+</span></div>
+          <div class="category-content" id="connectingRod">
+            <label><input type="checkbox" name="part" value="Уложишь нижнюю головку шатуна"> Уложишь нижнюю головку шатуна</label>
+            <label><input type="checkbox" name="part" value="Крепление крышки шатуна"> Крепление крышки шатуна</label>
+          </div>
+        </div>
+
+        <!-- Поршень -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('piston')">Поршень <span id="piston-sign">+</span></div>
+          <div class="category-content" id="piston">
+            <label><input type="checkbox" name="part" value="Комплект поршневых колец"> Комплект поршневых колец</label>
+            <label><input type="checkbox" name="part" value="Сальник, комплекты уплотнений"> Сальник, комплекты уплотнений</label>
+            <label><input type="checkbox" name="part" value="Механизм газораспределения"> Механизм газораспределения</label>
+          </div>
+        </div>
+
+        <!-- Клапан -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('valve')">Клапан <span id="valve-sign">+</span></div>
+          <div class="category-content" id="valve">
+            <label><input type="checkbox" name="part" value="Впускной клапан"> Впускной клапан</label>
+            <label><input type="checkbox" name="part" value="Выпускной клапан"> Выпускной клапан</label>
+            <label><input type="checkbox" name="part" value="Прокладка стержней"> Прокладка стержней</label>
+            <label><input type="checkbox" name="part" value="Подъемник клапана"> Подъемник клапана</label>
+            <label><input type="checkbox" name="part" value="Пружина клапана"> Пружина клапана</label>
+            <label><input type="checkbox" name="part" value="Замок пружины клапана"> Замок пружины клапана</label>
+            <label><input type="checkbox" name="part" value="Коромысло, балансир"> Коромысло, балансир</label>
+            <label><input type="checkbox" name="part" value="Приведение в действие клапанов"> Приведение в действие клапанов</label>
+          </div>
+        </div>
+
+        <!-- ГРМ -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('timing')">ГРМ <span id="timing-sign">+</span></div>
+          <div class="category-content" id="timing">
+            <label><input type="checkbox" name="part" value="Комплект цепи привода распредвала"> Комплект цепи привода распредвала</label>
+            <label><input type="checkbox" name="part" value="Цепь привода распредвала"> Цепь привода распредвала</label>
+            <label><input type="checkbox" name="part" value="Планка успокоителя"> Планка успокоителя</label>
+            <label><input type="checkbox" name="part" value="Планка натяжителя"> Планка натяжителя</label>
+            <label><input type="checkbox" name="part" value="Натяжитель цепи"> Натяжитель цепи</label>
+            <label><input type="checkbox" name="part" value="Шток"> Шток</label>
+            <label><input type="checkbox" name="part" value="Шестерни"> Шестерни</label>
+          </div>
+        </div>
+
+        <!-- Крепление двигателя -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('engineMount')">Крепление двигателя <span id="engineMount-sign">+</span></div>
+          <div class="category-content" id="engineMount">
+            <label><input type="checkbox" name="part" value="Кронштейн двигателя"> Кронштейн двигателя</label>
+            <label><input type="checkbox" name="part" value="Подвеска двигателя"> Подвеска двигателя</label>
+            <label><input type="checkbox" name="part" value="Система смазки"> Система смазки</label>
+            <label><input type="checkbox" name="part" value="Фильтр масляный"> Фильтр масляный</label>
+          </div>
+        </div>
+
+        <!-- Масляный насос -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('oilPump')">Масляный насос <span id="oilPump-sign">+</span></div>
+          <div class="category-content" id="oilPump">
+            <label><input type="checkbox" name="part" value="Впускная труба"> Впускная труба</label>
+            <label><input type="checkbox" name="part" value="Цепь привода"> Цепь привода</label>
+            <label><input type="checkbox" name="part" value="Корпус и прокладка масляного фильтра"> Корпус и прокладка масляного фильтра</label>
+          </div>
+        </div>
+
+        <!-- Поддон масляный -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('oilPan')">Поддон масляный <span id="oilPan-sign">+</span></div>
+          <div class="category-content" id="oilPan">
+            <label><input type="checkbox" name="part" value="Поддон масляный"> Поддон масляный</label>
+            <label><input type="checkbox" name="part" value="Прокладка"> Прокладка</label>
+          </div>
+        </div>
+
+        <!-- Радиатор масляный -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('oilRadiator')">Радиатор масляный <span id="oilRadiator-sign">+</span></div>
+          <div class="category-content" id="oilRadiator">
+            <label><input type="checkbox" name="part" value="Радиатор масляный"> Радиатор масляный</label>
+            <label><input type="checkbox" name="part" value="Прокладка"> Прокладка</label>
+            <label><input type="checkbox" name="part" value="Датчик давления масла"> Датчик давления масла</label>
+            <label><input type="checkbox" name="part" value="Указатель уровня масла"> Указатель уровня масла</label>
+            <label><input type="checkbox" name="part" value="Форсунка масляная"> Форсунка масляная</label>
+            <label><input type="checkbox" name="part" value="Соединительные элементы"> Соединительные элементы</label>
+            <label><input type="checkbox" name="part" value="Приготовление смеси"> Приготовление смеси</label>
+          </div>
+        </div>
+
+        <!-- Заслонка дроссельная (патрубок, фланец) -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('throttleFlange')">Заслонка дроссельная (патрубок, фланец) <span id="throttleFlange-sign">+</span></div>
+          <div class="category-content" id="throttleFlange">
+            <label><input type="checkbox" name="part" value="Дроссельная заслонка"> Дроссельная заслонка</label>
+            <label><input type="checkbox" name="part" value="Прокладка дроссельной заслонки"> Прокладка дроссельной заслонки</label>
+          </div>
+        </div>
+
+        <!-- Насос высокого давления (1) -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('highPressurePump')">Насос высокого давления <span id="highPressurePump-sign">+</span></div>
+          <div class="category-content" id="highPressurePump">
+            <label><input type="checkbox" name="part" value="Топливный насос высокого давления"> Топливный насос высокого давления</label>
+            <label><input type="checkbox" name="part" value="Прокладки/уплотнения"> Прокладки/уплотнения</label>
+            <label><input type="checkbox" name="part" value="Блок управления"> Блок управления</label>
+            <label><input type="checkbox" name="part" value="Датчик массового расхода воздуха"> Датчик массового расхода воздуха</label>
+            <label><input type="checkbox" name="part" value="Датчик кислорода"> Датчик кислорода</label>
+            <label><input type="checkbox" name="part" value="Система подачи воздуха"> Система подачи воздуха</label>
+          </div>
+        </div>
+
+        <!-- Корпус воздушного фильтра -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('airFilterHousing')">Корпус воздушного фильтра <span id="airFilterHousing-sign">+</span></div>
+          <div class="category-content" id="airFilterHousing">
+            <label><input type="checkbox" name="part" value="Фильтр воздушный"> Фильтр воздушный</label>
+            <label><input type="checkbox" name="part" value="Корпус воздушного фильтра в сборе"> Корпус воздушного фильтра в сборе</label>
+          </div>
+        </div>
+
+        <!-- Заслонка дроссельная (отдельная) -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('throttle2')">Заслонка дроссельная <span id="throttle2-sign">+</span></div>
+          <div class="category-content" id="throttle2">
+            <label><input type="checkbox" name="part" value="Дроссельная заслонка"> Дроссельная заслонка</label>
+            <label><input type="checkbox" name="part" value="Прокладка дроссельной заслонки"> Прокладка дроссельной заслонки</label>
+          </div>
+        </div>
+
+        <!-- Система нагнетания воздуха -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('airBoost')">Система нагнетания воздуха <span id="airBoost-sign">+</span></div>
+          <div class="category-content" id="airBoost">
+            <label><input type="checkbox" name="part" value="Компрессор"> Компрессор</label>
+            <label><input type="checkbox" name="part" value="Прокладка компрессора"> Прокладка компрессора</label>
+            <label><input type="checkbox" name="part" value="Охладитель наддувного воздуха (интеркуллер)"> Охладитель наддувного воздуха (интеркуллер)</label>
+            <label><input type="checkbox" name="part" value="Регулировка нагнетаемого воздуха"> Регулировка нагнетаемого воздуха</label>
+            <label><input type="checkbox" name="part" value="Трубка нагнетаемого воздуха"> Трубка нагнетаемого воздуха</label>
+          </div>
+        </div>
+
+        <!-- Коллектор впускной -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('intakeManifold')">Коллектор впускной <span id="intakeManifold-sign">+</span></div>
+          <div class="category-content" id="intakeManifold">
+            <label><input type="checkbox" name="part" value="Intake Manifold"> Intake Manifold</label>
+            <label><input type="checkbox" name="part" value="Прокладка впускного коллектора"> Прокладка впускного коллектора</label>
+            <label><input type="checkbox" name="part" value="Регулировка, управление"> Регулировка, управление</label>
+          </div>
+        </div>
+
+        <!-- Система зажигания, накаливания -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('ignition')">Система зажигания, накаливания <span id="ignition-sign">+</span></div>
+          <div class="category-content" id="ignition">
+            <label><input type="checkbox" name="part" value="Катушка зажигания"> Катушка зажигания</label>
+            <label><input type="checkbox" name="part" value="Свечи зажигания"> Свечи зажигания</label>
+            <label><input type="checkbox" name="part" value="Генератор импульсов"> Генератор импульсов</label>
+            <label><input type="checkbox" name="part" value="Ременный привод"> Ременный привод</label>
+          </div>
+        </div>
+
+        <!-- Ремень поликлиновый, ролики -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('belt')">Ремень поликлиновый, ролики <span id="belt-sign">+</span></div>
+          <div class="category-content" id="belt">
+            <label><input type="checkbox" name="part" value="Ремень поликлиновый"> Ремень поликлиновый</label>
+            <label><input type="checkbox" name="part" value="Ролик натяжителя"> Ролик натяжителя</label>
+            <label><input type="checkbox" name="part" value="Шкив"> Шкив</label>
+          </div>
+        </div>
+
+        <!-- Прокладки -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('gaskets')">Прокладки <span id="gaskets-sign">+</span></div>
+          <div class="category-content" id="gaskets">
+            <label><input type="checkbox" name="part" value="Прокладка головки цилиндра"> Прокладка головки цилиндра</label>
+            <label><input type="checkbox" name="part" value="Прокладка клапанной крышки"> Прокладка клапанной крышки</label>
+            <label><input type="checkbox" name="part" value="Прокладка впускного коллектора"> Прокладка впускного коллектора</label>
+            <label><input type="checkbox" name="part" value="Прокладка выпускного коллектора"> Прокладка выпускного коллектора</label>
+            <label><input type="checkbox" name="part" value="Прокладка крышки распределительного механизма"> Прокладка крышки распределительного механизма</label>
+            <label><input type="checkbox" name="part" value="Прокладка турбонагнетателя"> Прокладка турбонагнетателя</label>
+          </div>
+        </div>
+
+        <!-- Герметизация -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('sealing')">Герметизация <span id="sealing-sign">+</span></div>
+          <div class="category-content" id="sealing">
+            <label><input type="checkbox" name="part" value="Герметизация топливной системы"> Герметизация топливной системы</label>
+            <label><input type="checkbox" name="part" value="Герметизация в системе циркуляции масла"> Герметизация в системе циркуляции масла</label>
+            <label><input type="checkbox" name="part" value="Сальники, комплект уплотнений"> Сальники, комплект уплотнений</label>
+          </div>
+        </div>
+
+        <!-- Электроника двигателя -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('engineElectronics')">Электроника двигателя <span id="engineElectronics-sign">+</span></div>
+          <div class="category-content" id="engineElectronics">
+            <label><input type="checkbox" name="part" value="Кожух двигателя"> Кожух двигателя</label>
+          </div>
+        </div>
+
+        <!-- Топливная система -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('fuelSystem')">Топливная система <span id="fuelSystem-sign">+</span></div>
+          <div class="category-content" id="fuelSystem">
+            <label><input type="checkbox" name="part" value="Топливный инжектор"> Топливный инжектор</label>
+            <label><input type="checkbox" name="part" value="Форсунка, распылитель, насос-форсунка"> Форсунка, распылитель, насос-форсунка</label>
+            <label><input type="checkbox" name="part" value="Прокладка"> Прокладка</label>
+          </div>
+        </div>
+
+        <!-- Насос топливный, комплектующие -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('fuelPump')">Насос топливный, комплектующие <span id="fuelPump-sign">+</span></div>
+          <div class="category-content" id="fuelPump">
+            <label><input type="checkbox" name="part" value="Насос топливный"> Насос топливный</label>
+            <label><input type="checkbox" name="part" value="Аксессуары"> Аксессуары</label>
+          </div>
+        </div>
+
+        <!-- Насос высокого давления (2) - повтор из списка -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('highPressurePump2')">Насос высокого давления (дубль) <span id="highPressurePump2-sign">+</span></div>
+          <div class="category-content" id="highPressurePump2">
+            <label><input type="checkbox" name="part" value="Топливный насос высокого давления"> Топливный насос высокого давления</label>
+            <label><input type="checkbox" name="part" value="Прокладки/уплотнения"> Прокладки/уплотнения</label>
+          </div>
+        </div>
+
+        <!-- Бак топливный -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('fuelTank')">Бак топливный <span id="fuelTank-sign">+</span></div>
+          <div class="category-content" id="fuelTank">
+            <label><input type="checkbox" name="part" value="Топливный бак в сборе"> Топливный бак в сборе</label>
+            <label><input type="checkbox" name="part" value="Датчик уровня топлива"> Датчик уровня топлива</label>
+            <label><input type="checkbox" name="part" value="Крышка топливного бака в сборе"> Крышка топливного бака в сборе</label>
+            <label><input type="checkbox" name="part" value="Заливная горловина топливного бака в подборе"> Заливная горловина топливного бака в подборе</label>
+            <label><input type="checkbox" name="part" value="Топливопровод"> Топливопровод</label>
+            <label><input type="checkbox" name="part" value="Клапан"> Клапан</label>
+            <label><input type="checkbox" name="part" value="Соединительные элементы"> Соединительные элементы</label>
+          </div>
+        </div>
+
+        <!-- Система охлаждения -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('coolingSystem')">Система охлаждения <span id="coolingSystem-sign">+</span></div>
+          <div class="category-content" id="coolingSystem">
+            <label><input type="checkbox" name="part" value="Насос системы охлаждения"> Насос системы охлаждения</label>
+            <label><input type="checkbox" name="part" value="Термостат"> Термостат</label>
+            <label><input type="checkbox" name="part" value="Патрубки системы охлаждения"> Патрубки системы охлаждения</label>
+            <label><input type="checkbox" name="part" value="Радиатор системы охлаждения"> Радиатор системы охлаждения</label>
+            <label><input type="checkbox" name="part" value="Крепление радиатора"> Крепление радиатора</label>
+            <label><input type="checkbox" name="part" value="Расширительный бачок"> Расширительный бачок</label>
+            <label><input type="checkbox" name="part" value="Вентилятор охлаждения радиатора"> Вентилятор охлаждения радиатора</label>
+            <label><input type="checkbox" name="part" value="Выключатель, датчик"> Выключатель, датчик</label>
+            <label><input type="checkbox" name="part" value="Жидкость охлаждающая"> Жидкость охлаждающая</label>
+          </div>
+        </div>
+
+        <!-- Система выпуска -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('exhaust')">Система выпуска <span id="exhaust-sign">+</span></div>
+          <div class="category-content" id="exhaust">
+            <label><input type="checkbox" name="part" value="Коллектор выпускной"> Коллектор выпускной</label>
+            <label><input type="checkbox" name="part" value="Прокладка выпускного коллектора"> Прокладка выпускного коллектора</label>
+            <label><input type="checkbox" name="part" value="Турбокомпрессор"> Турбокомпрессор</label>
+            <label><input type="checkbox" name="part" value="Глушитель в сборе"> Глушитель в сборе</label>
+            <label><input type="checkbox" name="part" value="Трубы"> Трубы</label>
+            <label><input type="checkbox" name="part" value="Катализатор"> Катализатор</label>
+            <label><input type="checkbox" name="part" value="Глушитель"> Глушитель</label>
+            <label><input type="checkbox" name="part" value="Насадка"> Насадка</label>
+            <label><input type="checkbox" name="part" value="Датчик кислорода"> Датчик кислорода</label>
+            <label><input type="checkbox" name="part" value="Детали монтажа"> Детали монтажа</label>
+            <label><input type="checkbox" name="part" value="Монтажные элементы"> Монтажные элементы</label>
+          </div>
+        </div>
+
+        <!-- Трансмиссия -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('transmission')">Трансмиссия <span id="transmission-sign">+</span></div>
+          <div class="category-content" id="transmission">
+            <label><input type="checkbox" name="part" value="Автоматическая коробка передач"> Автоматическая коробка передач</label>
+            <label><input type="checkbox" name="part" value="Фильтр трансмиссионный, фильтр ГУР"> Фильтр трансмиссионный, фильтр ГУР</label>
+            <label><input type="checkbox" name="part" value="Коробка передач"> Коробка передач</label>
+            <label><input type="checkbox" name="part" value="Поддон масляный"> Поддон масляный</label>
+            <label><input type="checkbox" name="part" value="Сальники"> Сальники</label>
+            <label><input type="checkbox" name="part" value="Управление, гидравлика"> Управление, гидравлика</label>
+            <label><input type="checkbox" name="part" value="Transmission oil"> Transmission oil</label>
+            <label><input type="checkbox" name="part" value="Радиатор"> Радиатор</label>
+            <label><input type="checkbox" name="part" value="Комплект запчастей для замены масла"> Комплект запчастей для замены масла</label>
+            <label><input type="checkbox" name="part" value="Привод колеса"> Привод колеса</label>
+            <label><input type="checkbox" name="part" value="Приводной вал"> Приводной вал</label>
+            <label><input type="checkbox" name="part" value="Главная передача"> Главная передача</label>
+            <label><input type="checkbox" name="part" value="Дифференциал"> Дифференциал</label>
+            <label><input type="checkbox" name="part" value="Case"> Case</label>
+            <label><input type="checkbox" name="part" value="Seal, Gasket"> Seal, Gasket</label>
+            <label><input type="checkbox" name="part" value="Differential Mounting"> Differential Mounting</label>
+            <label><input type="checkbox" name="part" value="Продольный вал"> Продольный вал</label>
+            <label><input type="checkbox" name="part" value="Дисковый шарнир"> Дисковый шарнир</label>
+            <label><input type="checkbox" name="part" value="Карданный вал"> Карданный вал</label>
+            <label><input type="checkbox" name="part" value="Подшипник подвесной"> Подшипник подвесной</label>
+          </div>
+        </div>
+
+        <!-- Ходовая часть -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('suspension')">Ходовая часть <span id="suspension-sign">+</span></div>
+          <div class="category-content" id="suspension">
+            <label><input type="checkbox" name="part" value="Амортизатор подвески"> Амортизатор подвески</label>
+            <label><input type="checkbox" name="part" value="Амортизатор"> Амортизатор</label>
+            <label><input type="checkbox" name="part" value="Пылезащитный чехол амортизатора"> Пылезащитный чехол амортизатора</label>
+            <label><input type="checkbox" name="part" value="Буфер амортизатора"> Буфер амортизатора</label>
+            <label><input type="checkbox" name="part" value="Опора амортизатора подвески"> Опора амортизатора подвески</label>
+            <label><input type="checkbox" name="part" value="Пружина подвески"> Пружина подвески</label>
+            <label><input type="checkbox" name="part" value="Винтовые пружины"> Винтовые пружины</label>
+            <label><input type="checkbox" name="part" value="Проставка пружины"> Проставка пружины</label>
+            <label><input type="checkbox" name="part" value="Стабилизатор, крепление"> Стабилизатор, крепление</label>
+            <label><input type="checkbox" name="part" value="Втулка стойки стабилизатора"> Втулка стойки стабилизатора</label>
+            <label><input type="checkbox" name="part" value="Стойка стабилизатора, втулки стабилизатора"> Стойка стабилизатора, втулки стабилизатора</label>
+            <label><input type="checkbox" name="part" value="Стабилизатор"> Стабилизатор</label>
+            <label><input type="checkbox" name="part" value="Детали крепления"> Детали крепления</label>
+            <label><input type="checkbox" name="part" value="Рычаги и тяги подвески"> Рычаги и тяги подвески</label>
+            <label><input type="checkbox" name="part" value="Рычаг (поперечный, диагональный, продольный)"> Рычаг (поперечный, диагональный, продольный)</label>
+            <label><input type="checkbox" name="part" value="Крепление рычага подвески"> Крепление рычага подвески</label>
+            <label><input type="checkbox" name="part" value="Ступица колеса, составляющие"> Ступица колеса, составляющие</label>
+            <label><input type="checkbox" name="part" value="Ступица колеса"> Ступица колеса</label>
+            <label><input type="checkbox" name="part" value="Подшипник ступичный"> Подшипник ступичный</label>
+            <label><input type="checkbox" name="part" value="Кулак поворотный, составляющие"> Кулак поворотный, составляющие</label>
+            <label><input type="checkbox" name="part" value="Возвратный кулак"> Возвратный кулак</label>
+            <label><input type="checkbox" name="part" value="Балка моста, подвеска оси"> Балка моста, подвеска оси</label>
+            <label><input type="checkbox" name="part" value="Балка моста"> Балка моста</label>
+            <label><input type="checkbox" name="part" value="Балка моста, надрамник"> Балка моста, надрамник</label>
+            <label><input type="checkbox" name="part" value="Система контроля давления в шинах"> Система контроля давления в шинах</label>
+            <label><input type="checkbox" name="part" value="Колеса, шины"> Колеса, шины</label>
+            <label><input type="checkbox" name="part" value="Диски"> Диски</label>
+            <label><input type="checkbox" name="part" value="Комплектующие"> Комплектующие</label>
+            <label><input type="checkbox" name="part" value="Комплект колес"> Комплект колес</label>
+          </div>
+        </div>
+
+        <!-- Рулевое управление -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('steering')">Рулевое управление <span id="steering-sign">+</span></div>
+          <div class="category-content" id="steering">
+            <label><input type="checkbox" name="part" value="Рельс рулевой"> Рельс рулевой</label>
+            <label><input type="checkbox" name="part" value="Тяга рулевая"> Тяга рулевая</label>
+            <label><input type="checkbox" name="part" value="Наконечник рулевой тяги"> Наконечник рулевой тяги</label>
+            <label><input type="checkbox" name="part" value="Пыльник рулевой рейки"> Пыльник рулевой рейки</label>
+            <label><input type="checkbox" name="part" value="Система гидроусилителя руля"> Система гидроусилителя руля</label>
+            <label><input type="checkbox" name="part" value="Масло гидравлическое"> Масло гидравлическое</label>
+          </div>
+        </div>
+
+        <!-- Тормозная система -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('brakes')">Тормозная система <span id="brakes-sign">+</span></div>
+          <div class="category-content" id="brakes">
+            <label><input type="checkbox" name="part" value="Дисковый тормоз"> Дисковый тормоз</label>
+            <label><input type="checkbox" name="part" value="Тормозные колодки"> Тормозные колодки</label>
+            <label><input type="checkbox" name="part" value="Датчик износа тормозных колодок"> Датчик износа тормозных колодок</label>
+            <label><input type="checkbox" name="part" value="Диск тормозной"> Диск тормозной</label>
+            <label><input type="checkbox" name="part" value="Тормозной суппорт, крепление"> Тормозной суппорт, крепление</label>
+            <label><input type="checkbox" name="part" value="Штифт тормозного суппорта"> Штифт тормозного суппорта</label>
+            <label><input type="checkbox" name="part" value="Ремкомплект тормозного суппорта"> Ремкомплект тормозного суппорта</label>
+            <label><input type="checkbox" name="part" value="Детали тормозной системы"> Детали тормозной системы</label>
+            <label><input type="checkbox" name="part" value="Стояночный тормоз"> Стояночный тормоз</label>
+            <label><input type="checkbox" name="part" value="Регулировка динамики движения"> Регулировка динамики движения</label>
+            <label><input type="checkbox" name="part" value="Датчик АБС"> Датчик АБС</label>
+            <label><input type="checkbox" name="part" value="Тормозные шланги"> Тормозные шланги</label>
+            <label><input type="checkbox" name="part" value="Насос вакуумный"> Насос вакуумный</label>
+            <label><input type="checkbox" name="part" value="Тормозной усилитель"> Тормозной усилитель</label>
+            <label><input type="checkbox" name="part" value="Главный тормозной цилиндр"> Главный тормозной цилиндр</label>
+            <label><input type="checkbox" name="part" value="Выключатель фонаря сигнала торможения"> Выключатель фонаря сигнала торможения</label>
+            <label><input type="checkbox" name="part" value="Жидкость тормозная"> Жидкость тормозная</label>
+          </div>
+        </div>
+
+        <!-- Электрооборудование -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('electrical')">Электрооборудование <span id="electrical-sign">+</span></div>
+          <div class="category-content" id="electrical">
+            <label><input type="checkbox" name="part" value="Аккумулятор"> Аккумулятор</label>
+            <label><input type="checkbox" name="part" value="Система стартера"> Система стартера</label>
+            <label><input type="checkbox" name="part" value="Стартер"> Стартер</label>
+            <label><input type="checkbox" name="part" value="Генератор составляющие"> Генератор составляющие</label>
+            <label><input type="checkbox" name="part" value="Генератор"> Генератор</label>
+            <label><input type="checkbox" name="part" value="Система освещения"> Система освещения</label>
+            <label><input type="checkbox" name="part" value="Главный свет, составляющие"> Главный свет, составляющие</label>
+            <label><input type="checkbox" name="part" value="Главный свет"> Главный свет</label>
+            <label><input type="checkbox" name="part" value="Лампа накаливания основной фары"> Лампа накаливания основной фары</label>
+            <label><input type="checkbox" name="part" value="Регулировка угла наклона фар"> Регулировка угла наклона фар</label>
+            <label><input type="checkbox" name="part" value="Задние фонари/запчасти"> Задние фонари/запчасти</label>
+            <label><input type="checkbox" name="part" value="Задний фонарь"> Задний фонарь</label>
+            <label><input type="checkbox" name="part" value="Дополнительный стоп-сигнал"> Дополнительный стоп-сигнал</label>
+            <label><input type="checkbox" name="part" value="Фонарь освещения номерного знака"> Фонарь освещения номерного знака</label>
+            <label><input type="checkbox" name="part" value="Фонарь указателя поворота"> Фонарь указателя поворота</label>
+            <label><input type="checkbox" name="part" value="Дополнительное освещение"> Дополнительное освещение</label>
+            <label><input type="checkbox" name="part" value="Фара"> Фара</label>
+            <label><input type="checkbox" name="part" value="Противотуманная фара лампа накаливания"> Противотуманная фара лампа накаливания</label>
+            <label><input type="checkbox" name="part" value="Внутреннее освещение"> Внутреннее освещение</label>
+            <label><input type="checkbox" name="part" value="Освещение салона"> Освещение салона</label>
+            <label><input type="checkbox" name="part" value="Ходовые огни"> Ходовые огни</label>
+            <label><input type="checkbox" name="part" value="Отражатель"> Отражатель</label>
+            <label><input type="checkbox" name="part" value="Выключатель, реле, блок управления освещения"> Выключатель, реле, блок управления освещения</label>
+            <label><input type="checkbox" name="part" value="Выключатель"> Выключатель</label>
+            <label><input type="checkbox" name="part" value="Контрольные приборы"> Контрольные приборы</label>
+            <label><input type="checkbox" name="part" value="Датчики"> Датчики</label>
+            <label><input type="checkbox" name="part" value="Приборы управления"> Приборы управления</label>
+          </div>
+        </div>
+
+        <!-- Система очистки окон -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('windowCleaning')">Система очистки окон <span id="windowCleaning-sign">+</span></div>
+          <div class="category-content" id="windowCleaning">
+            <label><input type="checkbox" name="part" value="Щетки стеклоочистителя"> Щетки стеклоочистителя</label>
+            <label><input type="checkbox" name="part" value="Двигатель стеклоочистителя"> Двигатель стеклоочистителя</label>
+            <label><input type="checkbox" name="part" value="Насос омывателя"> Насос омывателя</label>
+            <label><input type="checkbox" name="part" value="Рычаг стеклоочистителя"> Рычаг стеклоочистителя</label>
+            <label><input type="checkbox" name="part" value="Система тяг и рычагов привода стеклоочистителя"> Система тяг и рычагов привода стеклоочистителя</label>
+            <label><input type="checkbox" name="part" value="Бачок стеклоочистителя"> Бачок стеклоочистителя</label>
+            <label><input type="checkbox" name="part" value="Распылитель омывателя"> Распылитель омывателя</label>
+            <label><input type="checkbox" name="part" value="Система очистки фар"> Система очистки фар</label>
+            <label><input type="checkbox" name="part" value="Звуковой сигнал"> Звуковой сигнал</label>
+          </div>
+        </div>
+
+        <!-- Дополнительные удобства -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('conveniences')">Дополнительные удобства <span id="conveniences-sign">+</span></div>
+          <div class="category-content" id="conveniences">
+            <label><input type="checkbox" name="part" value="Система помощи при парковке"> Система помощи при парковке</label>
+            <label><input type="checkbox" name="part" value="Подъемное устройство для окон"> Подъемное устройство для окон</label>
+            <label><input type="checkbox" name="part" value="Датчики"> Датчики</label>
+            <label><input type="checkbox" name="part" value="Центральный замок"> Центральный замок</label>
+            <label><input type="checkbox" name="part" value="Реле, выключатели, электроприводы"> Реле, выключатели, электроприводы</label>
+            <label><input type="checkbox" name="part" value="Стеклоподъемник"> Стеклоподъемник</label>
+          </div>
+        </div>
+
+        <!-- Отопление/кондиционер -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('heatingAC')">Отопление/кондиционер <span id="heatingAC-sign">+</span></div>
+          <div class="category-content" id="heatingAC">
+            <label><input type="checkbox" name="part" value="Отопление"> Отопление</label>
+            <label><input type="checkbox" name="part" value="Фильтр салонный"> Фильтр салонный</label>
+            <label><input type="checkbox" name="part" value="Теплообменник"> Теплообменник</label>
+            <label><input type="checkbox" name="part" value="Электродвигатель вентилятора"> Электродвигатель вентилятора</label>
+            <label><input type="checkbox" name="part" value="Блок управления"> Блок управления</label>
+            <label><input type="checkbox" name="part" value="Шланги, трубки"> Шланги, трубки</label>
+            <label><input type="checkbox" name="part" value="Кондиционер"> Кондиционер</label>
+            <label><input type="checkbox" name="part" value="Компрессор"> Компрессор</label>
+            <label><input type="checkbox" name="part" value="Конденсатор"> Конденсатор</label>
+            <label><input type="checkbox" name="part" value="Испаритель"> Испаритель</label>
+            <label><input type="checkbox" name="part" value="Осушитель"> Осушитель</label>
+            <label><input type="checkbox" name="part" value="Ремонтный комплект"> Ремонтный комплект</label>
+            <label><input type="checkbox" name="part" value="Клапаны"> Клапаны</label>
+            <label><input type="checkbox" name="part" value="Датчики"> Датчики</label>
+            <label><input type="checkbox" name="part" value="Управление, регулировка"> Управление, регулировка</label>
+          </div>
+        </div>
+
+        <!-- Детали салона -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('interior')">Детали салона <span id="interior-sign">+</span></div>
+          <div class="category-content" id="interior">
+            <label><input type="checkbox" name="part" value="Подъемное устройство для окон"> Подъемное устройство для окон</label>
+            <label><input type="checkbox" name="part" value="Ручки"> Ручки</label>
+            <label><input type="checkbox" name="part" value="Органы управления автомобилем"> Органы управления автомобилем</label>
+            <label><input type="checkbox" name="part" value="Солнцезащитный козырек"> Солнцезащитный козырек</label>
+            <label><input type="checkbox" name="part" value="Замок"> Замок</label>
+            <label><input type="checkbox" name="part" value="Центральный замок"> Центральный замок</label>
+            <label><input type="checkbox" name="part" value="Наружный замок"> Наружный замок</label>
+          </div>
+        </div>
+
+        <!-- Детали кузова -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('body')">Детали кузова <span id="body-sign">+</span></div>
+          <div class="category-content" id="body">
+            <label><input type="checkbox" name="part" value="Автомобиль, передняя часть"> Автомобиль, передняя часть</label>
+            <label><input type="checkbox" name="part" value="Бампер"> Бампер</label>
+            <label><input type="checkbox" name="part" value="Крыло, навесные части"> Крыло, навесные части</label>
+            <label><input type="checkbox" name="part" value="Колесная ниша"> Колесная ниша</label>
+            <label><input type="checkbox" name="part" value="Капот"> Капот</label>
+            <label><input type="checkbox" name="part" value="Кожух двигателя"> Кожух двигателя</label>
+            <label><input type="checkbox" name="part" value="Переднее стекло"> Переднее стекло</label>
+            <label><input type="checkbox" name="part" value="Главный свет"> Главный свет</label>
+            <label><input type="checkbox" name="part" value="Фара"> Фара</label>
+            <label><input type="checkbox" name="part" value="Фонарь указателя поворота"> Фонарь указателя поворота</label>
+            <label><input type="checkbox" name="part" value="Детали крепления"> Детали крепления</label>
+            <label><input type="checkbox" name="part" value="Покрытия, крышки"> Покрытия, крышки</label>
+            <label><input type="checkbox" name="part" value="Газовые пружины"> Газовые пружины</label>
+            <label><input type="checkbox" name="part" value="Спойлер"> Спойлер</label>
+            <label><input type="checkbox" name="part" value="Решетка радиатора"> Решетка радиатора</label>
+            <label><input type="checkbox" name="part" value="Облицовка, защитные накладки"> Облицовка, защитные накладки</label>
+            <label><input type="checkbox" name="part" value="Кабина пассажира"> Кабина пассажира</label>
+            <label><input type="checkbox" name="part" value="Накладки порога"> Накладки порога</label>
+            <label><input type="checkbox" name="part" value="Дверь"> Дверь</label>
+            <label><input type="checkbox" name="part" value="Дверные, боковые стекла"> Дверные, боковые стекла</label>
+            <label><input type="checkbox" name="part" value="Зеркало"> Зеркало</label>
+            <label><input type="checkbox" name="part" value="Автомобиль, задняя часть"> Автомобиль, задняя часть</label>
+            <label><input type="checkbox" name="part" value="Крышка багажника"> Крышка багажника</label>
+            <label><input type="checkbox" name="part" value="Заднее окно"> Заднее окно</label>
+            <label><input type="checkbox" name="part" value="Бак топливный"> Бак топливный</label>
+            <label><input type="checkbox" name="part" value="Задний фонарь"> Задний фонарь</label>
+            <label><input type="checkbox" name="part" value="Дополнительный стоп-сигнал"> Дополнительный стоп-сигнал</label>
+            <label><input type="checkbox" name="part" value="Фонарь освещения номерного знака"> Фонарь освещения номерного знака</label>
+            <label><input type="checkbox" name="part" value="Кузовные детали"> Кузовные детали</label>
+            <label><input type="checkbox" name="part" value="Облицовка, защитные накладки, эмблемы"> Облицовка, защитные накладки, эмблемы</label>
+            <label><input type="checkbox" name="part" value="Брызговик"> Брызговик</label>
+            <label><input type="checkbox" name="part" value="Балка продольная, поперечная"> Балка продольная, поперечная</label>
+            <label><input type="checkbox" name="part" value="Остекление"> Остекление</label>
+            <label><input type="checkbox" name="part" value="Оконное стекло"> Оконное стекло</label>
+            <label><input type="checkbox" name="part" value="Наружное зеркало заднего вида, узел"> Наружное зеркало заднего вида, узел</label>
+            <label><input type="checkbox" name="part" value="Зеркальное стекло"> Зеркальное стекло</label>
+            <label><input type="checkbox" name="part" value="Tail Lights/ parts"> Tail Lights/ parts</label>
+            <label><input type="checkbox" name="part" value="Боковой фонарь указателя поворота"> Боковой фонарь указателя поворота</label>
+            <label><input type="checkbox" name="part" value="Устойчивая капота в сборе"> Устойчивая капота в сборе</label>
+          </div>
+        </div>
+
+        <!-- Дополнительное оборудование -->
+        <div class="category-item">
+          <div class="category-header" onclick="toggleCategory('additionalEquipment')">Дополнительное оборудование <span id="additionalEquipment-sign">+</span></div>
+          <div class="category-content" id="additionalEquipment">
+            <label><input type="checkbox" name="part" value="Система безопасности"> Система безопасности</label>
+            <label><input type="checkbox" name="part" value="Система подушек безопасности"> Система подушек безопасности</label>
+            <label><input type="checkbox" name="part" value="Система ремней безопасности"> Система ремней безопасности</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="send-btn" onclick="sendToTelegram()">Отправить запрос</button>
+    <div id="results"></div>
+  </div>
+
+  <!-- Подключение QuaggaJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
+  <script>
+    // Telegram настройки (пример)
+    const ADMIN_CHAT_ID = "-1002239976197";
+    const BOT_TOKEN = "8099553216:AAEE3Ctou3yY4ddwVbXiUfHgfT7PeZyUyhA";
+
+    // Полный список моделей для каждой марки:
+    const carModels = {
+      "Acura": [
+        "Acura Integra", "Acura ILX", "Acura TLX", "Acura RDX", "Acura MDX", "Acura NSX",
+        "Acura Legend", "Acura Vigor", "Acura RSX", "Acura CL", "Acura TL", "Acura TSX", "Acura RLX"
+      ],
+      "Alfa Romeo": [
+        "Alfa Romeo 145", "Alfa Romeo 146", "Alfa Romeo 147", "Alfa Romeo 155", "Alfa Romeo 156",
+        "Alfa Romeo 159", "Alfa Romeo 164", "Alfa Romeo 166", "Alfa Romeo 33", "Alfa Romeo 75",
+        "Alfa Romeo 90", "Alfa Romeo Giulia", "Alfa Romeo Giulietta", "Alfa Romeo Stelvio",
+        "Alfa Romeo 4C", "Alfa Romeo 8C Competizione", "Alfa Romeo Spider", "Alfa Romeo GTV",
+        "Alfa Romeo Brera", "Alfa Romeo Montreal", "Alfa Romeo TZ"
+      ],
+      "Audi": [
+        "Audi 50", "Audi 80", "Audi 90", "Audi 100", "Audi 200", "Audi A1", "Audi A3", "Audi A4",
+        "Audi A5", "Audi A6", "Audi A7", "Audi A8", "Audi Q2", "Audi Q3", "Audi Q5", "Audi Q7",
+        "Audi Q8", "Audi TT", "Audi R8", "Audi e-tron"
+      ],
+      "BMW": [
+        "BMW 1 Series", "BMW 2 Series", "BMW 3 Series", "BMW 4 Series", "BMW 5 Series", "BMW 6 Series",
+        "BMW 7 Series", "BMW 8 Series", "BMW X1", "BMW X2", "BMW X3", "BMW X4", "BMW X5", "BMW X6",
+        "BMW X7", "BMW Z4", "BMW Z8", "BMW i3", "BMW i4", "BMW i8", "BMW M1", "BMW M2", "BMW M3",
+        "BMW M4", "BMW M5", "BMW M6", "BMW M8"
+      ],
+      "Chery": [
+        "Chery QQ", "Chery QQ3", "Chery Arrizo 5", "Chery Arrizo 6", "Chery Arrizo 7", "Chery Tiggo 2",
+        "Chery Tiggo 3", "Chery Tiggo 5", "Chery Tiggo 7", "Chery Tiggo 8", "Chery Tiggo 9", "Chery Fulwin 2"
+      ],
+      "Chevrolet": [
+        "Chevrolet Spark", "Chevrolet Sonic", "Chevrolet Cruze", "Chevrolet Malibu", "Chevrolet Impala",
+        "Chevrolet Camaro", "Chevrolet Corvette", "Chevrolet Trax", "Chevrolet Equinox", "Chevrolet Traverse",
+        "Chevrolet Suburban", "Chevrolet Tahoe", "Chevrolet Colorado", "Chevrolet Express",
+        "Chevrolet Blazer", "Chevrolet Trailblazer"
+      ],
+      "Chrysler": [
+        "Chrysler 300", "Chrysler Pacifica", "Chrysler 200", "Chrysler Town & Country",
+        "Chrysler PT Cruiser", "Chrysler Crossfire"
+      ],
+      "Citroen": [
+        "Citroen C1", "Citroen C2", "Citroen C3", "Citroen C3 Aircross", "Citroen C4",
+        "Citroen C4 Cactus", "Citroen C4 Picasso", "Citroen C5 Aircross", "Citroen C5", "Citroen C6",
+        "Citroen DS3", "Citroen DS4", "Citroen DS5", "Citroen Berlingo", "Citroen Jumpy", "Citroen Jumper"
+      ],
+      "Dacia": [
+        "Dacia Logan", "Dacia Sandero", "Dacia Duster", "Dacia Lodgy", "Dacia Dokker", "Dacia Spring"
+      ],
+      "Daewoo": [
+        "Daewoo Matiz", "Daewoo Lanos", "Daewoo Nubira", "Daewoo Leganza", "Daewoo Espero",
+        "Daewoo Magnus", "Daewoo Tacuma", "Daewoo Damas"
+      ],
+      "Daihatsu": [
+        "Daihatsu Mira", "Daihatsu Charade", "Daihatsu Terios", "Daihatsu Sirion", "Daihatsu Rocky",
+        "Daihatsu Copen", "Daihatsu Move", "Daihatsu Ayla", "Daihatsu Tanto", "Daihatsu Hijet",
+        "Daihatsu Gran Max"
+      ],
+      "Dodge": [
+        "Dodge Challenger", "Dodge Charger", "Dodge Durango", "Dodge Journey", "Dodge Grand Caravan",
+        "Dodge Viper", "Dodge Nitro"
+      ],
+      "Fiat": [
+        "Fiat 500", "Fiat Panda", "Fiat Punto", "Fiat Tipo", "Fiat 124 Spider",
+        "Fiat Doblo", "Fiat Fiorino", "Fiat Multipla"
+      ],
+      "Ford": [
+        "Ford Fiesta", "Ford Focus", "Ford Mustang", "Ford F-150", "Ford Explorer", "Ford Edge",
+        "Ford Fusion", "Ford Escape", "Ford Transit", "Ford Ranger", "Ford EcoSport", "Ford GT",
+        "Ford Bronco", "Ford Expedition"
+      ],
+      "Geely": [
+        "Geely Emgrand", "Geely Atlas", "Geely Boyue", "Geely Vision", "Geely LC"
+      ],
+      "Honda": [
+        "Honda Civic", "Honda Accord", "Honda Fit (Jazz)", "Honda CR-V", "Honda HR-V",
+        "Honda Odyssey", "Honda Pilot", "Honda Insight", "Honda Ridgeline", "Honda Passport",
+        "Honda S2000", "Honda Prelude"
+      ],
+      "Hyundai": [
+        "Hyundai Accent", "Hyundai Elantra", "Hyundai Sonata", "Hyundai Tucson", "Hyundai Santa Fe",
+        "Hyundai Kona", "Hyundai Palisade", "Hyundai Ioniq", "Hyundai Venue"
+      ],
+      "Isuzu": [
+        "Isuzu D-Max", "Isuzu MU-X", "Isuzu Trooper", "Isuzu Rodeo", "Isuzu Axiom"
+      ],
+      "Jeep": [
+        "Jeep Wrangler", "Jeep Grand Cherokee", "Jeep Cherokee", "Jeep Compass",
+        "Jeep Renegade", "Jeep Gladiator", "Jeep Liberty"
+      ],
+      "KIA": [
+        "Kia Rio", "Kia Forte", "Kia Optima", "Kia Stinger", "Kia Cadenza", "Kia Sorento",
+        "Kia Sportage", "Kia Seltos", "Kia Telluride", "Kia Soul"
+      ],
+      "Lada": [
+        "Lada Niva", "Lada Granta", "Lada Vesta", "Lada XRAY"
+      ],
+      "Land Rover": [
+        "Land Rover Range Rover", "Land Rover Range Rover Sport", "Land Rover Discovery",
+        "Land Rover Defender", "Land Rover Evoque"
+      ],
+      "Lexus": [
+        "Lexus IS", "Lexus ES", "Lexus GS", "Lexus LS", "Lexus UX", "Lexus NX", "Lexus RX",
+        "Lexus LC", "Lexus LX"
+      ],
+      "Mazda": [
+        "Mazda2", "Mazda3", "Mazda6", "Mazda CX-3", "Mazda CX-30", "Mazda CX-5", "Mazda CX-9",
+        "Mazda MX-5 Miata"
+      ],
+      "Mercedes": [
+        "Mercedes-Benz A-Class", "Mercedes-Benz C-Class", "Mercedes-Benz E-Class", "Mercedes-Benz S-Class",
+        "Mercedes-Benz CLA", "Mercedes-Benz CLS", "Mercedes-Benz GLA", "Mercedes-Benz GLC",
+        "Mercedes-Benz GLE", "Mercedes-Benz GLS", "Mercedes-Benz G-Class", "Mercedes-AMG GT",
+        "Mercedes-Benz SL"
+      ],
+      "Mini": [
+        "Mini Cooper", "Mini Clubman", "Mini Countryman", "Mini Paceman"
+      ],
+      "Mitsubishi": [
+        "Mitsubishi Lancer", "Mitsubishi Outlander", "Mitsubishi Eclipse Cross",
+        "Mitsubishi ASX", "Mitsubishi Pajero", "Mitsubishi Triton"
+      ],
+      "Nissan": [
+        "Nissan Versa", "Nissan Sentra", "Nissan Altima", "Nissan Maxima", "Nissan 370Z",
+        "Nissan GT-R", "Nissan Leaf", "Nissan Rogue", "Nissan Murano", "Nissan Pathfinder",
+        "Nissan Armada"
+      ],
+      "Opel": [
+        "Opel Corsa", "Opel Astra", "Opel Insignia", "Opel Mokka", "Opel Crossland", "Opel Zafira"
+      ],
+      "Peugeot": [
+        "Peugeot 208", "Peugeot 2008", "Peugeot 308", "Peugeot 3008", "Peugeot 508",
+        "Peugeot 5008", "Peugeot Expert", "Peugeot Traveller"
+      ],
+      "Porsche": [
+        "Porsche 911", "Porsche Boxster", "Porsche Cayman", "Porsche Panamera",
+        "Porsche Macan", "Porsche Cayenne", "Porsche Taycan"
+      ],
+      "Renault": [
+        "Renault Clio", "Renault Megane", "Renault Scenic", "Renault Talisman",
+        "Renault Captur", "Renault Kadjar", "Renault Koleos", "Renault Zoe"
+      ],
+      "Seat": [
+        "SEAT Ibiza", "SEAT Leon", "SEAT Arona", "SEAT Ateca", "SEAT Tarraco"
+      ],
+      "Skoda": [
+        "Škoda Fabia", "Škoda Octavia", "Škoda Rapid", "Škoda Superb",
+        "Škoda Kamiq", "Škoda Kodiaq", "Škoda Karoq"
+      ],
+      "Smart": [
+        "Smart Fortwo", "Smart Forfour"
+      ],
+      "Ssangyong": [
+        "SsangYong Tivoli", "SsangYong Korando", "SsangYong Rexton", "SsangYong Musso"
+      ],
+      "Subaru": [
+        "Subaru Impreza", "Subaru Legacy", "Subaru Outback", "Subaru Forester",
+        "Subaru Crosstrek", "Subaru WRX", "Subaru BRZ"
+      ],
+      "Suzuki": [
+        "Suzuki Swift", "Suzuki Baleno", "Suzuki Celerio", "Suzuki Vitara",
+        "Suzuki Jimny", "Suzuki Dzire"
+      ],
+      "Tesla": [
+        "Tesla Model S", "Tesla Model 3", "Tesla Model X", "Tesla Model Y"
+      ],
+      "Toyota": [
+        "Toyota Corolla", "Toyota Camry", "Toyota Prius", "Toyota Yaris", "Toyota RAV4",
+        "Toyota Highlander", "Toyota Land Cruiser", "Toyota 4Runner", "Toyota Tacoma",
+        "Toyota Tundra", "Toyota Sienna", "Toyota Supra"
+      ],
+      "UAZ": [
+        "UAZ Patriot", "UAZ Hunter", "UAZ 469"
+      ],
+      "Volkswagen": [
+        "Volkswagen Golf", "Volkswagen Polo", "Volkswagen Passat", "Volkswagen Jetta",
+        "Volkswagen Tiguan", "Volkswagen Touareg", "Volkswagen Beetle", "Volkswagen Arteon",
+        "Volkswagen Touran"
+      ],
+      "Volvo": [
+        "Volvo S60", "Volvo S90", "Volvo V60", "Volvo V90", "Volvo XC40",
+        "Volvo XC60", "Volvo XC90"
+      ],
+      "ZAZ": [
+        "ZAZ Lanos", "ZAZ Sens", "ZAZ Forza"
+      ]
+    };
+
+    // Обновление списка моделей при выборе марки
+    function updateModels() {
+      const make = document.getElementById('make').value;
+      const modelSelect = document.getElementById('model');
+      modelSelect.innerHTML = '<option value="">Выберите модель</option>';
+
+      if (make && carModels[make]) {
+        carModels[make].forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          modelSelect.appendChild(option);
+        });
+      }
+    }
+
+    // Сворачивание/разворачивание категорий
+    function toggleCategory(categoryId) {
+      const content = document.getElementById(categoryId);
+      content.classList.toggle('show');
+    }
+
+    // Отправка данных в Telegram
+    async function sendToTelegram() {
+      const make = document.getElementById('make').value;
+      const model = document.getElementById('model').value;
+      const year = document.getElementById('year').value;
+      const vin = document.getElementById('vin').value;
+      const selectedParts = Array.from(document.querySelectorAll('input[name="part"]:checked')).map(input => input.value);
+
+      if (!make || !model || !year) {
+        alert('Пожалуйста, выберите марку, модель и год!');
+        return;
+      }
+      if (selectedParts.length === 0) {
+        alert('Пожалуйста, выберите хотя бы одну запчасть!');
+        return;
+      }
+
+      let message = "Подбор автозапчастей:\n";
+      if (vin) message += `VIN: ${vin}\n`;
+      message += `Марка авто: ${make}\n`;
+      message += `Модель: ${model}\n`;
+      message += `Год выпуска: ${year}\n`;
+      message += `Запчасти:\n${selectedParts.map(part => `- ${part}`).join('\n')}\n`;
+
+      try {
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            chat_id: ADMIN_CHAT_ID,
+            text: message
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка Telegram API! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.ok) {
+          document.getElementById('results').innerHTML = '<p>Запрос успешно отправлен в Telegram!</p>';
+        } else {
+          throw new Error('Ошибка при отправке в Telegram');
+        }
+      } catch (error) {
+        console.error('Ошибка:', error);
+        document.getElementById('results').innerHTML = '<p>Произошла ошибка при отправке. Попробуйте еще раз.</p>';
+      }
+    }
+
+    // Сканирование VIN через QuaggaJS
+    let scannerActive = false;
+
+    function startScanner() {
+      if (scannerActive) return;
+
+      const scannerContainer = document.getElementById('scanner-container');
+      scannerContainer.style.display = 'block';
+      scannerActive = true;
+
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector('#scanner-video'),
+          constraints: {
+            width: 640,
+            height: 480,
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          readers: ["code_128_reader", "code_39_reader"]
+        }
+      }, function(err) {
+        if (err) {
+          console.error('Ошибка инициализации сканера:', err);
+          document.getElementById('results').innerHTML = '<p>Ошибка запуска сканера. Разрешите доступ к камере.</p>';
+          stopScanner();
+          return;
+        }
+        Quagga.start();
+      });
+
+      Quagga.onDetected(function(result) {
+        const vin = result.codeResult.code;
+        if (vin) {
+          document.getElementById('vin').value = vin;
+          stopScanner();
+          document.getElementById('results').innerHTML = `<p>VIN успешно отсканирован: ${vin}</p>`;
+        }
+      });
+    }
+
+    function stopScanner() {
+      if (!scannerActive) return;
+
+      Quagga.stop();
+      scannerActive = false;
+      const scannerContainer = document.getElementById('scanner-container');
+      scannerContainer.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
