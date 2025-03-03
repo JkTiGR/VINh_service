@@ -341,12 +341,11 @@
       <li><a href="#schedule">Расписание</a></li>
       <li><a href="#diagnostics">Диагностика</a></li>
       <li><a href="#repair">Ремонт</a></li>
-      <li><a href="parts">Запчасти</a></li>
+      <li><a href="{{ url_for('vin_bp.parts') }}">Запчасти</a></li>
       <li><a href="#wash">Мойка</a></li>
       <li><a href="#tires">Шиномонтаж</a></li>
       <li><a href="#contact">Контакт</a></li>
       <li><a href="{{ url_for('vin_bp.login') }}">Войти как пользователь</a></li>
-      <li><a href="{{ url_for('vin_bp.login_admin') }}">Войти как админ</a></li>
     </ul>
   </nav>
 

@@ -3,54 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
-  <title>Поиск автозапчастей</title>
+  <title>VINh автозапчастей</title>
   <style>
+    /* ======= ГЛОБАЛЬНЫЕ СТИЛИ ======= */
     :root {
       --dark-bg: #1a1a1a;
       --dark-card: rgba(30, 30, 30, 0.9);
-      --glass-bg: rgba(30, 30, 30, 0.5);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-bg: rgba(255, 255, 255, 0.1); /* полупрозрачный для "стекла" */
+      --glass-border: rgba(255, 255, 255, 0.18);
       --text-color: #fff;
       --accent-color: #007bff;
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
 
-    body {
-      font-family: 'Arial', sans-serif;
+    html, body {
       margin: 0;
       padding: 0;
+      min-height: 100vh;
       background-color: var(--dark-bg);
       color: var(--text-color);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
+      font-family: Arial, sans-serif;
       overflow-x: hidden;
     }
 
-    .container {
-      width: 90%;
-      max-width: 500px;
-      padding: 20px;
+    /* ======= БОКОВОЕ МЕНЮ (SPRAVA) ======= */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -240px; /* изначально сдвинуто за экран */
+      width: 240px;
+      height: 100vh;
       background: var(--glass-bg);
-      border-radius: 15px;
-      border: 1px solid var(--glass-border);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       box-shadow: var(--shadow);
-      margin-top: 20px;
+      border: 1px solid var(--glass-border);
+      border-radius: 15px 0 0 15px;
+      padding: 20px;
+      transition: right 0.3s ease;
+      z-index: 1100;
+    }
+    .sidebar.active {
+      right: 0;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar ul li {
+      margin: 15px 0;
+    }
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      transition: color 0.3s;
+    }
+    .sidebar ul li a:hover {
+      color: #00c6ff;
+    }
+
+    /* ======= КНОПКА БУРГЕР ======= */
+    .menu-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1200;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .menu-toggle img {
+      width: 30px;
+      height: 30px;
+    }
+
+    /* ======= ОСНОВНОЙ КОНТЕЙНЕР ======= */
+    .container-glass {
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      background: var(--dark-card);
+      border-radius: 15px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      position: relative; /* чтобы не налезать на меню */
     }
 
     .form-group {
       margin-bottom: 15px;
     }
-
     label {
       font-weight: bold;
       margin-bottom: 5px;
       font-size: 1rem;
+      display: block;
     }
 
-    /* Общие стили только для select и текстовых полей */
     select,
     input[type="text"],
     input[type="number"],
@@ -64,23 +115,19 @@
       background: var(--dark-card);
       color: var(--text-color);
       font-size: 1rem;
-      position: relative;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
       outline: none;
     }
-
     select:focus,
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="password"]:focus,
     input[type="email"]:focus,
     textarea:focus {
-      outline: none;
       border-color: var(--accent-color);
       box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
     }
 
-    /* Стили, исправляющие чекбоксы */
     input[type="checkbox"] {
       width: auto;
       padding: 0;
@@ -90,18 +137,8 @@
       cursor: pointer;
     }
 
-    /* Группа для поля VIN и кнопки «Сканировать VIN» */
-    .vin-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .vin-group input {
-      flex: 1;
-    }
-
-    button.scan-btn {
+    /* КНОПКИ */
+    button.lens-btn {
       padding: 8px 12px;
       background-color: var(--accent-color);
       color: var(--text-color);
@@ -112,13 +149,12 @@
       box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
       transition: background-color 0.3s, transform 0.2s;
     }
-
-    button.scan-btn:hover {
+    button.lens-btn:hover {
       background-color: #0056b3;
       transform: scale(1.05);
     }
 
-    button.stop-btn, button.send-btn {
+    button.send-btn {
       padding: 10px 20px;
       background-color: var(--accent-color);
       color: var(--text-color);
@@ -130,8 +166,7 @@
       box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
       transition: background-color 0.3s, transform 0.2s;
     }
-
-    button.stop-btn:hover, button.send-btn:hover {
+    button.send-btn:hover {
       background-color: #0056b3;
       transform: scale(1.05);
     }
@@ -141,6 +176,7 @@
       color: var(--text-color);
     }
 
+    /* ======= ДЕРЕВО КАТЕГОРИЙ ======= */
     .category-tree {
       margin-top: 15px;
       background: var(--dark-card);
@@ -149,12 +185,10 @@
       box-shadow: var(--shadow);
       padding: 10px;
     }
-
     .category-item {
       margin-left: 10px;
       margin-bottom: 10px;
     }
-
     .category-header {
       cursor: pointer;
       padding: 10px;
@@ -168,89 +202,88 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .category-header:hover {
       background: rgba(50, 50, 50, 0.7);
     }
-
     .category-header span {
-      margin-left: 10px; /* Отступ между текстом и знаком */
+      margin-left: 10px;
     }
-
-    /* При развёрнутой категории используем одну колонку для чекбоксов */
     .category-content {
       display: none;
       margin-left: 15px;
       padding: 5px;
     }
-
     .category-content.show {
       display: block;
     }
-
     .category-content label {
-      display: block; /* Каждый чекбокс в отдельной строке */
-      margin-bottom: 5px; /* Отступ между строками */
-      white-space: normal; /* Разрешаем перенос текста */
+      display: block;
+      margin-bottom: 5px;
+      white-space: normal;
     }
 
-    /* Адаптация для смартфонов */
+    /* ======= АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ ======= */
     @media (max-width: 480px) {
-      .container {
+      .sidebar {
+        width: 200px;
+        right: -480px;
+      }
+      .sidebar.active {
+        right: 0;
+      }
+      .container-glass {
         width: 95%;
-        padding: 15px;
+        margin: 20px auto;
       }
-
-      select, input, button {
-        font-size: 0.9rem;
-        padding: 8px;
-      }
-
       .category-header, .category-content label {
         font-size: 0.9rem;
         padding: 8px;
       }
-
-      button.scan-btn {
+      button.lens-btn {
         width: auto;
         padding: 6px 10px;
         font-size: 0.8rem;
       }
-
-      button.stop-btn, button.send-btn {
+      button.send-btn {
         width: 100%;
         margin-bottom: 10px;
-      }
-
-      /* На мобильных устройствах сохраняем одну колонку */
-      .category-content label {
-        white-space: normal;
-        width: 100%;
-      }
-
-      /* Группа VIN становится вертикальной */
-      .vin-group {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      /* На мобильных устройствах знаки "+" и "X" могут быть меньше для экономии места */
-      .category-header span {
-        font-size: 0.8rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- КНОПКА БУРГЕР -->
+  <button class="menu-toggle" id="menuButton">
+    <img src="{{ url_for('static', filename='img/menu_icon.png') }}" alt="Menu">
+  </button>
 
-    <!-- ЛОГОТИП -->
-    <div class="header-flex" style="display: flex; align-items: center;">
-      <h1 style="margin-right: 10px;">VINh автозапчастей</h1>
-      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+  <!-- БОКОВОЕ МЕНЮ (SPRAWA) -->
+  <div id="sidebar" class="sidebar">
+    <ul>
+      <li><a href="{{ url_for('vin_bp.index') }}">Home</a></li>
+      <li><a href="https://calendar.google.com/calendar/embed?src=jediservice.ua%40gmail.com&ctz=Europe%2FKiev" target="_blank">Расписание</a></li>
+      <li><a href="{{ url_for('vin_bp.diag') }}">Диагностика</a></li>
+      <li><a href="{{ url_for('vin_bp.remont') }}">Ремонт</a></li>
+      <li><a href="{{ url_for('vin_bp.parts') }}">Запчасти</a></li>
+      <li><a href="{{ url_for('vin_bp.wash') }}">Мойка</a></li>
+      <li><a href="{{ url_for('vin_bp.shino') }}">Шиномонтаж</a></li>
+      <li><a href="{{ url_for('vin_bp.VK') }}">Контакт</a></li>
+      <li><a href="{{ url_for('vin_bp.visit') }}">Выйти</a></li>
+    </ul>
+  </div>
+
+  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
+  <div class="container-glass">
+    <!-- ШАПКА С ЛОГОТИПОМ (уменьшен) -->
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h1 style="margin: 0;">VINh автозапчастей</h1>
+      <img src="{{ url_for('static', filename='img/logo.png') }}"
+           alt="Logo"
+           style="width: 60px; height: auto; border-radius: 8px;">
     </div>    
 
-    <div class="form-group">
+    <!-- ФОРМА ВЫБОРА МАРКИ, МОДЕЛИ, ГОДА -->
+    <div class="form-group" style="margin-top:20px;">
       <label for="make">Марка авто:</label>
       <select id="make" onchange="updateModels()">
         <option value="">Выберите марку</option>
@@ -300,12 +333,14 @@
         <option value="ZAZ">ZAZ</option>
       </select>
     </div>
+
     <div class="form-group">
       <label for="model">Модель:</label>
       <select id="model">
         <option value="">Выберите модель</option>
       </select>
     </div>
+
     <div class="form-group">
       <label for="year">Год выпуска:</label>
       <select id="year">
@@ -318,20 +353,18 @@
         </script>
       </select>
     </div>
-    <!-- Группа для поля VIN и кнопки «Сканировать VIN» -->
-    <div class="form-group vin-group">
-      <label for="vin"></label>
-      <div style="display: flex; gap: 10px; width: 100%;">
+
+    <!-- VIN + КНОПКА ДЛЯ GOOGLE LENS -->
+    <div class="form-group">
+      <label for="vin">VIN code:</label>
+      <div style="display: flex; gap: 10px;">
         <input type="text" id="vin" placeholder="VIN code">
-        <button class="scan-btn" onclick="startScanner()">scan VIN</button>
+        <!-- Кнопка, открывающая Google Lens (попытка) -->
+        <button class="lens-btn" onclick="openGoogleLens()">scan VIN with Google Lens</button>
       </div>
     </div>
-    <!-- Контейнер для сканера VIN -->
-    <div id="scanner-container" style="display:none; margin-top: 15px; background: var(--dark-card); border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: var(--shadow);">
-      <video id="scanner-video" autoplay style="width: 100%; max-width: 100%; border-radius: 10px;"></video>
-      <button class="stop-btn" onclick="stopScanner()">Остановить сканирование</button>
-    </div>
 
+    <!-- ВЫБОР ЗАПЧАСТЕЙ (ДЕРЕВО КАТЕГОРИЙ) -->
     <div class="form-group">
       <label>Выбор запчастей:</label>
       <div class="category-tree" id="category-tree">
@@ -926,15 +959,39 @@
       </div>
     </div>
 
+    <!-- КНОПКА ОТПРАВКИ В TELEGRAM -->
     <button class="send-btn" onclick="sendToTelegram()">Отправить запрос</button>
     <div id="results"></div>
   </div>
 
-  <!-- Подключение QuaggaJS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-
   <script>
-    // Telegram настройки (пример)
+    /* ======= ЛОГИКА БОКОВОГО МЕНЮ (СПРАВА) ======= */
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+    menuButton.addEventListener('click', function(event) {
+      event.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
+    document.addEventListener('click', function(event) {
+      if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    /* ======= ПЫТАЕМСЯ ОТКРЫТЬ GOOGLE LENS ======= */
+    function openGoogleLens() {
+      // Проверка, что пользователь на Android
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      if (isAndroid) {
+        // Попытка открыть Intent Google Lens
+        // (Нет официальной схемы, может не сработать на некоторых устройствах)
+        window.location.href = 'intent://scan/#Intent;scheme=zxing;package=com.google.android.apps.searchlite;end';
+      } else {
+        alert('Для сканирования VIN через Google Lens используйте Android-устройство с установленным приложением Lens.');
+      }
+    }
+
+    /* ======= TELEGRAM НАСТРОЙКИ ======= */
     const ADMIN_CHAT_ID = "-1002239976197";
     const BOT_TOKEN = "8099553216:AAEE3Ctou3yY4ddwVbXiUfHgfT7PeZyUyhA";
 
