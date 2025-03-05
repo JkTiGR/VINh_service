@@ -1,35 +1,75 @@
 /* Основной контейнер */
 .container-glass {
-    width: 90%;
-    max-width: 500px;
-    background: rgba(30, 30, 30, 0.9);
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    margin: 20px auto;
-  }
-  
-  /* Шапка: выравнивание заголовка и логотипа */
-  .header {
-    display: flex;
-    align-items: center; /* Центрирование элементов по вертикали */
-    justify-content: center; /* Центрирование по горизонтали */
-    gap: 10px; /* Отступ между текстом и логотипом */
-  }
-  
-  /* Заголовок "VINh" */
-  .title {
-    margin: 0;
-    font-size: 28px;
-    font-weight: bold;
-    color: #fff;
-  }
-  
-  /* Логотип */
-  .logo {
-    width: 50px; /* Фиксированный размер логотипа */
-    height: auto;
-    border-radius: 8px;
-  }
-  
-  
+  width: 90%;
+  max-width: 500px;
+  background: rgba(30, 30, 30, 0.9);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  margin: 20px auto;
+}
+
+/* Шапка: выравнивание заголовка и логотипа */
+.header {
+  display: flex;
+  align-items: center;   /* Центрирование элементов по вертикали */
+  justify-content: center; /* Центрирование по горизонтали */
+  gap: 10px;            /* Отступ между текстом и логотипом */
+}
+
+/* Заголовок "VINh" */
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Логотип */
+.logo {
+  width: 50px; /* Фиксированный размер логотипа */
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Кнопка с «неоновым» эффектом */
+.btn-neon {
+  position: relative;
+  color: #fff;
+  /* Имитируем неоновый отблеск: несколько теней разного радиуса */
+  text-shadow:
+    0 0 5px  #f0f,
+    0 0 10px #f0f,
+    0 0 20px #f0f;
+  box-shadow: 0 0 10px #f0f;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.btn-neon:hover {
+  /* При наведении усиливаем свечение и чуть увеличиваем кнопку */
+  box-shadow: 0 0 20px #f0f;
+  transform: scale(1.05);
+}
+
+@font-face {
+  font-family: 'NASA-Regular';
+  src: url("{{ url_for('static', filename='fonts/NASA.woff2') }}") format('woff2');
+}
+
+@font-face {
+  font-family: 'NASA-Bold';
+  src: url("{{ url_for('static', filename='fonts/NASA1.woff2') }}") format('woff2');
+}
+
+.vinh {
+  font-family: 'NASA-Bold', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+}
+
+.autoser {
+  font-family: 'NASA-Regular', sans-serif;
+  font-size: 32px;
+  letter-spacing: 1px;
+  margin-left: 8px;
+}
