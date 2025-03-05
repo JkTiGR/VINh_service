@@ -257,15 +257,17 @@
       <div class="order">
         <!-- Секция VINh AUTOSERVICE -->
         <div id="vinh-container" style="margin:20px;">
-          <div class="header">
-            <div class="header-left">
-              <h1 class="rainbow-text">VINh AUTOSERVICE</h1>
-              <div id="dateTimeVin"></div>
-            </div>
-            <div class="header-right">
-              <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+          <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
+          <div class="container-glass">
+            <!-- ШАПКА С ЛОГОТИПОМ -->
+            <div class="header">
+              <h1 class="title">VINh AUTOSERVICE</h1>
+              <img src="{{ url_for('static', filename='img/logo.png') }}" 
+                   alt="Logo" 
+                   class="logo">
             </div>
           </div>
+
           <!-- Данные клиента -->
           <div class="row">
             <div class="col-md-6 col-12">
@@ -445,22 +447,6 @@
                 <td><input type="checkbox" name="recReplace1" class="checkbox-yellow"></td>
                 <td><input type="checkbox" name="critReplace1" class="checkbox-red"></td>
               </tr>
-              <tr>
-                <td>2</td>
-                <td><input type="text" class="form-control" name="part2"></td>
-                <td><input type="checkbox" name="wear2" class="checkbox-green"></td>
-                <td><input type="checkbox" name="looseness2" class="checkbox-black"></td>
-                <td><input type="checkbox" name="recReplace2" class="checkbox-yellow"></td>
-                <td><input type="checkbox" name="critReplace2" class="checkbox-red"></td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td><input type="text" class="form-control" name="part3"></td>
-                <td><input type="checkbox" name="wear3" class="checkbox-green"></td>
-                <td><input type="checkbox" name="looseness3" class="checkbox-black"></td>
-                <td><input type="checkbox" name="recReplace3" class="checkbox-yellow"></td>
-                <td><input type="checkbox" name="critReplace3" class="checkbox-red"></td>
-              </tr>
             </tbody>
           </table>
           <!-- Легенда под таблицей -->
@@ -470,9 +456,10 @@
             <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. замена
             <span class="legend-square legend-red" style="margin-left:10px;"></span>Критический замена
           </div>
-          <!-- Кнопка для добавления строки -->
+          <!-- Кнопки для добавления/удаления строки -->
           <div style="margin-top:10px;">
             <button type="button" class="btn btn-primary btn-small add-row-btn">Додати рядок</button>
+            <button type="button" class="btn btn-danger btn-small remove-row-btn">Удалить строку</button>
           </div>
           <!-- Блок "Дополнительные примечания" -->
           <div style="margin-top:10px;">
@@ -490,13 +477,7 @@
         <div id="work-container" class="section" style="margin:20px;">
           <hr>
           <h2 class="rainbow-text">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
-          <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
-            <strong>|</strong> <span id="vin_work"></span> 
-            <strong>|</strong> <span id="carModel_work"></span> 
-            <strong>|</strong> <span id="year_work"></span> 
-            <strong>|</strong> <span id="plate_work"></span>
-          </div>
-          <div id="dateTimeWork" style="font-size:0.9em; margin-bottom:5px;"></div>
+          ...
           <table class="work-table" style="margin-top:10px;">
             <thead>
               <tr>
@@ -506,16 +487,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="number" class="form-control part-price"></td>
-                <td><input type="number" class="form-control work-price"></td>
-              </tr>
-              <tr>
-                <td><input type="text" class="form-control"></td>
-                <td><input type="number" class="form-control part-price"></td>
-                <td><input type="number" class="form-control work-price"></td>
-              </tr>
+              <!-- Оставляем только одну строку -->
               <tr>
                 <td><input type="text" class="form-control"></td>
                 <td><input type="number" class="form-control part-price"></td>
@@ -524,8 +496,13 @@
             </tbody>
           </table>
           <div class="work-total" style="margin-top:10px; text-align:right;">Общая сумма: 0</div>
-          <button type="button" class="btn btn-primary btn-small add-work-row-btn" style="margin-top:10px;">Додати рядок</button>
+          <!-- Две кнопки: "Добавить" и "Удалить" -->
+          <div style="margin-top:10px;">
+            <button type="button" class="btn btn-primary btn-small add-work-row-btn">Додати рядок</button>
+            <button type="button" class="btn btn-danger btn-small remove-work-row-btn">Удалить строку</button>
+          </div>
         </div>
+
         
         <!-- Секция Контрольные отметки и подписи -->
         <div id="control-signatures-container" class="glass-card">
@@ -552,7 +529,9 @@
         
         <!-- Блок кнопок -->
         <div style="display:flex; justify-content: space-between; margin:10px;">
-          <button type="button" class="btn btn-primary btn-small" id="sendAdminBtn">Сохранить</button>
+          <!-- Кнопка "Сохранить" -->
+          <button id="sendAdminBtn">Сохранить</button>
+          <!-- Кнопка добавления нового наряда -->
           <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
         </div>
       </div>
@@ -693,6 +672,7 @@
         if (section) {
           const clone = section.cloneNode(true);
           clone.removeAttribute("id");
+          // Очищаем поля при клонировании
           if (id === "vinh-container") {
             const allowedNames = ["clientName", "phone", "vin", "carModel", "year", "plate"];
             clone.querySelectorAll("input, textarea").forEach(el => {
@@ -889,5 +869,7 @@
   </script>
   <!-- Подключаем Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Подключаем дополнительный скрипт main.js, если требуется -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

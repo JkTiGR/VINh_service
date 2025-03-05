@@ -17,7 +17,7 @@
     }
 
     html, body {
-      margin: 0;
+      margin: 1;
       padding: 0;
       min-height: 100vh;
       background-color: var(--dark-bg);
@@ -79,18 +79,16 @@
       height: 30px;
     }
 
-    /* ======= ОСНОВНОЙ КОНТЕЙНЕР ======= */
+    /* Основной контейнер по центру */
     .container-glass {
-      width: 90%;
-      max-width: 500px;
-      margin: 20px auto;
-      background: var(--dark-card);
+      margin: 0 auto;       /* центрируем */
+      max-width: 500px;     /* ограничиваем ширину */
+      width: 100%;          /* чтобы на мобилке занимало всю ширину */
+      padding: 12px;
+      background: rgba(30, 30, 30, 0.9);
       border-radius: 15px;
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      position: relative; /* чтобы не налезать на меню */
     }
+
 
     .form-group {
       margin-bottom: 15px;
@@ -272,15 +270,17 @@
     </ul>
   </div>
 
-  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
-  <div class="container-glass">
-    <!-- ШАПКА С ЛОГОТИПОМ (уменьшен) -->
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-      <h1 style="margin: 0;">VINh автозапчастей</h1>
-      <img src="{{ url_for('static', filename='img/logo.png') }}"
-           alt="Logo"
-           style="width: 60px; height: auto; border-radius: 8px;">
-    </div>    
+<!-- ОСНОВНОЙ КОНТЕЙНЕР -->
+<div class="container-glass">
+  <!-- ШАПКА С ЛОГОТИПОМ -->
+  <div class="header">
+    <h1 class="title">VINh</h1>
+    <img src="{{ url_for('static', filename='img/logo.png') }}" 
+         alt="Logo" 
+         class="logo">
+  </div>
+</div>
+
 
     <!-- ФОРМА ВЫБОРА МАРКИ, МОДЕЛИ, ГОДА -->
     <div class="form-group" style="margin-top:20px;">
