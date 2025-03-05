@@ -30,8 +30,8 @@
     .sidebar {
       position: fixed;
       top: 0;
-      right: -240px; /* изначально сдвинуто за экран */
-      width: 240px;
+      right: -340px; /* изначально сдвинуто за экран */
+      width: 40px;
       height: 100vh;
       background: var(--glass-bg);
       backdrop-filter: blur(10px);
@@ -270,16 +270,14 @@
     </ul>
   </div>
 
-<!-- ОСНОВНОЙ КОНТЕЙНЕР -->
-<div class="container-glass">
-  <!-- ШАПКА С ЛОГОТИПОМ -->
-  <div class="header">
-    <h1 class="title">VINh</h1>
-    <img src="{{ url_for('static', filename='img/logo.png') }}" 
-         alt="Logo" 
-         class="logo">
-  </div>
-</div>
+    <!-- Шапка, логотип, данные клиента -->
+    <div id="vinh-container" style="margin:20px;">
+      <div class="container-glass">
+        <div class="header">
+          <h1 class="title">VINh AUTOSERVICE</h1>
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo">
+        </div>
+      </div>
 
 
     <!-- ФОРМА ВЫБОРА МАРКИ, МОДЕЛИ, ГОДА -->
