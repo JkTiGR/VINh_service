@@ -7,11 +7,6 @@
   <!-- Подключаем Bootstrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    /* Подключение шрифта NASA */
-    @font-face {
-      font-family: 'NASA';
-      src: url("{{ url_for('static', filename='fonts/NASA.woff2') }}") format("woff2");
-    }
     /* Глобальные стили */
     :root {
       --bs-body-color: white;
@@ -27,7 +22,7 @@
       color: #fff;
       overflow-x: hidden;
     }
-    /* Стили бокового меню (glassmorphism) */
+    /* Стили для бокового меню (Sidebar) в стиле glassmorphism */
     .sidebar {
       position: fixed;
       top: 0;
@@ -69,7 +64,7 @@
     .sidebar ul li a:hover {
       color: #00c6ff;
     }
-    /* Кнопка-триггер */
+    /* Кнопка-триггер для бокового меню */
     .menu-toggle {
       position: fixed;
       top: 10px;
@@ -85,15 +80,10 @@
       width: 30px;
       height: 30px;
     }
-    /* Классы для кнопок */
+    /* Прочие стили */
     .btn-small {
       font-size: 14px !important;
       padding: 5px 10px !important;
-    }
-    .btn-group-flex {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
     }
     .square-checkbox {
       -webkit-appearance: none;
@@ -155,14 +145,7 @@
     .header-left { text-align: left; }
     .header-left h1 { margin: 0; padding: 0; }
     .header-left #dateTimeVin { font-size: 0.9em; margin-top: 5px; }
-    /* Применяем шрифт NASA к заголовку */
-    .title {
-      font-family: 'NASA', sans-serif;
-    }
     .header-right img { width: 80px; border-radius: 50%; margin: 0; padding: 0; }
-    .logo {
-      width: 60px; /* уменьшённый логотип */
-    }
     .form-control {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(0,198,255,0.5);
@@ -221,7 +204,8 @@
       gap: 10px;
     }
     hr { border: 1px solid #00c6ff; margin: 10px 0; }
-    /* Media Queries */
+
+    /* Media Queries для адаптивности */
     @media (max-width: 768px) {
       main {
         margin: 10px;
@@ -244,7 +228,7 @@
   </style>
 </head>
 <body>
-  <!-- Боковое меню -->
+  <!-- Боковое меню (Sidebar) -->
   <div id="sidebar" class="sidebar">
     <ul>
       <li><a href="{{ url_for('vin_bp.index') }}">Home</a></li>
@@ -259,25 +243,31 @@
     </ul>
   </div>
   
-  <!-- Кнопка меню -->
+  <!-- Кнопка-триггер для бокового меню -->
   <div class="menu-toggle">
     <button id="menuButton">
       <img src="{{ url_for('static', filename='img/menu_icon.png') }}" alt="Menu">
     </button>
   </div>
   
-  <!-- Основное содержимое (Dashboard) -->
+  <!-- Основное содержимое страницы (Dashboard) -->
   <div class="container" style="padding-top: 60px;">
-    <form action="{{ url_for('submit_order') }}" method="POST" style="width:100%;">
+    <form action="{{ url_for('vin_bp.submit_order') }}" method="POST" style="width:100%;">
+      <!-- Контейнер с данными заказа -->
       <div class="order">
         <!-- Секция VINh AUTOSERVICE -->
         <div id="vinh-container" style="margin:20px;">
+          <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
           <div class="container-glass">
+            <!-- ШАПКА С ЛОГОТИПОМ -->
             <div class="header">
               <h1 class="title">VINh AUTOSERVICE</h1>
-              <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo">
+              <img src="{{ url_for('static', filename='img/logo.png') }}" 
+                   alt="Logo" 
+                   class="logo">
             </div>
           </div>
+
           <!-- Данные клиента -->
           <div class="row">
             <div class="col-md-6 col-12">
@@ -466,8 +456,8 @@
             <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. замена
             <span class="legend-square legend-red" style="margin-left:10px;"></span>Критический замена
           </div>
-          <!-- Кнопки для добавления/удаления строки (flex) -->
-          <div class="btn-group-flex">
+          <!-- Кнопки для добавления/удаления строки -->
+          <div style="margin-top:10px;">
             <button type="button" class="btn btn-primary btn-small add-row-btn">Додати рядок</button>
             <button type="button" class="btn btn-danger btn-small remove-row-btn">Удалить строку</button>
           </div>
@@ -487,12 +477,7 @@
         <div id="work-container" class="section" style="margin:20px;">
           <hr>
           <h2 class="rainbow-text">ЗАЯВКА НА ВИКОНАННЯ РОБІТ</h2>
-          <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
-            <strong>|</strong> <span id="vin_defects"></span>
-            <strong>|</strong> <span id="carModel_defects"></span>
-            <strong>|</strong> <span id="year_defects"></span>
-            <strong>|</strong> <span id="plate_defects"></span>
-          </div>
+          ...
           <table class="work-table" style="margin-top:10px;">
             <thead>
               <tr>
@@ -502,6 +487,7 @@
               </tr>
             </thead>
             <tbody>
+              <!-- Оставляем только одну строку -->
               <tr>
                 <td><input type="text" class="form-control"></td>
                 <td><input type="number" class="form-control part-price"></td>
@@ -510,12 +496,13 @@
             </tbody>
           </table>
           <div class="work-total" style="margin-top:10px; text-align:right;">Общая сумма: 0</div>
-          <!-- Кнопки "Добавить" и "Удалить" (flex) -->
-          <div class="btn-group-flex">
+          <!-- Две кнопки: "Добавить" и "Удалить" -->
+          <div style="margin-top:10px;">
             <button type="button" class="btn btn-primary btn-small add-work-row-btn">Додати рядок</button>
             <button type="button" class="btn btn-danger btn-small remove-work-row-btn">Удалить строку</button>
           </div>
         </div>
+
         
         <!-- Секция Контрольные отметки и подписи -->
         <div id="control-signatures-container" class="glass-card">
@@ -540,18 +527,349 @@
           </div>
         </div>
         
-        <!-- Блок кнопок (flex) -->
-        <div class="btn-group-flex" style="margin:10px;">
-          <button id="sendAdminBtn" class="btn btn-primary btn-small">Сохранить</button>
+        <!-- Блок кнопок -->
+        <div style="display:flex; justify-content: space-between; margin:10px;">
+          <!-- Кнопка "Сохранить" -->
+          <button id="sendAdminBtn">Сохранить</button>
+          <!-- Кнопка добавления нового наряда -->
           <button type="button" class="btn btn-primary btn-small" id="addOrderBtn">добавить НАРЯД-ЗАМОВЛЕННЯ</button>
         </div>
       </div>
     </form>
   </div>
   
+  <!-- JavaScript -->
+  <script>
+    // Telegram настройки
+    const ADMIN_CHAT_ID = "-1002239976197";
+    const BOT_TOKEN = "8099553216:AAEE3Ctou3yY4ddwVbXiUfHgfT7PeZyUyhA";
+    
+    /* Бургер-меню */
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+    menuButton.addEventListener('click', function(event) {
+      event.stopPropagation();
+      sidebar.classList.toggle('active');
+    });
+    document.addEventListener('click', function(event) {
+      if (!sidebar.contains(event.target) && !menuButton.contains(event.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    /* Обновление даты и времени */
+    function updateDateTime() {
+      const now = new Date();
+      const formatted = now.toLocaleString();
+      const dtVin = document.getElementById('dateTimeVin');
+      const dtAct = document.getElementById('dateTimeAct');
+      const dtWork = document.getElementById('dateTimeWork');
+      if (dtVin) dtVin.textContent = formatted;
+      if (dtAct) dtAct.textContent = formatted;
+      if (dtWork) dtWork.textContent = formatted;
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+    
+    /* Обновление дублированных полей (VIN, модель, год, госномер) */
+    function updateDuplicates() {
+      const vinValue = document.getElementById("vin").value;
+      const carModelValue = document.getElementById("carModel").value;
+      const yearValue = document.getElementById("year").value;
+      const plateValue = document.getElementById("plate").value;
+      document.getElementById("vin_defects").textContent = vinValue;
+      document.getElementById("carModel_defects").textContent = carModelValue;
+      document.getElementById("year_defects").textContent = yearValue;
+      document.getElementById("plate_defects").textContent = plateValue;
+      document.getElementById("vin_work").textContent = vinValue;
+      document.getElementById("carModel_work").textContent = carModelValue;
+      document.getElementById("year_work").textContent = yearValue;
+      document.getElementById("plate_work").textContent = plateValue;
+    }
+    document.getElementById("vin").addEventListener("input", updateDuplicates);
+    document.getElementById("carModel").addEventListener("input", updateDuplicates);
+    document.getElementById("year").addEventListener("input", updateDuplicates);
+    document.getElementById("plate").addEventListener("input", updateDuplicates);
+    updateDuplicates();
+    
+    /* Пересчет общей суммы работ в таблице */
+    function recalcWorkTableForContainer(container) {
+      const rows = container.querySelectorAll("table.work-table tbody tr");
+      let total = 0;
+      rows.forEach(row => {
+        const partPrice = parseFloat(row.querySelector(".part-price").value) || 0;
+        const workPrice = parseFloat(row.querySelector(".work-price").value) || 0;
+        total += partPrice + workPrice;
+      });
+      const workTotalElem = container.querySelector(".work-total");
+      if (workTotalElem) {
+        workTotalElem.textContent = "Общая сумма: " + total.toFixed(2);
+      }
+    }
+    
+    /* Переинициализация обработчиков для контейнера заказа */
+    function reinitializeOrderEventsForContainer(orderContainer) {
+      orderContainer.querySelectorAll(".part-price, .work-price").forEach(input => {
+        input.addEventListener("input", function() {
+          recalcWorkTableForContainer(orderContainer);
+        });
+      });
+      
+      orderContainer.querySelectorAll(".add-row-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const tableBody = orderContainer.querySelector("table.details-table tbody");
+          if (!tableBody) return;
+          const lastRow = tableBody.lastElementChild.cloneNode(true);
+          lastRow.cells[0].textContent = tableBody.rows.length + 1;
+          lastRow.querySelectorAll("input[type='text']").forEach(input => input.value = "");
+          lastRow.querySelectorAll("input[type='checkbox']").forEach(chk => chk.checked = false);
+          tableBody.appendChild(lastRow);
+        });
+      });
+      
+      orderContainer.querySelectorAll(".add-work-row-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const tbody = orderContainer.querySelector("table.work-table tbody");
+          if (!tbody) return;
+          const newRow = tbody.lastElementChild.cloneNode(true);
+          newRow.querySelectorAll("input").forEach(input => input.value = "");
+          tbody.appendChild(newRow);
+          newRow.querySelectorAll(".part-price, .work-price").forEach(input => {
+            input.addEventListener("input", function() {
+              recalcWorkTableForContainer(orderContainer);
+            });
+          });
+          recalcWorkTableForContainer(orderContainer);
+        });
+      });
+      
+      const workTotalElem = orderContainer.querySelector(".work-total");
+      if (workTotalElem) {
+        workTotalElem.textContent = "Общая сумма: 0";
+      }
+    }
+    
+    /* Инициализация для оригинального заказа */
+    const originalOrder = document.querySelector(".order");
+    if (originalOrder) {
+      reinitializeOrderEventsForContainer(originalOrder);
+    }
+    
+    /* Функция для клонирования заказа (добавление нового) */
+    function addOrderHandler() {
+      const sectionIds = [
+        "vinh-container",
+        "indicators-container",
+        "defects-container",
+        "work-container",
+        "control-signatures-container"
+      ];
+      const newOrder = document.createElement("div");
+      newOrder.classList.add("order");
+      
+      sectionIds.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+          const clone = section.cloneNode(true);
+          clone.removeAttribute("id");
+          // Очищаем поля при клонировании
+          if (id === "vinh-container") {
+            const allowedNames = ["clientName", "phone", "vin", "carModel", "year", "plate"];
+            clone.querySelectorAll("input, textarea").forEach(el => {
+              if (!allowedNames.includes(el.name)) {
+                el.value = "";
+                if (el.type === "checkbox" || el.type === "radio") {
+                  el.checked = false;
+                }
+              }
+            });
+          } else {
+            clone.querySelectorAll("input, textarea").forEach(el => {
+              el.value = "";
+              if (el.type === "checkbox" || el.type === "radio") {
+                el.checked = false;
+              }
+            });
+          }
+          newOrder.appendChild(clone);
+        }
+      });
+      
+      const orderButtons = document.createElement("div");
+      orderButtons.style.display = "flex";
+      orderButtons.style.justifyContent = "space-between";
+      orderButtons.style.marginTop = "10px";
+      
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "btn btn-primary btn-small";
+      saveBtn.textContent = "Сохранить";
+      saveBtn.addEventListener("click", function() {
+        alert("Новый наряд сохранён (функция сохранения должна быть реализована на сервере)");
+      });
+      
+      const addOrderBtnClone = document.createElement("button");
+      addOrderBtnClone.type = "button";
+      addOrderBtnClone.className = "btn btn-primary btn-small";
+      addOrderBtnClone.textContent = "добавить НАРЯД-ЗАМОВЛЕННЯ";
+      addOrderBtnClone.addEventListener("click", addOrderHandler);
+      
+      orderButtons.appendChild(saveBtn);
+      orderButtons.appendChild(addOrderBtnClone);
+      newOrder.appendChild(orderButtons);
+      
+      const workTotalElem = newOrder.querySelector(".work-total");
+      if (workTotalElem) {
+        workTotalElem.textContent = "Общая сумма: 0";
+      }
+      
+      document.querySelector("form").appendChild(newOrder);
+      reinitializeOrderEventsForContainer(newOrder);
+    }
+    
+    document.getElementById("addOrderBtn").addEventListener("click", addOrderHandler);
+    
+    /* Функция для сбора данных формы в объект */
+    function collectFormData() {
+      const formData = {};
+      document.querySelectorAll('form input, form textarea').forEach(el => {
+        if (el.id) {
+          if (el.type === 'checkbox') {
+            formData[el.id] = el.checked;
+          } else {
+            formData[el.id] = el.value;
+          }
+        }
+      });
+      return formData;
+    }
+    
+    /* Функция для сохранения данных дашборда на сервере */
+    function saveDashboardData() {
+      const data = collectFormData();
+      fetch("{{ url_for('vin_bp.submit_order') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.message) {
+          alert('Данные успешно сохранены!');
+        } else {
+          alert('Ошибка сохранения: ' + result.error);
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при сохранении данных.');
+      });
+    }
+    
+    /* Привязка кнопки "Сохранить" к сохранению данных на сервере */
+    document.getElementById('sendAdminBtn').addEventListener('click', saveDashboardData);
+    
+    /* Функция для загрузки данных дашборда с сервера по госномеру */
+    function loadDashboardData() {
+      const plate = document.getElementById('plate').value;
+      if (plate) {
+        fetch('/api/dashboard?plate=' + encodeURIComponent(plate))
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              console.log('Данные для данного госномера не найдены');
+            } else {
+              for (const key in data) {
+                const element = document.getElementById(key);
+                if (element) {
+                  if (element.type === 'checkbox') {
+                    element.checked = data[key];
+                  } else {
+                    element.value = data[key];
+                  }
+                }
+              }
+              updateDuplicates();
+            }
+          })
+          .catch(error => console.error('Ошибка загрузки данных:', error));
+      }
+    }
+    
+    window.addEventListener('load', function() {
+      if (document.getElementById('plate').value) {
+        loadDashboardData();
+      }
+    });
+    
+    /* Функция отправки сообщения с данными формы в Telegram */
+    document.getElementById('sendPartsBtn').addEventListener('click', function() {
+      // Собираем данные из формы
+      const clientName = document.getElementById('clientName').value;
+      const phone = document.getElementById('phone').value;
+      const vin = document.getElementById('vin').value;
+      const carModel = document.getElementById('carModel').value;
+      const year = document.getElementById('year').value;
+      const plate = document.getElementById('plate').value;
+      const mileage = document.getElementById('mileage').value;
+      const workList = document.getElementById('workList').value;
+      
+      // Пример сбора данных индикаторов
+      const indicators = [];
+      ['checkEngine','battery','oil','coolant','tpms','airbag','abs','esp','brakeWear'].forEach(id => {
+        if(document.getElementById(id).checked) {
+          indicators.push(id);
+        }
+      });
+      
+      // Пример сбора названий запчастей (из таблицы деталей)
+      const partNames = [];
+      document.querySelectorAll("table.details-table tbody tr").forEach(row => {
+        const input = row.querySelector("input[type='text']");
+        if(input && input.value.trim() !== "") {
+          partNames.push(input.value.trim());
+        }
+      });
+      
+      // Формируем сообщение
+      const message = 
+        `Имя клиента: ${clientName}\n` +
+        `Телефон: ${phone}\n` +
+        `VIN номер: ${vin}\n` +
+        `Модель авто: ${carModel}\n` +
+        `Год выпуска: ${year}\n` +
+        `Номерний знак: ${plate}\n` +
+        `Пробег (км): ${mileage}\n` +
+        `Перечень желаемых работ: ${workList}\n` +
+        `Индикаторы: ${indicators.join(", ")}\n` +
+        `Назва запчастини або вузла: ${partNames.join(", ")}`;
+      
+      // Отправляем сообщение через Telegram Bot API
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: ADMIN_CHAT_ID,
+          text: message
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok) {
+          alert('Сообщение отправлено администратору!');
+        } else {
+          alert('Ошибка отправки: ' + data.description);
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка при отправке сообщения:', error);
+        alert('Ошибка при отправке данных.');
+      });
+    });
+  </script>
   <!-- Подключаем Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Подключаем основной скрипт main.js -->
+  <!-- Подключаем дополнительный скрипт main.js, если требуется -->
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

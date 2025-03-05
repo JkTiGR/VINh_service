@@ -220,107 +220,28 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   document.getElementById("addOrderBtn").addEventListener("click", addOrderHandler);
 
-  // ==============================
-  // 9. Сбор данных формы и сохранение на сервере
-  // ==============================
-  function collectFormData() {
-    const formData = {};
-    document.querySelectorAll('form input, form textarea').forEach(el => {
-      if (el.id) {
-        if (el.type === 'checkbox') {
-          formData[el.id] = el.checked;
-        } else {
-          formData[el.id] = el.value;
-        }
-      }
-    });
-    return formData;
-  }
-  function saveDashboardData() {
-    const data = collectFormData();
-    fetch("{{ url_for('submit_order') }}", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+`Индикаторы: ${
+  ['checkEngine', 'battery', 'oil', 'coolant', 'tpms', 'airbag', 'abs', 'esp', 'brakeWear']
+    .filter(id => {
+      const el = document.getElementById(id);
+      return el && el.checked;
     })
-    .then(response => response.json())
-    .then(result => {
-      if (result.message) {
-        // Формируем сообщение для Telegram с перечислением необходимых полей
-        const currentDateTime = new Date().toLocaleString();
-        const message =
-          `Имя клиента: ${data.clientName}\n` +
-          `Телефон: ${data.phone}\n` +
-          `VIN номер: ${data.vin}\n` +
-          `Модель авто: ${data.carModel}\n` +
-          `Год выпуска: ${data.year}\n` +
-          `Номерний знак: ${data.plate}\n` +
-          `Пробег (км): ${data.mileage}\n` +
-          `Перечень желаемых работ: ${data.workList}\n` +
-          `Индикаторы: ${['checkEngine','battery','oil','coolant','tpms','airbag','abs','esp','brakeWear']
-            .filter(id => {
-              const el = document.getElementById(id);
-              return el && el.checked;
-            })
-            .map(id => {
-              const names = {
-                checkEngine: "Check Engine",
-                battery: "Battery",
-                oil: "Oil",
-                coolant: "Coolant",
-                tpms: "TPMS",
-                airbag: "Airbag",
-                abs: "ABS",
-                esp: "ESP",
-                brakeWear: "Brake Wear"
-              };
-              return names[id] || id;
-            }).join(", ")}\n\n` +
-          `Акт дефектів автомобіля\n` +
-          `|  |  |  | ${data.plate}\n` +
-          `${currentDateTime}\n` +
-          `передний тормозной колодки (%): ${data.ptk_percent || ""}\n` +
-          `задний тормозной колодки (%): ${data.ztk_percent || ""}\n` +
-          `передний тормозной диски (мм): ${data.ptd_mm || ""}\n` +
-          `задний тормозной диски (мм): ${data.ztd_mm || ""}\n` +
-          `тормозной жидкости: ${data.brakeFluid || ""}\n` +
-          `охлаждающая жидкость: ${data.antifreeze || ""}\n` +
-          `моторное масло: ${data.engineOil || ""}\n` +
-          `масла в трансмиссии: ${data.transmissionOil || ""}\n` +
-          `#\tНазва запчастини або вузла: ${"1" /* здесь можно добавить детали */}\n\n` +
-          `Дополнительные примечания: ${data.notes || ""}\n` +
-          `Администрация сервиса.\n\n` +
-          `ЗАЯВКА НА ВИКОНАННЯ РОБІТ\n` +
-          `|  |  |  |\n` +
-          `Назва запчастини або вузла\tціна запчастини\tціна работы\n` +
-          `Общая сумма: ${document.querySelector(".work-total").textContent.split(": ")[1]}`;
-        // Отправляем сообщение в Telegram
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: ADMIN_CHAT_ID,
-            text: message
-          })
-        })
-        .then(resp => resp.json())
-        .then(data => {
-          if (data.ok) {
-            alert('Данные успешно сохранены и сообщение отправлено!');
-          } else {
-            alert('Ошибка отправки Telegram: ' + data.description);
-          }
-        })
-        .catch(error => {
-          console.error('Ошибка при отправке Telegram:', error);
-          alert('Ошибка при отправке данных в Telegram.');
-        });
-      } else {
-        alert('Ошибка сохранения: ' + result.error);
-      }
-    }
-  }
-  document.getElementById('sendAdminBtn').addEventListener('click', saveDashboardData);
+    .map(id => {
+      const names = {
+        checkEngine: "Check Engine",
+        battery: "Battery",
+        oil: "Oil",
+        coolant: "Coolant",
+        tpms: "TPMS",
+        airbag: "Airbag",
+        abs: "ABS",
+        esp: "ESP",
+        brakeWear: "Brake Wear"
+      };
+      return names[id] || id;
+    })
+    .join(", ")
+}\n\n`
 
   // ==============================
   // 10. Загрузка данных дашборда по госномеру
