@@ -137,5 +137,12 @@ git push origin main
 
 Это позволит зафиксировать все изменения в вашем проекте.
 
+
+git status
+git add .
+git commit -m "some message"
+git push origin main
+
+
 ##########################################
 git ls-files
