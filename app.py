@@ -376,6 +376,6 @@ app.register_blueprint(vin_bp)
 # 11. Точка входа
 if __name__ == '__main__':
     with app.app_context():
-        # Создаём таблицы в базе данных, если они ещё не существуют
-        db.create_all()
-    app.run(host="0.0.0.0", port=5003, debug=True)
+        db.create_all()  # Создаст все таблицы, если их нет
+    app.run(debug=True)
+
