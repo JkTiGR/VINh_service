@@ -787,7 +787,7 @@
     }
     function saveDashboardData() {
       const data = collectFormData();
-      fetch("{{ url_for('vin_bp.submit_order') }}", {
+      fetch("{{ url_for('submit_order') }}", {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
