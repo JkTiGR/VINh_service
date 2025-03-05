@@ -154,9 +154,6 @@ def admin_dashboard():
 @vin_bp.route('/submit', methods=['POST'])
 @login_required
 def submit_client():
-    """
-    Создаёт новую запись в таблице Client (пример).
-    """
     data = request.get_json() if request.is_json else request.form
     try:
         client_data = {
@@ -180,9 +177,6 @@ def submit_client():
 @vin_bp.route('/update/<int:client_id>', methods=['POST'])
 @login_required
 def update_client(client_id):
-    """
-    Обновляет существующую запись (Client) по ID.
-    """
     data = request.get_json() if request.is_json else request.form
     client = Client.query.get_or_404(client_id)
 
@@ -295,14 +289,10 @@ def forgot_password():
 # -------------------- Главный маршрут /submit_order (пример сохранения + Telegram) --------------------
 @app.route('/submit_order', methods=['POST'])
 def submit_order():
-    """
-    Пример: Принимает JSON, сохраняет в Client и отправляет уведомление в Telegram.
-    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Нет данных"}), 400
 
-    # 1. Сохраняем данные в БД
     try:
         client_name = data.get('clientName', 'Не указано')
         phone = data.get('phone', 'Не указано')
@@ -328,7 +318,6 @@ def submit_order():
         db.session.rollback()
         return jsonify({"error": f"Ошибка сохранения: {str(e)}"}), 500
 
-    # 2. Отправляем сообщение в Telegram
     telegram_token = os.getenv("TELEGRAM_TOKEN", "")
     admin_chat_id = os.getenv("ADMIN_CHAT_ID", "")
     if telegram_token and admin_chat_id:
@@ -353,7 +342,6 @@ def submit_order():
     else:
         app.logger.warning("TELEGRAM_TOKEN или ADMIN_CHAT_ID не заданы, Telegram не отправлен.")
 
-    # 3. Возвращаем JSON об успехе
     return jsonify({"message": "Данные успешно сохранены"}), 200
 
 # -------------------- Обработчики ошибок --------------------
@@ -373,9 +361,13 @@ def internal_error(error):
 # 10. Регистрируем Blueprint
 app.register_blueprint(vin_bp)
 
+# ==============================
+# ВАЖНО: выносим db.create_all() из if __name__ == '__main__'
+# ==============================
+with app.app_context():
+    db.create_all()  # Создаст все таблицы, если они не существуют
+
 # 11. Точка входа
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Создаст все таблицы, если их нет
-    app.run(debug=True)
-
+    # Здесь уже без db.create_all(), т.к. он вызывается выше
+    app.run(host="0.0.0.0", port=5003, debug=True)
