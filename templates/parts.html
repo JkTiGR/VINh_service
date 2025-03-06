@@ -269,17 +269,20 @@
       <li><a href="{{ url_for('vin_bp.visit') }}">Выйти</a></li>
     </ul>
   </div>
-
-    <!-- Шапка, логотип, данные клиента -->
-    <div id="vinh-container" style="margin:20px;">
-      <div class="container-glass">
-        <div class="header">
-          <h1 class="title">VINh AUTOSERVICE</h1>
-          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo">
+  <!-- Основное содержимое страницы (Dashboard) -->
+  <div class="container" style="padding-top: 0px;">
+    <!-- Форма с action на ваш эндпоинт submit_order -->
+    <form action="{{ url_for('submit_order') }}" method="POST" style="width:100%;">
+      <!-- Общий контейнер заказа -->
+      <div class="order">
+        
+        <!-- Шапка, логотип, данные клиента -->
+        <div id="vinh-container" style="margin:0px;">
+          <div class="header">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo">
+            <h1 class="title">VINh AUTOSERVICE</h1>
+          </div>
         </div>
-      </div>
-
-
     <!-- ФОРМА ВЫБОРА МАРКИ, МОДЕЛИ, ГОДА -->
     <div class="form-group" style="margin-top:20px;">
       <label for="make">Марка авто:</label>
