@@ -46,15 +46,20 @@ class Client(db.Model):
 
 
 class Order(db.Model):
-    """
-    Модель заказа.
-    Заказ связан с клиентом через внешний ключ.
-    """
+    __tablename__ = 'orders'  # Имя таблицы в базе
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
-    work_list = db.Column(db.Text, nullable=False)  # Перечень работ
-    total_price = db.Column(db.Float, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Внешний ключ: ссылается на поле 'id' в таблице 'clients'
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
+
+    # Пример дополнительных полей
+    work_list = db.Column(db.Text)     # перечень работ
+    total_price = db.Column(db.Float)  # итоговая стоимость
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Пример отношения: один клиент -> много заказов
+    client = db.relationship("Client", backref="orders")
+
     def __repr__(self):
-        return f"<Order {self.id} - {self.total_price} UAH>"
+        return f"<Order {self.id} (Client {self.client_id})>"
+
