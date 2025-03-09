@@ -54,6 +54,11 @@ def load_user(user_id):
 
 # 9. Создаём Blueprint для маршрутов /vin.com
 vin_bp = Blueprint('vin_bp', __name__, url_prefix='/vin.com')
+@vin_bp.route('/visit')
+def visit():
+    return render_template('visit.html')
+
+app.register_blueprint(vin_bp)
 
 # -------------------- Вспомогательная функция --------------------
 def safe_int(val):
@@ -253,15 +258,15 @@ def submit_order():
         client_name=data.get('clientName'),
         phone=data.get('phone'),
         vin=data.get('vin', '').upper(),
-        # make=data.get('make'),
+        make=data.get('make'),
         car_model=data.get('carModel'),
         year=safe_int(data.get('year')),
         mileage=safe_int(data.get('mileage')),
         plate=data.get('plate', '').replace(" ", "").upper(),
-        # work_list=data.get('workList', ''),
-        # parts_selected=parts_selected,
-        # indicators=indicators_selected,
-        # notes=data.get('notes', '')
+        work_list=data.get('workList', ''),
+        parts_selected=parts_selected,
+        indicators=indicators_selected,
+        notes=data.get('notes', '')
     )
 
     try:
@@ -276,9 +281,9 @@ def submit_order():
             f"Авто: {client.car_model} ({client.year})\n"
             f"Пробег: {client.mileage}\n"
             f"Госномер: {client.plate}\n"
-            # f"Работы: {client.work_list}\n"
-            # f"Запчасти: {client.parts_selected}\n"
-            # f"Индикаторы: {client.indicators}\n"
+            f"Работы: {client.work_list}\n"
+            f"Запчасти: {client.parts_selected}\n"
+            f"Индикаторы: {client.indicators}\n"
         )
         bot_token = os.getenv("BOT_TOKEN")
         admin_chat_id = os.getenv("ADMIN_CHAT_ID")
