@@ -47,20 +47,16 @@ login_manager.login_view = "vin_bp.login"
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ----------------------------------------------------------------------------
-# Создаём Blueprint + маршруты ДО регистрации blueprint:
-# ----------------------------------------------------------------------------
-
+# --------------------------------------------------------
+# Создаём Blueprint (vin_bp) и объявляем маршруты ДО регистрации
+# --------------------------------------------------------
 vin_bp = Blueprint("vin_bp", __name__, url_prefix="/vin.com")
 
 def safe_int(val):
-    """Безопасное преобразование строки в int. Возвращает 0 при ошибке."""
     try:
         return int(val)
     except (ValueError, TypeError):
         return 0
-
-# ------------------- Маршруты Blueprint -------------------
 
 @vin_bp.route("/visit")
 def visit():
@@ -124,7 +120,6 @@ def register():
 @vin_bp.route("/dashboard/<plate>")
 @login_required
 def dashboard(plate):
-    # Если пользователь пытается открыть чужой дашборд, перенаправим на свой
     if current_user.plate != plate:
         return redirect(url_for("vin_bp.dashboard", plate=current_user.plate))
     return render_template("dashboard.html", plate=plate)
@@ -229,10 +224,14 @@ def send_admin():
     else:
         return jsonify({"status": "error", "message": r.text}), 500
 
-# ----------------------------------------------------------------------------
-# Пример маршрута сохранения + Telegram (вне Blueprint), если нужно:
-# ----------------------------------------------------------------------------
+# --------------------------------------------------------
+# Регистрируем Blueprint
+# --------------------------------------------------------
+app.register_blueprint(vin_bp)
 
+# --------------------------------------------------------
+# Пример маршрута сохранения + Telegram (вне Blueprint)
+# --------------------------------------------------------
 @app.route("/submit_order", methods=["POST"])
 @login_required
 def submit_order():
@@ -241,7 +240,6 @@ def submit_order():
     parts_selected = ", ".join(data.getlist("part"))
     indicators_selected = ", ".join(data.getlist("indicators"))
 
-    # Если модель Client содержит поля: work_list, parts_selected, indicators, notes
     client = Client(
         client_name=data.get("clientName"),
         phone=data.get("phone"),
@@ -259,7 +257,6 @@ def submit_order():
     try:
         db.session.add(client)
         db.session.commit()
-        # Формируем сообщение для Telegram
         telegram_message = (
             f"🔔 Новый заказ:\n"
             f"Имя клиента: {client.client_name}\n"
@@ -294,12 +291,11 @@ def submit_order():
 
     return jsonify({"message": "Заказ сохранён и (при наличии токена) отправлен в Telegram!"}), 200
 
-# ----------------------------------------------------------------------------
+# --------------------------------------------------------
 # Обработчики ошибок
-# ----------------------------------------------------------------------------
+# --------------------------------------------------------
 @app.errorhandler(404)
 def not_found_error(error):
-    # Если запрос шёл к /vin.com/api/... или формат JSON, вернуть JSON
     if request.path.startswith("/vin.com/api") or request.is_json:
         return jsonify(error="Resource not found"), 404
     return render_template("404.html"), 404
@@ -307,19 +303,18 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    # Если JSON, вернуть JSON
     if request.path.startswith("/vin.com/api") or request.is_json:
         return jsonify(error="Internal server error"), 500
     return render_template("500.html"), 500
 
-# ----------------------------------------------------------------------------
-# 10. Создаём таблицы (если нет)
-# ----------------------------------------------------------------------------
+# --------------------------------------------------------
+# Создаём таблицы (если нет)
+# --------------------------------------------------------
 with app.app_context():
     db.create_all()
 
-# ----------------------------------------------------------------------------
-# 11. Точка входа
-# ----------------------------------------------------------------------------
+# --------------------------------------------------------
+# Точка входа
+# --------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5003, debug=True)
