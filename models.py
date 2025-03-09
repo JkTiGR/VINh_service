@@ -24,26 +24,26 @@ class User(db.Model, UserMixin):
         return f"<User {self.plate}>"
 
 class Client(db.Model):
-    """
-    Модель клиента.
-    """
+    __tablename__ = 'clients'
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    vin = db.Column(db.String(50), unique=True, nullable=False)
-    car_model = db.Column(db.String(100), nullable=False)
-    year = db.Column(db.Integer, nullable=False)
-    mileage = db.Column(db.Integer, nullable=False)
+    client_name = db.Column(db.String(100))
+    phone = db.Column(db.String(20))
+    vin = db.Column(db.String(50))
+    make = db.Column(db.String(50))
+    model = db.Column(db.String(50))
+    year = db.Column(db.Integer)
+    mileage = db.Column(db.Integer)
+    plate = db.Column(db.String(20))
+    work_list = db.Column(db.Text)
+    parts_selected = db.Column(db.Text)
+    indicators = db.Column(db.String(200))
+    notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Внешний ключ для привязки к пользователю
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    
-    # Связь с заказами
-    orders = db.relationship('Order', backref='client', lazy=True)
-    
+
     def __repr__(self):
-        return f"<Client {self.name} ({self.car_model})>"
+        return f"<Client {self.client_name} - {self.plate}>"
+
 
 class Order(db.Model):
     """

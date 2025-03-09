@@ -8,10 +8,18 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user, UserMixin
+from datetime import datetime
 
 # 1. Определяем базовую директорию и загружаем переменные окружения
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
+
+
+# Импортируем модели и db
+from models import db, User, Client
 
 # Если папка instance отсутствует, создаём её
 instance_folder = os.path.join(basedir, 'instance')
@@ -22,8 +30,8 @@ if not os.path.exists(instance_folder):
 app = Flask(__name__, static_folder="static")
 
 # 3. Настройки приложения
-# Формируем абсолютный путь к базе данных crm.db
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'instance', 'crm.db')}"
+# Путь к базе данных (sqlite)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/crm.db'
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "default-secret-key")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -69,11 +77,14 @@ vin_bp = Blueprint('vin_bp', __name__, url_prefix='/vin.com')
 
 # -------------------- Вспомогательная функция --------------------
 def safe_int(val):
+    """
+    Безопасное преобразование строки в int.
+    Если невозможно преобразовать, вернет 0.
+    """
     try:
-        return int(val.strip()) if val and val.strip() != '' else 0
-    except Exception:
+        return int(val)
+    except (ValueError, TypeError):
         return 0
-
 # -------------------- Основные маршруты Blueprint --------------------
 @vin_bp.route('/')
 def index():
@@ -287,62 +298,75 @@ def forgot_password():
     return render_template('forgot_password.html', error=error, message=message)
 
 # -------------------- Главный маршрут /submit_order (пример сохранения + Telegram) --------------------
+# ----------------------
 @app.route('/submit_order', methods=['POST'])
+@login_required
 def submit_order():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Нет данных"}), 400
+    """
+    Обрабатывает форму, сохраняет данные клиента в базу и отправляет уведомление в Telegram.
+    """
+    data = request.form
+    
+    # Собираем выбранные запчасти и чекбоксы
+    parts_selected = ", ".join(request.form.getlist('part'))
+    indicators_selected = ", ".join(request.form.getlist('indicators'))
+
+    # Создаем запись в таблице Client
+    client = Client(
+        client_name=data.get('clientName'),
+        phone=data.get('phone'),
+        vin=data.get('vin', '').upper(),
+        make=data.get('make'),
+        model=data.get('carModel'),           # Если форма использует carModel, а не model
+        year=safe_int(data.get('year')),
+        mileage=safe_int(data.get('mileage')),
+        plate=data.get('plate', '').replace(" ", "").upper(),
+        work_list=data.get('workList', ''),
+        parts_selected=parts_selected,
+        indicators=indicators_selected,
+        notes=data.get('notes', '')
+    )
 
     try:
-        client_name = data.get('clientName', 'Не указано')
-        phone = data.get('phone', 'Не указано')
-        vin = data.get('vin', '').upper()
-        car_model = data.get('carModel', 'Не указана')
-        year = safe_int(data.get('year', '0'))
-        mileage = safe_int(data.get('mileage', '0'))
-        plate = data.get('plate', '').replace(" ", "").upper()
-
-        new_client = Client(
-            client_name=client_name,
-            phone=phone,
-            vin=vin,
-            car_model=car_model,
-            year=year,
-            mileage=mileage,
-            plate=plate
-        )
-        db.session.add(new_client)
+        db.session.add(client)
         db.session.commit()
-    except Exception as e:
-        app.logger.error(f"Ошибка при сохранении: {e}")
-        db.session.rollback()
-        return jsonify({"error": f"Ошибка сохранения: {str(e)}"}), 500
-
-    telegram_token = os.getenv("TELEGRAM_TOKEN", "")
-    admin_chat_id = os.getenv("ADMIN_CHAT_ID", "")
-    if telegram_token and admin_chat_id:
-        message = (
-            f"Новый заказ #{new_client.id}:\n"
-            f"Имя клиента: {client_name}\n"
-            f"Телефон: {phone}\n"
-            f"VIN: {vin}\n"
-            f"Авто: {car_model} ({year})\n"
-            f"Пробег: {mileage}\n"
-            f"Номерной знак: {plate}\n"
+        
+        # Формируем сообщение для Telegram
+        telegram_message = (
+            f"🔔 Новый заказ:\n"
+            f"👤 Клиент: {client.client_name}\n"
+            f"📞 Телефон: {client.phone}\n"
+            f"🚗 Авто: {client.make or ''} {client.model or ''}, {client.year}\n"
+            f"📍 Госномер: {client.plate}\n"
+            f"🔧 Работы: {client.work_list}\n"
+            f"⚙️ Запчасти: {client.parts_selected}\n"
+            f"📊 Индикаторы: {client.indicators}\n"
+            f"📝 Примечания: {client.notes}\n"
+            f"Дата записи: {client.created_at.strftime('%Y-%m-%d %H:%M')}"
         )
-        try:
-            resp = requests.post(
-                f"https://api.telegram.org/bot{telegram_token}/sendMessage",
-                json={"chat_id": admin_chat_id, "text": message}
-            )
-            if resp.status_code != 200:
-                app.logger.error(f"Ошибка Telegram: {resp.text}")
-        except Exception as e:
-            app.logger.error(f"Ошибка при запросе к Telegram: {e}")
-    else:
-        app.logger.warning("TELEGRAM_TOKEN или ADMIN_CHAT_ID не заданы, Telegram не отправлен.")
 
-    return jsonify({"message": "Данные успешно сохранены"}), 200
+        # Получаем токен и ID чата из .env
+        bot_token = os.getenv("BOT_TOKEN")
+        admin_chat_id = os.getenv("ADMIN_CHAT_ID")
+        if not bot_token or not admin_chat_id:
+            app.logger.warning("BOT_TOKEN или ADMIN_CHAT_ID не заданы в .env")
+        else:
+            # Отправляем сообщение
+            telegram_response = requests.post(
+                f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                json={"chat_id": admin_chat_id, "text": telegram_message}
+            )
+            if telegram_response.status_code != 200:
+                app.logger.error(f\"Ошибка отправки в Telegram: {telegram_response.text}\")
+                return jsonify({"error": "Ошибка отправки уведомления в Telegram."}), 500
+
+    except Exception as e:
+        app.logger.error(f"Ошибка при сохранении заказа: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Ошибка при сохранении заказа."}), 500
+
+    return jsonify({"message": "Заказ сохранён и отправлен в Telegram!"}), 200
+
 
 # -------------------- Обработчики ошибок --------------------
 @app.errorhandler(404)
