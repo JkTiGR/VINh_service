@@ -188,6 +188,12 @@ def update_client(client_id):
         app.logger.error(f"Ошибка при обновлении записи: {e}")
         return jsonify({"status": "error", "message": str(e)}), 400
 
+
+@vin_bp.route("/parts")
+def parts():
+    # Если у вас есть шаблон parts.html, рендерим именно его
+    return render_template("parts.html")
+
 @vin_bp.route("/api/dashboard", methods=["GET"])
 @login_required
 def get_dashboard():
