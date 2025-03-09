@@ -357,7 +357,8 @@ def submit_order():
                 json={"chat_id": admin_chat_id, "text": telegram_message}
             )
             if telegram_response.status_code != 200:
-                app.logger.error(f\"Ошибка отправки в Telegram: {telegram_response.text}\")
+                app.logger.error(f"Ошибка отправки в Telegram: {telegram_response.text}")
+
                 return jsonify({"error": "Ошибка отправки уведомления в Telegram."}), 500
 
     except Exception as e:
