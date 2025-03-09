@@ -1,6 +1,7 @@
 import os
 import logging
 import requests
+from datetime import datetime
 
 from flask import Flask, request, render_template, redirect, url_for, jsonify, Blueprint
 from flask_sqlalchemy import SQLAlchemy
@@ -8,30 +9,26 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, render_template, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user, UserMixin
-from datetime import datetime
+
+# Импортируем модели: db, User, Client
+from models import db, User, Client
 
 # 1. Определяем базовую директорию и загружаем переменные окружения
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
-
-# Импортируем модели и db
-from models import db, User, Client
-
 # Если папка instance отсутствует, создаём её
 instance_folder = os.path.join(basedir, 'instance')
-if not os.path.exists(instance_folder):
-    os.makedirs(instance_folder)
+os.makedirs(instance_folder, exist_ok=True)
+
+# Полный путь к базе данных (absolute path)
+db_path = os.path.join(instance_folder, 'crm.db')
 
 # 2. Создаём Flask‑приложение
 app = Flask(__name__, static_folder="static")
 
 # 3. Настройки приложения
-# Путь к базе данных (sqlite)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/crm.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "default-secret-key")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -40,37 +37,20 @@ logging.basicConfig(level=logging.INFO)
 app.logger.info("Запуск приложения")
 
 # 5. Инициализация расширений
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
+
 login_manager = LoginManager(app)
 login_manager.login_view = "vin_bp.login"
 
-# 6. Модель User
-class User(db.Model, UserMixin):
-    __tablename__ = 'users'
-
-    id = db.Column(db.Integer, primary_key=True)
-    plate = db.Column(db.String(20), unique=True, nullable=False)  # Госномер
-    password = db.Column(db.String(128), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
-
-# 7. Модель Client
-class Client(db.Model):
-    __tablename__ = 'clients'
-
-    id = db.Column(db.Integer, primary_key=True)
-    client_name = db.Column(db.String(100))
-    phone = db.Column(db.String(20))
-    vin = db.Column(db.String(50))
-    car_model = db.Column(db.String(50))
-    year = db.Column(db.Integer)
-    mileage = db.Column(db.Integer)
-    plate = db.Column(db.String(20))
-
-# 8. Функция загрузки пользователя для Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+###############################################
+# МОДЕЛИ (дублируются, если в models.py есть),
+# либо импортируем их из models.py (как выше).
+###############################################
 
 # 9. Создаём Blueprint для маршрутов /vin.com
 vin_bp = Blueprint('vin_bp', __name__, url_prefix='/vin.com')
@@ -85,7 +65,10 @@ def safe_int(val):
         return int(val)
     except (ValueError, TypeError):
         return 0
-# -------------------- Основные маршруты Blueprint --------------------
+
+###############################################
+# МАРШРУТЫ BLUEPRINT
+###############################################
 @vin_bp.route('/')
 def index():
     return render_template('visit.html')
@@ -144,7 +127,7 @@ def register():
 @vin_bp.route('/dashboard/<plate>')
 @login_required
 def dashboard(plate):
-    # Если пользователь пытается открыть чужой дашборд, перенаправляем на свой
+    # Если пользователь пытается открыть чужой дашборд, перенаправляем
     if current_user.plate != plate:
         return redirect(url_for('vin_bp.dashboard', plate=current_user.plate))
     return render_template('dashboard.html', plate=plate)
@@ -217,8 +200,8 @@ def update_client(client_id):
 @vin_bp.route('/api/dashboard', methods=['GET'])
 @login_required
 def get_dashboard():
-    plate = request.args.get('plate', '').replace(" ", "").upper()
-    client = Client.query.filter_by(plate=plate).order_by(Client.id.desc()).first()
+    plate_query = request.args.get('plate', '').replace(" ", "").upper()
+    client = Client.query.filter_by(plate=plate_query).order_by(Client.id.desc()).first()
     if client:
         return jsonify(
             client_id=client.id,
@@ -233,15 +216,17 @@ def get_dashboard():
     else:
         return jsonify(error="Данные для данного госномера не найдены"), 404
 
-# -------------------- Пример маршрута, который шлёт ссылку админу --------------------
+# --------------------
+# Пример отправки ссылки админу
+# --------------------
 @vin_bp.route('/send_admin', methods=['POST'])
 @login_required
 def send_admin():
-    plate = current_user.plate
-    link = f"http://127.0.0.1:5003/vin.com/dashboard/{plate}"
-    admin_chat = os.getenv('ADMIN_CHAT_ID', "7371111768")
+    plate_var = current_user.plate
+    link = f"http://127.0.0.1:5003/vin.com/dashboard/{plate_var}"
+    admin_chat = os.getenv('ADMIN_CHAT_ID')
     telegram_token = os.getenv('TELEGRAM_TOKEN')
-    if not telegram_token:
+    if not telegram_token or not admin_chat:
         return jsonify({'status': 'error', 'message': 'TELEGRAM_TOKEN не задан'}), 500
     send_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
     payload = {"chat_id": admin_chat, "text": f"Новый заказ: {link}"}
@@ -251,125 +236,75 @@ def send_admin():
     else:
         return jsonify({'status': 'error', 'message': r.text}), 500
 
-# -------------------- Маршруты, отображающие шаблоны --------------------
-@vin_bp.route('/home')
-def home():
-    return render_template('home.html')
-
-@vin_bp.route('/diag')
-def diag():
-    return render_template('diag.html')
-
-@vin_bp.route('/remont')
-def remont():
-    return render_template('remont.html')
-
-@vin_bp.route('/parts')
-def parts():
-    return render_template('parts.html')
-
-@vin_bp.route('/wash')
-def wash():
-    return render_template('wash.html')
-
-@vin_bp.route('/shino')
-def shino():
-    return render_template('shino.html')
-
-@vin_bp.route('/VK')
-def VK():
-    return render_template('VK.html')
-
-@vin_bp.route('/visit')
-def visit():
-    return render_template('visit.html')
-
-@vin_bp.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    error = None
-    message = None
-    if request.method == 'POST':
-        plate = request.form.get('plate', '').replace(" ", "").upper()
-        user = User.query.filter_by(plate=plate).first()
-        if user:
-            message = "Инструкции по восстановлению пароля отправлены"
-        else:
-            error = "Пользователь с данным госномером не найден"
-    return render_template('forgot_password.html', error=error, message=message)
-
-# -------------------- Главный маршрут /submit_order (пример сохранения + Telegram) --------------------
-# ----------------------
+# --------------------
+# Пример маршрута сохранения + Telegram
+# --------------------
 @app.route('/submit_order', methods=['POST'])
 @login_required
 def submit_order():
-    """
-    Обрабатывает форму, сохраняет данные клиента в базу и отправляет уведомление в Telegram.
-    """
     data = request.form
-    
-    # Собираем выбранные запчасти и чекбоксы
+
     parts_selected = ", ".join(request.form.getlist('part'))
     indicators_selected = ", ".join(request.form.getlist('indicators'))
 
-    # Создаем запись в таблице Client
+    # Если модель Client содержит поля work_list, parts_selected, indicators, notes, и т.д.
+    # В противном случае уберите или добавьте поля в модель Client
     client = Client(
         client_name=data.get('clientName'),
         phone=data.get('phone'),
         vin=data.get('vin', '').upper(),
-        make=data.get('make'),
-        model=data.get('carModel'),           # Если форма использует carModel, а не model
+        # make=data.get('make'),
+        car_model=data.get('carModel'),
         year=safe_int(data.get('year')),
         mileage=safe_int(data.get('mileage')),
         plate=data.get('plate', '').replace(" ", "").upper(),
-        work_list=data.get('workList', ''),
-        parts_selected=parts_selected,
-        indicators=indicators_selected,
-        notes=data.get('notes', '')
+        # work_list=data.get('workList', ''),
+        # parts_selected=parts_selected,
+        # indicators=indicators_selected,
+        # notes=data.get('notes', '')
     )
 
     try:
         db.session.add(client)
         db.session.commit()
-        
-        # Формируем сообщение для Telegram
+        # Текст сообщения для Telegram
         telegram_message = (
             f"🔔 Новый заказ:\n"
-            f"👤 Клиент: {client.client_name}\n"
-            f"📞 Телефон: {client.phone}\n"
-            f"🚗 Авто: {client.make or ''} {client.model or ''}, {client.year}\n"
-            f"📍 Госномер: {client.plate}\n"
-            f"🔧 Работы: {client.work_list}\n"
-            f"⚙️ Запчасти: {client.parts_selected}\n"
-            f"📊 Индикаторы: {client.indicators}\n"
-            f"📝 Примечания: {client.notes}\n"
-            f"Дата записи: {client.created_at.strftime('%Y-%m-%d %H:%M')}"
+            f"Имя клиента: {client.client_name}\n"
+            f"Телефон: {client.phone}\n"
+            f"VIN: {client.vin}\n"
+            f"Авто: {client.car_model} ({client.year})\n"
+            f"Пробег: {client.mileage}\n"
+            f"Госномер: {client.plate}\n"
+            # f"Работы: {client.work_list}\n"
+            # f"Запчасти: {client.parts_selected}\n"
+            # f"Индикаторы: {client.indicators}\n"
         )
-
-        # Получаем токен и ID чата из .env
         bot_token = os.getenv("BOT_TOKEN")
         admin_chat_id = os.getenv("ADMIN_CHAT_ID")
-        if not bot_token or not admin_chat_id:
-            app.logger.warning("BOT_TOKEN или ADMIN_CHAT_ID не заданы в .env")
+        if bot_token and admin_chat_id:
+            try:
+                resp = requests.post(
+                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                    json={"chat_id": admin_chat_id, "text": telegram_message}
+                )
+                if resp.status_code != 200:
+                    app.logger.error(f"Ошибка Telegram: {resp.text}")
+            except Exception as ex:
+                app.logger.error(f"Ошибка при запросе к Telegram: {ex}")
         else:
-            # Отправляем сообщение
-            telegram_response = requests.post(
-                f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                json={"chat_id": admin_chat_id, "text": telegram_message}
-            )
-            if telegram_response.status_code != 200:
-                app.logger.error(f"Ошибка отправки в Telegram: {telegram_response.text}")
-
-                return jsonify({"error": "Ошибка отправки уведомления в Telegram."}), 500
+            app.logger.warning("BOT_TOKEN или ADMIN_CHAT_ID не заданы в .env")
 
     except Exception as e:
         app.logger.error(f"Ошибка при сохранении заказа: {e}")
         db.session.rollback()
         return jsonify({"error": "Ошибка при сохранении заказа."}), 500
 
-    return jsonify({"message": "Заказ сохранён и отправлен в Telegram!"}), 200
+    return jsonify({"message": "Заказ сохранён и (при наличии токена) отправлен в Telegram!"}), 200
 
-
-# -------------------- Обработчики ошибок --------------------
+# --------------------
+# Обработчики ошибок
+# --------------------
 @app.errorhandler(404)
 def not_found_error(error):
     if request.path.startswith('/vin.com/api') or request.is_json:
@@ -386,13 +321,11 @@ def internal_error(error):
 # 10. Регистрируем Blueprint
 app.register_blueprint(vin_bp)
 
-# ==============================
-# ВАЖНО: выносим db.create_all() из if __name__ == '__main__'
-# ==============================
+# Создаём таблицы (если нет)
 with app.app_context():
-    db.create_all()  # Создаст все таблицы, если они не существуют
+    db.create_all()
 
 # 11. Точка входа
 if __name__ == '__main__':
-    # Здесь уже без db.create_all(), т.к. он вызывается выше
     app.run(host="0.0.0.0", port=5003, debug=True)
+
