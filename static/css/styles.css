@@ -329,3 +329,93 @@ button.send-btn:hover {
   letter-spacing: 1px;
   margin-left: 8px;
 }
+
+/* ===== CSS-Переменные для цветовой схемы ===== */
+:root {
+  --primary-orange: #FF6C00;      /* Ярко-оранжевый акцент */
+  --white: #FFFFFF;              /* Белый */
+  --metallic-light: #D3D3D3;     /* Светлый металл */
+  --metallic-medium: #8B8B8B;    /* Средний металл */
+  --black: #000000;              /* Чёрный */
+  
+  --dark-bg-start: #1A1A1A;      /* Тёмно-серый (градиент, начало) */
+  --dark-bg-end: #2A2A2A;        /* Тёмно-серый (градиент, конец) */
+  
+  /* Переменные для glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.15);    /* Прозрачная подложка */
+  --glass-border: rgba(255, 255, 255, 0.3); /* Полупрозрачная рамка */
+}
+
+/* Сброс базовых отступов */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Фон сайта: тёмный градиент (чтобы стекло смотрелось контрастнее) */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(
+    135deg,
+    var(--dark-bg-start) 0%,
+    var(--dark-bg-end) 100%
+  );
+  color: var(--white); /* Базовый цвет текста */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Центровка основных контейнеров, если нужно */
+header, main, footer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Эффект стекла на блоках */
+.glass-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Для Safari */
+  border: 1px solid var(--glass-border);
+  border-radius: 15px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+}
+
+/* Стили заголовков */
+h1, h2 {
+  margin-bottom: 1rem;
+}
+
+/* Ссылки и кнопки */
+a, button {
+  color: var(--white);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Пример кнопки с оранжевым акцентом */
+.btn-primary {
+  background-color: var(--primary-orange);
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #ff7c1a; /* Слегка изменяем оттенок на hover */
+}
+
+/* Подвал: можно уменьшить шрифт */
+footer p {
+  text-align: center;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
