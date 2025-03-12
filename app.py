@@ -6,50 +6,117 @@ from datetime import datetime
 from flask import Flask, request, render_template, redirect, url_for, jsonify, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import (LoginManager, login_user, logout_user,
+                         login_required, current_user, UserMixin)
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 
-# Импорт моделей
-from models import db, User, Client
-
-# 1. Определяем базовую директорию и загружаем переменные окружения
+# -----------------------------------------------------------------
+# 1. Загрузка переменных окружения и конфигурация
+# -----------------------------------------------------------------
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
-# Создаём папку instance, если её нет
+# Создаём папку instance (если её нет), чтобы хранить там sqlite-базу
 instance_folder = os.path.join(basedir, 'instance')
 os.makedirs(instance_folder, exist_ok=True)
 
 # Абсолютный путь к файлу БД
 db_path = os.path.join(instance_folder, 'crm.db')
 
+# -----------------------------------------------------------------
 # 2. Создаём Flask-приложение
-app = Flask(__name__, static_folder="static")
+# -----------------------------------------------------------------
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
-# 3. Настройки приложения
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "default-secret-key")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 4. Настройка логирования
+# Включаем логирование (инфо уровень)
 logging.basicConfig(level=logging.INFO)
 app.logger.info("Запуск приложения")
 
-# 5. Инициализация расширений
-db.init_app(app)
+# -----------------------------------------------------------------
+# 3. Инициализируем расширения: БД, миграции, логин-менеджер
+# -----------------------------------------------------------------
+db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
+# Если пользователь не авторизован и заходит на защищённую страницу,
+# Flask-Login перенаправит его на "vin_bp.login"
 login_manager.login_view = "vin_bp.login"
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --------------------------------------------------------
-# Создаём Blueprint (vin_bp) и объявляем маршруты ДО регистрации
-# --------------------------------------------------------
+# -----------------------------------------------------------------
+# 4. Определяем модели (User, Client)
+# -----------------------------------------------------------------
+
+class User(db.Model, UserMixin):
+    """ Модель пользователя системы. 
+        Атрибуты:
+          - id (int, PK)
+          - plate (str, уникальный госномер)
+          - password (str, хэш пароля)
+          - is_admin (bool, по умолчанию False)
+    """
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    plate = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return f"<User {self.plate}>"
+
+
+class Client(db.Model):
+    """ Модель с данными клиента/авто:
+          - id (int, PK)
+          - client_name
+          - phone
+          - vin (VIN-номер)
+          - car_model
+          - year
+          - mileage
+          - plate (госномер)
+          - work_list (текст - доп. работы)
+          - parts_selected
+          - indicators
+          - notes
+          - timestamp (дата внесения)
+    """
+    __tablename__ = "clients"
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_name = db.Column(db.String(100), nullable=True)
+    phone = db.Column(db.String(50), nullable=True)
+    vin = db.Column(db.String(50), nullable=True)
+    car_model = db.Column(db.String(100), nullable=True)
+    year = db.Column(db.Integer, default=0)
+    mileage = db.Column(db.Integer, default=0)
+    plate = db.Column(db.String(50), nullable=True)
+
+    # Дополнительные поля, которые могут понадобиться
+    work_list = db.Column(db.Text, nullable=True)
+    parts_selected = db.Column(db.Text, nullable=True)
+    indicators = db.Column(db.Text, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Client id={self.id} plate={self.plate}>"
+
+
+# -----------------------------------------------------------------
+# 5. Создаём Blueprint (vin_bp) и объявляем маршруты
+# -----------------------------------------------------------------
 vin_bp = Blueprint("vin_bp", __name__, url_prefix="/vin.com")
 
 def safe_int(val):
@@ -109,6 +176,7 @@ def register():
             error = "Пользователь с таким госномером уже существует"
         if error:
             return render_template("register.html", error=error)
+
         hashed_password = generate_password_hash(password)
         new_user = User(plate=plate, password=hashed_password)
         db.session.add(new_user)
@@ -188,7 +256,6 @@ def update_client(client_id):
         app.logger.error(f"Ошибка при обновлении записи: {e}")
         return jsonify({"status": "error", "message": str(e)}), 400
 
-
 @vin_bp.route("/parts")
 def parts():
     # Если у вас есть шаблон parts.html, рендерим именно его
@@ -230,14 +297,12 @@ def send_admin():
     else:
         return jsonify({"status": "error", "message": r.text}), 500
 
-# --------------------------------------------------------
 # Регистрируем Blueprint
-# --------------------------------------------------------
 app.register_blueprint(vin_bp)
 
-# --------------------------------------------------------
-# Пример маршрута сохранения + Telegram (вне Blueprint)
-# --------------------------------------------------------
+# -----------------------------------------------------------------
+# Дополнительный маршрут (пример: submit_order) - вне blueprint
+# -----------------------------------------------------------------
 @app.route("/submit_order", methods=["POST"])
 @login_required
 def submit_order():
@@ -263,6 +328,7 @@ def submit_order():
     try:
         db.session.add(client)
         db.session.commit()
+
         telegram_message = (
             f"🔔 Новый заказ:\n"
             f"Имя клиента: {client.client_name}\n"
@@ -275,6 +341,7 @@ def submit_order():
             f"Запчасти: {client.parts_selected}\n"
             f"Индикаторы: {client.indicators}\n"
         )
+
         bot_token = os.getenv("BOT_TOKEN")
         admin_chat_id = os.getenv("ADMIN_CHAT_ID")
         if bot_token and admin_chat_id:
@@ -297,9 +364,9 @@ def submit_order():
 
     return jsonify({"message": "Заказ сохранён и (при наличии токена) отправлен в Telegram!"}), 200
 
-# --------------------------------------------------------
+# -----------------------------------------------------------------
 # Обработчики ошибок
-# --------------------------------------------------------
+# -----------------------------------------------------------------
 @app.errorhandler(404)
 def not_found_error(error):
     if request.path.startswith("/vin.com/api") or request.is_json:
@@ -313,14 +380,15 @@ def internal_error(error):
         return jsonify(error="Internal server error"), 500
     return render_template("500.html"), 500
 
-# --------------------------------------------------------
+# -----------------------------------------------------------------
 # Создаём таблицы (если нет)
-# --------------------------------------------------------
+# -----------------------------------------------------------------
 with app.app_context():
     db.create_all()
 
-# --------------------------------------------------------
+# -----------------------------------------------------------------
 # Точка входа
-# --------------------------------------------------------
+# -----------------------------------------------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5003, debug=True)
+
