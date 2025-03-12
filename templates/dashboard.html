@@ -7,9 +7,17 @@
   <!-- Подключаем Bootstrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    /* Глобальные стили */
+    /* Глобальные стили и переменные */
     :root {
-      --bs-body-color: white;
+      --mars-orange: #ff6e00;
+      --mars-orange-light: #ff9500;
+      --white: #fff;
+      --glass-bg: rgba(255,255,255,0.1);
+      --glass-blur: 10px;
+      --glass-border: rgba(255,255,255,0.3);
+
+      --btn-gradient: linear-gradient(45deg, #ff6e00, #ff9500);
+      --btn-hover-gradient: linear-gradient(45deg, #ff4500, #af3f00);
     }
     html, body {
       font-family: Arial, sans-serif;
@@ -19,22 +27,23 @@
       background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
                   url("{{ url_for('static', filename='img/image.png') }}") no-repeat center center fixed;
       background-size: cover;
-      color: #fff;
+      color: var(--white);
       overflow-x: hidden;
     }
-    /* Стили для бокового меню (Sidebar) в стиле glassmorphism */
+
+    /* Стили для бокового меню (Sidebar) в стиле Glassmorphism */
     .sidebar {
       position: fixed;
       top: 0;
       right: -300px;
       width: 300px;
       height: 100vh;
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--glass-bg);
       border-radius: 15px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
-      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      border: 1px solid var(--glass-border);
       padding: 20px;
       transition: right 0.3s ease;
       z-index: 1100;
@@ -56,14 +65,15 @@
       margin: 15px 0;
     }
     .sidebar ul li a {
-      color: #fff;
+      color: var(--white);
       text-decoration: none;
       font-size: 18px;
       transition: color 0.3s;
     }
     .sidebar ul li a:hover {
-      color: #00c6ff;
+      color: var(--mars-orange-light);
     }
+
     /* Кнопка-триггер для бокового меню */
     .menu-toggle {
       position: fixed;
@@ -80,7 +90,8 @@
       width: 30px;
       height: 30px;
     }
-    /* Прочие стили */
+
+    /* Мелкие элементы */
     .btn-small {
       font-size: 14px !important;
       padding: 5px 10px !important;
@@ -90,7 +101,7 @@
       appearance: none;
       width: 18px;
       height: 18px;
-      border: 1px solid #00c6ff;
+      border: 1px solid var(--mars-orange-light);
       border-radius: 3px;
       margin-right: 5px;
       vertical-align: middle;
@@ -98,7 +109,7 @@
       background: rgba(255,255,255,0.1);
     }
     .square-checkbox:checked {
-      background-color: #00c6ff;
+      background-color: var(--mars-orange-light);
     }
     .legend-square {
       display: inline-block;
@@ -106,7 +117,7 @@
       height: 16px;
       vertical-align: middle;
       margin-right: 5px;
-      border: 1px solid #fff;
+      border: 1px solid var(--white);
     }
     .legend-green { background-color: green; }
     .legend-black { background-color: black; }
@@ -127,47 +138,56 @@
     .checkbox-red:checked {
       accent-color: red;
     }
+
     .glass-card {
-      background: rgba(255,255,255,0.1);
+      background: var(--glass-bg);
       border-radius: 20px;
       padding: 15px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
       margin: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     }
+
+    /* Пример анимированного «радужного» текста */
     .rainbow-text {
-      animation: rainbowText 30s linear infinite;
+      animation: rainbowText 20s linear infinite;
     }
     @keyframes rainbowText {
-      0%   { text-shadow: 0 0 3px darkblue, 0 0 6px darkblue; }
-      25%  { text-shadow: 0 0 3px indigo, 0 0 6px indigo; }
-      50%  { text-shadow: 0 0 3px darkviolet, 0 0 6px darkviolet; }
-      75%  { text-shadow: 0 0 3px #8B008B, 0 0 6px #8B008B; }
-      100% { text-shadow: 0 0 3px darkblue, 0 0 6px darkblue; }
+      0%   { text-shadow: 0 0 5px #ff6e00; }
+      25%  { text-shadow: 0 0 5px #ff9500; }
+      50%  { text-shadow: 0 0 5px #ff4500; }
+      75%  { text-shadow: 0 0 5px #af3f00; }
+      100% { text-shadow: 0 0 5px #ff6e00; }
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
+
+    /* Инпуты (Form-control) в стиле Glassmorphism + оранжевый акцент */
     .form-control {
       background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(0,198,255,0.5);
-      color: #fff;
+      border: 1px solid var(--mars-orange-light);
+      color: var(--white);
       border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,198,255,0.5);
+      box-shadow: 0 0 5px rgba(255,165,0,0.4);
       backdrop-filter: blur(5px);
-      transition: background 0.3s, border-color 0.3s;
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
     .form-control:focus {
       background: rgba(255,255,255,0.2);
-      border-color: rgba(0,198,255,0.7);
-      box-shadow: 0 0 5px rgba(0,198,255,0.7);
+      border-color: rgba(255,165,0,0.7);
+      box-shadow: 0 0 8px rgba(255,140,0,0.7);
     }
+
+    /* Кнопка отправки (Primary) */
     .btn-primary {
-      background: linear-gradient(45deg, #005eff, #00c6ff);
+      background: var(--btn-gradient);
       border: none;
       font-weight: bold;
       color: #fff;
@@ -176,19 +196,62 @@
       border-radius: 12px;
       cursor: pointer;
       transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
-      box-shadow: 0 0 8px #00c6ff;
+      box-shadow: 0 0 12px rgba(255,100,0,0.4);
     }
     .btn-primary:hover {
-      background: linear-gradient(45deg, #0039ff, #000000);
-      box-shadow: 0 0 20px #00c6ff;
+      background: var(--btn-hover-gradient);
+      box-shadow: 0 0 20px rgba(255,140,0,0.6);
       transform: scale(1.02);
     }
+    .btn-danger {
+      background: linear-gradient(45deg, #ff3000, #cc0000);
+      border: none;
+      font-weight: bold;
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+      box-shadow: 0 0 10px rgba(255,0,0,0.4);
+    }
+    .btn-danger:hover {
+      background: linear-gradient(45deg, #d60000, #7f0000);
+      box-shadow: 0 0 16px rgba(255,0,0,0.6);
+      transform: scale(1.02);
+    }
+    .btn-neon {
+      position: relative;
+      overflow: hidden;
+      outline: none;
+    }
+    .btn-neon:before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      background: linear-gradient(45deg, #ff6e00, #ff9500, #ff4500, #af3f00);
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(5px);
+      opacity: 0.7;
+      animation: neonGlow 10s infinite linear;
+    }
+    @keyframes neonGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Таблицы (общее оформление) */
     .work-table, .details-table {
       width: 100%;
       border: none;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 0 5px #00c6ff;
+      box-shadow: 0 0 8px rgba(255,100,0,0.4);
       background: rgba(255,255,255,0.1);
       margin-bottom: 20px;
     }
@@ -199,17 +262,20 @@
       text-align: center;
     }
     .work-table th, .details-table th {
-      background-color: rgba(0,43,85,0.7);
+      background-color: rgba(100, 40, 0, 0.7);
     }
+
+    /* Блок индикаторов (сетка) */
     .indicators {
       display: grid;
       grid-template-columns: repeat(3,1fr);
       gap: 10px;
     }
     hr {
-      border: 1px solid #00c6ff;
+      border: 1px solid var(--mars-orange-light);
       margin: 10px 0;
     }
+
     /* Адаптивность */
     @media (max-width: 768px) {
       .sidebar {
@@ -253,11 +319,9 @@
 
   <!-- Основное содержимое страницы (Dashboard) -->
   <div class="container" style="padding-top: 60px;">
-    <!-- Форма с action на ваш эндпоинт submit_order -->
+    <!-- Форма, отправляющая данные методом POST на ваш эндпоинт submit_order -->
     <form action="{{ url_for('submit_order') }}" method="POST" style="width:100%;">
-      <!-- Общий контейнер заказа -->
       <div class="order">
-        
         <!-- Шапка, логотип, данные клиента -->
         <div id="vinh-container" style="margin:20px;">
           <div class="container-glass">
@@ -296,7 +360,7 @@
           </div>
           <div class="row" style="margin-top:10px;">
             <div class="col-md-6 col-6">
-              <label for="plate">Номерний знак:</label>
+              <label for="plate">Номерной знак:</label>
               <input type="text" id="plate" name="plate" class="form-control"
                      style="text-transform: uppercase;"
                      oninput="this.value = this.value.replace(/\s+/g, '').toUpperCase(); updateDuplicates();"
@@ -319,126 +383,132 @@
             ></textarea>
           </div>
         </div>
-        <!-- Скрипт для autoGrow -->
+
+        <!-- Скрипт autoGrow для textarea -->
         <script>
-            function autoGrow(element) {
+          function autoGrow(element) {
             element.style.height = "auto";
             element.style.height = (element.scrollHeight) + "px";
-            }
+          }
         </script>
-        <!-- Секция Индикаторы -->
+
+        <!-- Секция Индикаторы (иконки + чекбоксы) -->
         <div id="indicators-container" class="glass-card">
-            <h4>Индикаторы</h4>
-            <div class="indicators">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
-                <label class="form-check-label" for="checkEngine">
-                  <img src="{{ url_for('static', filename='icons/check_engine.png') }}" alt="Check Engine" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="battery" name="battery">
-                <label class="form-check-label" for="battery">
-                  <img src="{{ url_for('static', filename='icons/battery.png') }}" alt="Battery" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="oil" name="oil">
-                <label class="form-check-label" for="oil">
-                  <img src="{{ url_for('static', filename='icons/oil.png') }}" alt="Oil" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
-                <label class="form-check-label" for="coolant">
-                  <img src="{{ url_for('static', filename='icons/coolant.png') }}" alt="Coolant" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
-                <label class="form-check-label" for="tpms">
-                  <img src="{{ url_for('static', filename='icons/tpms.png') }}" alt="TPMS" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
-                <label class="form-check-label" for="airbag">
-                  <img src="{{ url_for('static', filename='icons/airbag.png') }}" alt="Airbag" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="abs" name="abs">
-                <label class="form-check-label" for="abs">
-                  <img src="{{ url_for('static', filename='icons/abs.png') }}" alt="ABS" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="esp" name="esp">
-                <label class="form-check-label" for="esp">
-                  <img src="{{ url_for('static', filename='icons/esp.png') }}" alt="ESP" style="width:24px; height:24px;">
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
-                <label class="form-check-label" for="brakeWear">
-                  <img src="{{ url_for('static', filename='icons/brake_wear.png') }}" alt="Brake Wear" style="width:24px; height:24px;">
-                </label>
-              </div>
+          <h4>Индикаторы</h4>
+          <div class="indicators">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="checkEngine" name="checkEngine">
+              <label class="form-check-label" for="checkEngine">
+                <img src="{{ url_for('static', filename='icons/check_engine.png') }}" alt="Check Engine" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="battery" name="battery">
+              <label class="form-check-label" for="battery">
+                <img src="{{ url_for('static', filename='icons/battery.png') }}" alt="Battery" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="oil" name="oil">
+              <label class="form-check-label" for="oil">
+                <img src="{{ url_for('static', filename='icons/oil.png') }}" alt="Oil" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="coolant" name="coolant">
+              <label class="form-check-label" for="coolant">
+                <img src="{{ url_for('static', filename='icons/coolant.png') }}" alt="Coolant" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="tpms" name="tpms">
+              <label class="form-check-label" for="tpms">
+                <img src="{{ url_for('static', filename='icons/tpms.png') }}" alt="TPMS" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="airbag" name="airbag">
+              <label class="form-check-label" for="airbag">
+                <img src="{{ url_for('static', filename='icons/airbag.png') }}" alt="Airbag" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="abs" name="abs">
+              <label class="form-check-label" for="abs">
+                <img src="{{ url_for('static', filename='icons/abs.png') }}" alt="ABS" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="esp" name="esp">
+              <label class="form-check-label" for="esp">
+                <img src="{{ url_for('static', filename='icons/esp.png') }}" alt="ESP" style="width:24px; height:24px;">
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="brakeWear" name="brakeWear">
+              <label class="form-check-label" for="brakeWear">
+                <img src="{{ url_for('static', filename='icons/brake_wear.png') }}" alt="Brake Wear" style="width:24px; height:24px;">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Акт дефектів автомобіля -->
+        <div id="defects-container" class="section" style="margin:20px;">
+          <hr>
+          <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
+          <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
+            <strong>|</strong> <span id="vin_defects"></span>
+            <strong>|</strong> <span id="carModel_defects"></span>
+            <strong>|</strong> <span id="year_defects"></span>
+            <strong>|</strong> <span id="plate_defects"></span>
+          </div>
+          <div id="dateTimeAct" style="font-size:0.9em; margin-bottom:5px;"></div>
+
+          <div class="row">
+            <div class="col-md-6 col-6">
+              <label for="ptk_percent">передний тормоз. колодки (%):</label>
+              <input type="text" id="ptk_percent" name="ptk_percent" class="form-control">
+            </div>
+            <div class="col-md-6 col-6">
+              <label for="ztk_percent">задний тормоз. колодки (%):</label>
+              <input type="text" id="ztk_percent" name="ztk_percent" class="form-control">
             </div>
           </div>
 
-        <!-- Акт дефектів автомобіля -->
-        <!-- Секция Акт дефектів автомобіля -->
-        <div id="defects-container" class="section" style="margin:20px;">
-            <hr>
-            <h4 class="rainbow-text">Акт дефектів автомобіля</h4>
-            <div class="duplicate-info" style="font-size:0.9em; margin-bottom:10px;">
-              <strong>|</strong> <span id="vin_defects"></span>
-              <strong>|</strong> <span id="carModel_defects"></span>
-              <strong>|</strong> <span id="year_defects"></span>
-              <strong>|</strong> <span id="plate_defects"></span>
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="ptd_mm">передний тормоз. диски (мм):</label>
+              <input type="text" id="ptd_mm" name="ptd_mm" class="form-control">
             </div>
-            <div id="dateTimeAct" style="font-size:0.9em; margin-bottom:5px;"></div>
-            <div class="row">
-              <div class="col-md-6 col-6">
-                <label for="ptk_percent">передний тормозной колодки (%):</label>
-                <input type="text" id="ptk_percent" name="ptk_percent" class="form-control">
-              </div>
-              <div class="col-md-6 col-6">
-                <label for="ztk_percent">задний тормозной колодки (%):</label>
-                <input type="text" id="ztk_percent" name="ztk_percent" class="form-control">
-              </div>
+            <div class="col-md-6 col-6">
+              <label for="ztd_mm">задний тормоз. диски (мм):</label>
+              <input type="text" id="ztd_mm" name="ztd_mm" class="form-control">
             </div>
-            <div class="row" style="margin-top:10px;">
-              <div class="col-md-6 col-6">
-                <label for="ptd_mm">передний тормозной диски (мм):</label>
-                <input type="text" id="ptd_mm" name="ptd_mm" class="form-control">
-              </div>
-              <div class="col-md-6 col-6">
-                <label for="ztd_mm">задний тормозной диски (мм):</label>
-                <input type="text" id="ztd_mm" name="ztd_mm" class="form-control">
-              </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="brakeFluid">тормозная жидкость:</label>
+              <input type="text" id="brakeFluid" name="brakeFluid" class="form-control">
             </div>
-            <div class="row" style="margin-top:10px;">
-              <div class="col-md-6 col-6">
-                <label for="brakeFluid">тормозной жидкости:</label>
-                <input type="text" id="brakeFluid" name="brakeFluid" class="form-control">
-              </div>
-              <div class="col-md-6 col-6">
-                <label for="antifreeze">охлаждающая жидкость:</label>
-                <input type="text" id="antifreeze" name="antifreeze" class="form-control">
-              </div>
+            <div class="col-md-6 col-6">
+              <label for="antifreeze">охлаждающая жидкость:</label>
+              <input type="text" id="antifreeze" name="antifreeze" class="form-control">
             </div>
-            <div class="row" style="margin-top:10px;">
-              <div class="col-md-6 col-6">
-                <label for="engineOil">моторное масло:</label>
-                <input type="text" id="engineOil" name="engineOil" class="form-control">
-              </div>
-              <div class="col-md-6 col-6">
-                <label for="transmissionOil">масла в трансмиссии:</label>
-                <input type="text" id="transmissionOil" name="transmissionOil" class="form-control">
-              </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="col-md-6 col-6">
+              <label for="engineOil">моторное масло:</label>
+              <input type="text" id="engineOil" name="engineOil" class="form-control">
             </div>
+            <div class="col-md-6 col-6">
+              <label for="transmissionOil">масло в трансмиссии:</label>
+              <input type="text" id="transmissionOil" name="transmissionOil" class="form-control">
+            </div>
+          </div>
+
           <!-- Таблица деталей -->
           <table class="details-table" style="margin-top:10px;width:100%;">
             <thead>
@@ -468,29 +538,17 @@
             <span class="legend-square legend-yellow" style="margin-left:10px;"></span>Рек. замена
             <span class="legend-square legend-red" style="margin-left:10px;"></span>Критический замена
           </div>
-          <!-- Кнопки для добавления/удаления строки -->
-            <div style="margin-top:10px; display: flex; justify-content: space-between; align-items: center;">
-            <!-- "Добавить" слева -->
-            <button type="button" class="btn btn-primary btn-small add-row-btn">
-            Додати рядок
-            </button>
-            
-            <!-- "Удалить" справа, с neon-классом -->
-            <button type="button" class="btn btn-danger btn-small btn-neon remove-row-btn">
-            Удалить строку
-            </button>
-        </div>
-          <!-- Пример HTML-части для "Дополнительные примечания" -->
-        <div style="margin-top:10px;">
+          <!-- Кнопки добавить/удалить строку -->
+          <div style="margin-top:10px; display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn btn-primary btn-small add-row-btn">Додати рядок</button>
+            <button type="button" class="btn btn-danger btn-small btn-neon remove-row-btn">Удалить строку</button>
+          </div>
+
+          <!-- Примечания -->
+          <div style="margin-top:10px;">
             <label for="notes">Дополнительные примечания:</label>
-            <textarea
-            class="form-control"
-            id="notes"
-            name="notes"
-            rows="3"
-            oninput="autoGrow(this)"
-            ></textarea>
-        </div>
+            <textarea class="form-control" id="notes" name="notes" rows="3" oninput="autoGrow(this)"></textarea>
+          </div>
           <div style="margin-top:10px;text-align:right;">
             <p style="margin:0;font-size:0.9em;">Администрация сервиса.</p>
             <button type="button" class="btn btn-primary btn-small" id="sendPartsBtn" style="margin-top:5px;">
@@ -558,7 +616,6 @@
 
         <!-- Кнопки внизу -->
         <div style="display:flex;justify-content:space-between;margin:10px;">
-          <!-- Кнопка с неоновым эффектом -->
           <button id="sendAdminBtn" type="button" class="btn btn-primary btn-neon">
             Сохранить
           </button>
@@ -573,9 +630,9 @@
 
   <!-- Скрипты -->
   <script>
-    // Telegram настройки (пример)
+    // Пример идентификаторов для Telegram
     const ADMIN_CHAT_ID = "-1002239976197";
-    const BOT_TOKEN = "8099553216:AAEE3Ctou3yY4ddwVbXiUfHgfT7PeZyUyhA";
+    const BOT_TOKEN = "BOT_TOKEN_HERE";
 
     /* Бургер-меню */
     const menuButton = document.getElementById('menuButton');
@@ -609,19 +666,16 @@
       const yearValue = document.getElementById('year')?.value || "";
       const plateValue = document.getElementById('plate')?.value || "";
 
-      // Акт дефектов
       document.getElementById('vin_defects').textContent = vinValue;
       document.getElementById('carModel_defects').textContent = carModelValue;
       document.getElementById('year_defects').textContent = yearValue;
       document.getElementById('plate_defects').textContent = plateValue;
 
-      // Заявка на работы
       document.getElementById('vin_work').textContent = vinValue;
       document.getElementById('carModel_work').textContent = carModelValue;
       document.getElementById('year_work').textContent = yearValue;
       document.getElementById('plate_work').textContent = plateValue;
     }
-    // Привязываем к полям
     ['vin','carModel','year','plate'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.addEventListener("input", updateDuplicates);
@@ -645,9 +699,9 @@
       }
     }
 
-    /* Инициализация обработчиков для добавления/удаления строк */
+    /* Инициализация обработчиков для строк */
     function reinitializeOrderEventsForContainer(orderContainer) {
-      // Считаем сумму
+      // Считаем сумму на ввод
       orderContainer.querySelectorAll(".part-price,.work-price").forEach((input) => {
         input.addEventListener("input", () => recalcWorkTableForContainer(orderContainer));
       });
@@ -697,11 +751,11 @@
         });
       });
     }
-    // Инициализация для основного заказа
+    // Инициализация для основного «заказа»
     const originalOrder = document.querySelector(".order");
     if (originalOrder) reinitializeOrderEventsForContainer(originalOrder);
 
-    /* Функция для добавления нового заказа (клонирование) */
+    /* Добавить новый заказ (клонирование секций) */
     function addOrderHandler() {
       const sectionIds = [
         "vinh-container",
@@ -741,7 +795,7 @@
       saveBtn.className = "btn btn-primary btn-small";
       saveBtn.textContent = "Сохранить";
       saveBtn.addEventListener("click", () => {
-        alert("Новый наряд сохранён (реализуйте сохранение на сервере).");
+        alert("Новый наряд сохранён (реализуйте сохранение).");
       });
 
       const addMoreBtn = document.createElement("button");
@@ -754,13 +808,12 @@
       orderButtons.appendChild(addMoreBtn);
       newOrder.appendChild(orderButtons);
 
-      // Добавляем в форму
       document.querySelector("form").appendChild(newOrder);
       reinitializeOrderEventsForContainer(newOrder);
     }
     document.getElementById("addOrderBtn").addEventListener("click", addOrderHandler);
 
-    /* Сбор данных формы и отправка POST /submit_order */
+    /* Сбор данных формы и отправка (POST) на /submit_order */
     function collectFormData() {
       const data = {};
       document.querySelectorAll('form input, form textarea').forEach((el) => {
@@ -804,7 +857,6 @@
         .then((res) => res.json())
         .then((data) => {
           if (!data.error) {
-            // Заполняем поля
             for (const key in data) {
               const el = document.getElementById(key);
               if (el) {
@@ -827,7 +879,7 @@
       }
     });
 
-    /* Кнопка sendPartsBtn -> отправка в Telegram */
+    /* Кнопка sendPartsBtn -> отправка данных в Telegram */
     document.getElementById('sendPartsBtn').addEventListener("click", () => {
       const clientName = document.getElementById('clientName')?.value || "";
       const phone = document.getElementById('phone')?.value || "";
@@ -878,7 +930,7 @@
       .then((res) => res.json())
       .then((data) => {
         if (data.ok) {
-          alert("Сообщение отправлено!");
+          alert("Сообщение отправлено в Telegram!");
         } else {
           alert("Ошибка отправки: " + data.description);
         }
