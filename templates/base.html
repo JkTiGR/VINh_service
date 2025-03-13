@@ -27,7 +27,14 @@
             </li>
             {% if current_user.is_authenticated %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('vin_bp.logout') }}">Выйти</a>
+              {# 
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('vin_bp.logout') }}">Выйти</a>
+                </li>
+                {% endif %}
+                #}
+                
             </li>
             {% endif %}
           </ul>
